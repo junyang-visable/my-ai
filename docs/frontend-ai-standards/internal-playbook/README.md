@@ -18,7 +18,7 @@
 
 | 模块 | 作用 | 入口 |
 |------|------|------|
-| **工具层** | 约束 Cursor / MCP 在各仓库中的行为边界（允许 / 禁止 / 优先级） | [01 Cursor 配置规范](./01-cursor-rules/README.md) |
+| **工具层** | 约束 Cursor 在各仓库中的行为边界（允许 / 禁止 / 优先级） | [01 Cursor 配置规范](./01-cursor-rules/README.md) |
 | **上下文** | 通过 RepoWiki 沉淀架构、约束与术语，可供检索并对齐人机理解，降低歧义成本 | [02 RepoWiki 规范](./02-repowiki/README.md) |
 | **规格** | 在实现前产出可评审、可版本化的需求与行为说明（OpenSpecs / SDD） | [03 SDD 规范](./03-sdd/README.md) |
 | **日常编码** | 采用结构化 Prompt（上下文 / 任务 / 约束 / 输出），稳定 AI 产出质量 | [04 Prompt 模板库](./04-prompt-templates/README.md) |
@@ -70,7 +70,7 @@
 
 | 阶段 | 内容 |
 |------|------|
-| 第 1 日 | 阅读 [01](./01-cursor-rules/README.md)，配置本地 Cursor（含 `.cursorrules` 与可选 MCP） |
+| 第 1 日 | 阅读 [01](./01-cursor-rules/README.md)，配置本地 Cursor（`.cursorrules`） |
 | 第 2 日 | 阅读当前业务的 RepoWiki；若尚未建立，可参考 [02](./02-repowiki/README.md) 从模板初始化 |
 | 第 3 日起 | 新功能前先遵循 [03](./03-sdd/README.md)；日常编码使用 [04](./04-prompt-templates/README.md)；提交前依据 [05](./05-review-checklist/README.md) 自检或 Peer Review |
 
@@ -82,7 +82,7 @@
 
 | 模块 | 内容摘要 |
 |------|----------|
-| [01 Cursor 配置规范](./01-cursor-rules/README.md) | `.cursorrules` 示例（如 `vue-nuxt-cursorrules.md`）、MCP 配置指引 |
+| [01 Cursor 配置规范](./01-cursor-rules/README.md) | `.cursorrules` 示例（如 `vue-nuxt-cursorrules.md`） |
 | [02 RepoWiki 规范](./02-repowiki/README.md) | 撰写原则、`templates/` 下 01–07 模板与 INDEX |
 | [03 SDD 规范](./03-sdd/README.md) | OpenSpec 与 Spec 粒度；操作流程见 [openspecs-frontend-guide.md](./03-sdd/openspecs-frontend-guide.md) |
 | [04 Prompt 模板库](./04-prompt-templates/README.md) | 组件、页面重构、API、样式、单元测试、排障等场景模板 |

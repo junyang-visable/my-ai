@@ -26,11 +26,11 @@ docs/frontend-ai-standards/internal-playbook/02-repowiki/
     └── 07-测试用例.template.md
 ```
 
-实际落地到业务仓库时，建议将填好的 Wiki 放在例如 `docs/repowiki/`（或团队约定路径），并保持与 `templates/` 中章节一一对应，便于同步更新。
+实际落地到业务仓库时，将填好的 Wiki 放在项目根目录的 `repowiki/` 下，并保持与 `templates/` 中章节一一对应，便于同步更新。
 
 ## 使用步骤（5 步）
 
-1. **复制模板**：将 `templates/` 下各 `.template.md` 复制到目标仓库的 Wiki 目录，去掉 `.template` 后缀（或按团队规范命名）。
+1. **复制模板**：将 `templates/` 下各 `.template.md` 复制到目标仓库根目录的 `repowiki/` 下，去掉 `.template` 后缀（或按团队规范命名）。
 2. **填写占位符**：将所有 `[替换]`、`[TODO: …]` 替换为真实信息；无此项则删除行或写「不适用」。
 3. **维护 INDEX**：在 `INDEX` 中更新链接与摘要，保证与 01–07 文档标题一致。
 4. **评审与冻结**：由前端负责人（或架构代表）做一次完整性检查，确认约束与示例与代码一致。

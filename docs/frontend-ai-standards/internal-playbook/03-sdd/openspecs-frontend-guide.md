@@ -1,6 +1,8 @@
 # OpenSpecs 前端实践指南
 
-面向 **Vue 3 / Nuxt 3** 与 **Cursor** 团队：如何用 OpenSpec CLI 与 AI 协作完成「存量补 Specs → 新需求先 Spec → 合并后同步」的闭环。官方仓库：<https://github.com/Fission-AI/OpenSpec>。
+面向 **Vue 3 / Nuxt 3** 与 **Cursor** 团队：如何用 OpenSpec CLI 与 Superpower 技能链完成「存量补 Specs → 新需求先 Spec → 合并后同步」的完整闭环。官方仓库：<https://github.com/Fission-AI/OpenSpec>。
+
+> **本指南在四支柱模型中的位置**：专注 **OpenSpec（定方向）** 的具体操作；Superpower 节奏在每个场景末尾给出衔接指引。
 
 ---
 
@@ -56,16 +58,17 @@ openspec update
 
 ### 2.1 前置条件
 
-- 目标仓库已具备或可生成的 **RepoWiki**（建议路径如 `docs/repowiki/`，并与 [RepoWiki 模板](../02-repowiki/templates/) 章节对应）。
-- 已在仓库根目录执行过 `openspec init`（若团队暂不用 OpenSpec 变更目录，至少保证存在 `specs/` 或约定输出路径）。
+- 目标仓库已具备 `repowiki/`（并与 [RepoWiki 模板](../02-repowiki/templates/) 章节对应）。
+- 已在仓库根目录执行过 `openspec init`（若团队暂不用 OpenSpec 变更目录，至少保证存在 `specs/` 目录）。
 
 ### 2.2 推荐步骤
 
-1. 在 Cursor 中打开目标仓库，确认 `docs/repowiki/`（或你们实际 Wiki 路径）最新。
+1. 在 Cursor 中打开目标仓库，确认 `repowiki/` 最新。
 2. 新建或确保存在目录 `specs/`。
 3. 将 **2.3 节完整 Prompt** 粘贴到新对话（Composer / Agent），发送后等待生成 `specs/global-specs.md`。
 4. **生成后人工评审**（见 2.4）。
 5. 通过后按 **2.5** 提交 Git。
+6. **衔接 Superpower**：全局 Specs 就绪后，后续新需求可直接进入「场景二」节奏，无需每次重新梳理全局。
 
 ### 2.3 完整 Prompt 模板（复制即用）
 
@@ -73,7 +76,7 @@ openspec update
 你是资深前端架构师，熟悉 Vue 3、Nuxt 3、Pinia（或本仓库实际状态方案）。请为本仓库生成一份「全局 Specs」文档，用于 SDD（Spec-Driven Development）与 AI 编码时的单一事实来源。
 
 ## 输入来源（必须阅读）
-1. 先阅读本仓库的 RepoWiki：从 `docs/repowiki/INDEX.md`（若不存在则从 `docs/repowiki/` 目录下索引文件）开始，按其中指引依次阅读 01–07（或等价章节）：项目概述、技术规范、路由与页面结构、组件库、状态管理、业务知识、测试等。
+1. 先阅读本仓库的 RepoWiki：从 `repowiki/INDEX.md`（若不存在则从 `repowiki/` 目录下索引文件）开始，按其中指引依次阅读 01–07（或等价章节）：项目概述、技术规范、路由与页面结构、组件库、状态管理、业务知识、测试等。
 2. 结合代码验证：对照 `pages/`、`app/`、`layouts/`、`components/`、`stores/`、`composables/`、`server/api/`（以本仓库实际目录为准）与 Wiki 是否一致；若 Wiki 与代码冲突，以代码为准并在 Spec 中标注「Wiki 待更新」。
 
 ## 输出要求
@@ -104,7 +107,7 @@ openspec update
 ### 2.5 提交建议
 
 ```bash
-git add specs/global-specs.md docs/repowiki/
+git add specs/global-specs.md repowiki/
 git status
 git commit -m "docs: add global SDD specs from RepoWiki and codebase"
 ```
@@ -121,6 +124,11 @@ git commit -m "docs: add global SDD specs from RepoWiki and codebase"
 2. 将 **3.2 完整 Prompt** 粘贴到 Cursor，把需求原文贴入指定位置后发送。
 3. 人工评审 AI 输出的四个章节，补充边界与验收标准。
 4. **明确回复 AI「确认 Spec，可以开始编码」之前，禁止开始写业务实现代码**（允许 AI 只改文档或 OpenSpec 变更目录下的 markdown）。
+5. **Spec 确认后，交棒 Superpower**（OpenSpec apply 不再使用）：
+   - **方案不明时**（可选）：先调用 `superpowers:brainstorming` 探实现方案，产出设计文档后自动衔接 `writing-plans`。
+   - **方案明确时**：直接调用 `superpowers:writing-plans`，基于确认后的 Spec + `repowiki/` 生成分步实施计划。
+   - 计划评审通过后，调用 `superpowers:subagent-driven-development`（推荐）或 `superpowers:executing-plans` 执行。
+   - 全部任务完成后，调用 `superpowers:verification-before-completion` 确认无遗漏，再进入 `superpowers:finishing-a-development-branch`。
 
 ### 3.2 完整 Prompt 模板（复制即用）
 
@@ -131,6 +139,9 @@ git commit -m "docs: add global SDD specs from RepoWiki and codebase"
 """
 [在此粘贴完整需求描述：背景、目标用户、入口、验收标准、已知约束、设计稿或原型链接（如有）]
 """
+
+## 上下文（必须先读）
+请先阅读 `repowiki/INDEX.md`，按索引阅读与本次需求相关的章节（至少：技术规范、路由与页面结构、状态管理），再结合 `.cursorrules` 中的约束，生成与仓库实际情况一致的 Spec。
 
 ## 你必须输出的 Spec 结构（四个章节，中文）
 请输出一份独立的 Markdown Spec（若团队已有 OpenSpec 变更目录，可说明建议文件名，例如 `openspec/changes/feature-xxx/specs.md`；否则用 `specs/feature-<short-name>.md`）。四个章节如下：
@@ -152,7 +163,7 @@ git commit -m "docs: add global SDD specs from RepoWiki and codebase"
 - 可访问性与文案：关键按钮、错误提示、loading 文案要点（如有设计规范请遵守）。
 
 ### 4. 技术约束
-- 必须使用的组件库/组合式函数/已有模块（从 RepoWiki 与代码惯例推断；不确定则写「待对照 RepoWiki」）。
+- 必须使用的组件库/组合式函数/已有模块（从 repowiki/ 与 .cursorrules 推断；不确定则写「待对照 RepoWiki」）。
 - 性能与安全：列表虚拟化、防抖节流、XSS、敏感字段脱敏等要求。
 - 埋点/监控：若需求涉及分析事件，列出建议事件名与属性（与团队 GA/埋点规范一致时再定稿）。
 - 测试：建议的单元/E2E 覆盖点（不写具体测试代码）。
@@ -163,14 +174,16 @@ git commit -m "docs: add global SDD specs from RepoWiki and codebase"
 3. 输出结束后停止，并写明：「请人类评审并回复：确认 Spec 后我才会开始编码。」
 4. 在我方明确回复「确认 Spec，可以开始编码」之前，你不要创建或修改 `.vue`、`.ts` 等业务源码文件。
 
-请现在开始：基于需求原文生成上述 Spec。
+请现在开始：先说明你将阅读哪些 RepoWiki 章节与 .cursorrules，然后生成上述 Spec。
 ```
 
 ---
 
 ## 4. 场景三：开发完成后更新 Specs
 
-在 PR 合并或发布完成后，用下列 **短 Prompt** 同步文档与 Wiki，避免 Spec 与代码再次分叉。
+在 PR 合并或发布完成后，用下列**短 Prompt** 同步文档与 Wiki，避免 Spec 与代码再次分叉。
+
+> **节奏提示**：此步骤通常在 `superpowers:verification-before-completion` 确认无误、准备提 PR 前或合并后执行。
 
 ### 短 Prompt 模板（复制即用）
 
@@ -179,7 +192,7 @@ git commit -m "docs: add global SDD specs from RepoWiki and codebase"
 
 1. 阅读本次改动涉及的源码（diff 或文件列表若我贴在下方请一并参考）。
 2. 更新对应的 Spec 文件（全局 `specs/global-specs.md`、页面/功能级 Spec、或 `openspec/changes/` 中未归档条目）：修正页面路径、交互、Store、API 等与实现不一致之处。
-3. 若 `docs/repowiki/` 中路由、状态、业务章节与实现不一致，给出具体修改片段或完整替换段落（优先最小 diff）。
+3. 若 `repowiki/` 中路由、状态、业务章节与实现不一致，给出具体修改片段或完整替换段落（优先最小 diff）。
 4. 输出：① 变更文件清单；② 每个文件的更新摘要；③ 是否仍有「待确认」项。
 
 【可选：粘贴 PR 链接、commit SHA、或改动文件路径列表】
@@ -193,12 +206,14 @@ git commit -m "docs: add global SDD specs from RepoWiki and codebase"
 
 - [ ] **可对码**：Spec 中能定位到具体路由/页面、主要交互步骤、以及关键 API 与 Store，工程师或 AI 无需再猜「在哪改」。
 - [ ] **可验收**：功能范围与 Out of scope 清楚；交互含成功/失败/空/加载；与需求原文无明显遗漏或冲突（开放问题已闭环或有负责人）。
-- [ ] **可维护**：合并后已同步 `specs/` 与 RepoWiki（或已建 issue 跟踪 Wiki 更新），避免「代码已变、文档仍旧」长期存在。
+- [ ] **可维护**：合并后已同步 `specs/` 与 `repowiki/`（或已建 issue 跟踪 Wiki 更新），避免「代码已变、文档仍旧」长期存在。
+- [ ] **Superpower 已完整走过**：`writing-plans` → `subagent-driven-development` / `executing-plans` → `verification-before-completion` → `finishing-a-development-branch` 均已执行（方案不明时 `brainstorming` 应在 `writing-plans` 前执行），无跳跃。
 
 ---
 
 ## 相关链接
 
 - [OpenSpec GitHub](https://github.com/Fission-AI/OpenSpec)
-- [本目录 README：SDD 规范说明](./README.md)
+- [本目录 README：SDD 四支柱规范](./README.md)
 - [RepoWiki（前端版）](../02-repowiki/README.md)
+- [Cursorrules 模板](../01-cursor-rules/README.md)
