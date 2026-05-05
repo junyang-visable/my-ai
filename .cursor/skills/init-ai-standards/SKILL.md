@@ -31,6 +31,8 @@ description: Initializes a frontend project's AI engineering standards: generate
 | `composables/`（列一层） | 公共组合式函数列表 |
 | `server/api/`（列一层，可选） | Server Route 结构 |
 | `locales/` 或 `i18n/` 是否存在 | 是否启用 i18n |
+| `.env` / `.env.example`（可选） | API Base URL 环境变量（如 `VITE_API_BASE_URL` / `NUXT_PUBLIC_API_BASE`） |
+| `utils/request*` 或 `composables/use*Fetch*`（可选） | HTTP 封装文件路径 |
 
 扫描完成后输出「仓库快照」：
 
@@ -43,6 +45,8 @@ description: Initializes a frontend project's AI engineering standards: generate
 - Stores：N 个，名称：...
 - i18n：是 / 否
 - 测试框架：___
+- API Base URL 变量：___（或「未找到」）
+- HTTP 封装文件：___（或「未找到」）
 ```
 
 **关键信息缺失（如 UI 库不明）时，在继续前询问用户确认，不要猜测。**
@@ -87,7 +91,7 @@ description: Initializes a frontend project's AI engineering standards: generate
 
 写入 `repowiki/INDEX.md`。
 
-### 3.3 生成 01–07 章节
+### 3.3 生成 01–08 章节
 
 读取各模板文件，按下表填入可确定字段，其余 `[替换]` / `[TODO]` 占位符保留：
 
@@ -98,21 +102,23 @@ description: Initializes a frontend project's AI engineering standards: generate
 | `repowiki-03-routes.md` | `repowiki/03-路由与页面结构.md` | 路由列表（路径 + 文件名，填入表格；其余守卫/布局留占位符） |
 | `repowiki-04-components.md` | `repowiki/04-组件库文档.md` | 顶层组件目录列表；Props/Emits 细节留占位符 |
 | `repowiki-05-state.md` | `repowiki/05-状态管理.md` | Store 名称列表（填入 Store 列表表格；State/Actions 留占位符） |
-| `repowiki-06-business.md` | `repowiki/06-业务知识.md` | 仅填项目名；术语与流程全部留占位符（需人工填写） |
-| `repowiki-07-tests.md` | `repowiki/07-测试用例.md` | 测试框架名称；环境 URL 与账号留占位符 |
+| `repowiki-06-api.md` | `repowiki/06-API文档.md` | Base URL（从 `.env` / vite/nuxt 配置提取）、请求封装路径（扫描 `utils/` 或 `composables/`）；接口列表、错误码与类型路径留占位符 |
+| `repowiki-07-business.md` | `repowiki/07-业务知识.md` | 仅填项目名；术语与流程全部留占位符（需人工填写） |
+| `repowiki-08-tests.md` | `repowiki/08-测试用例.md` | 测试框架名称；环境 URL 与账号留占位符 |
 
 > 原则：**只填能从代码确定的字段**，无法确定的一律保留原始占位符。
 
 ### 3.4 输出汇总
 
 ```
-repowiki/ 初始化完成（8 个文件）。
+repowiki/ 初始化完成（9 个文件）。
 待人工补充：
 - 01：生产/测试环境 URL、负责人
 - 03：路由守卫规则、布局说明
 - 04：业务组件 Props / Emits 详情
-- 06：领域术语、核心流程、常见误区
-- 07：测试环境账号、E2E 用例
+- 06：接口列表、鉴权方式、错误码、Mock 配置
+- 07：领域术语、核心流程、常见误区
+- 08：测试环境账号、E2E 用例
 ```
 
 ---
@@ -152,14 +158,15 @@ openspec init
 
 已生成：
 - .cursorrules
-- repowiki/INDEX.md + 01-07.md（共 8 个文件）
+- repowiki/INDEX.md + 01-08.md（共 9 个文件）
 - specs/global-specs.md
 
 待人工补充（第一次 onboarding 时完成）：
 - [ ] repowiki/01：环境 URL、负责人
 - [ ] repowiki/03：路由守卫规则
 - [ ] repowiki/04：核心业务组件 Props/Emits
-- [ ] repowiki/06：领域术语与主业务流程
-- [ ] repowiki/07：测试账号与 E2E 用例优先级
+- [ ] repowiki/06：接口列表、鉴权方式、错误码、Mock 配置
+- [ ] repowiki/07：领域术语与主业务流程
+- [ ] repowiki/08：测试账号与 E2E 用例优先级
 - [ ] specs/global-specs.md：补充「待确认」字段
 ```
