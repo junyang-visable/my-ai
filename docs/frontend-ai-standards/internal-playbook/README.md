@@ -1,17 +1,36 @@
 # 内部 Playbook · 前端 AI 协作指南
 
-欢迎来到团队的前端 AI 协作内部 Playbook。这是一份**面向内部研发团队**的实操手册：无论你是刚加入的新人，还是已经熟悉业务的老同事，都可以在这里找到统一的流程、模板与审查标准，让 AI 辅助开发更稳、更快、更可复盘。
+本 Playbook 为内部研发团队提供统一的前端 AI 协作基准。共享本页并按章节向下浏览，即可作为主要讲解路径；如需模板与细则，再进入下方各子文档。
 
-**这份 Playbook 解决什么问题？**
-
-- 让 Cursor、RepoWiki、OpenSpecs（SDD）和 Prompt 模板在同一套叙事里串起来，而不是零散文档。
-- 把「写代码」扩展为「需求 → 规格 → 上下文 → 编码 → 审查 → 合并 → 知识回写」的完整闭环。
+适用范围：在多前端项目中落实一致的工程实践——涵盖 **Cursor 配置、RepoWiki（项目知识库）、OpenSpecs / SDD、Prompt 使用方式，以及评审与交付定义**，避免工具链与文档体系碎片化。
 
 ---
 
-## 推荐开发流程
+## 范围与原则
 
-按下面顺序走一遍，就是一次标准的前端 AI 协作迭代。**核心原则：更新完 Specs 和 RepoWiki 才算是一次完整的代码改动**——代码合并只是中间节点，知识资产也要跟上。
+- **一致性范围**：不仅对齐代码风格，而将 **工具边界、上下文资产（RepoWiki）、规格资产（Specs）、Prompt 规范与评审门禁** 纳入同一套协作框架。
+- **变更闭环与交付定义（Definition of Done）**：代码合并至主分支仅表示实现阶段结束；同一变更还须 **同步更新 Specs 与 RepoWiki**，使规格与知识与实现保持一致，便于审计与后续迭代。未满足文档同步的变更视为交付不完整。
+- **职责分工**：技术负责人 / 项目负责人优先落实模块 **01（工具）、02（上下文）** 的初始化与运维；开发人员按 **03（规格）→ 04（日常编码）→ 05（评审）** 执行；全体将「合并后的规格与 RepoWiki 同步」纳入该变更的 Definition of Done。
+
+---
+
+## 文档结构（与子目录映射）
+
+| 模块 | 作用 | 入口 |
+|------|------|------|
+| **工具层** | 约束 Cursor / MCP 在各仓库中的行为边界（允许 / 禁止 / 优先级） | [01 Cursor 配置规范](./01-cursor-rules/README.md) |
+| **上下文** | 通过 RepoWiki 沉淀架构、约束与术语，可供检索并对齐人机理解，降低歧义成本 | [02 RepoWiki 规范](./02-repowiki/README.md) |
+| **规格** | 在实现前产出可评审、可版本化的需求与行为说明（OpenSpecs / SDD） | [03 SDD 规范](./03-sdd/README.md) |
+| **日常编码** | 采用结构化 Prompt（上下文 / 任务 / 约束 / 输出），稳定 AI 产出质量 | [04 Prompt 模板库](./04-prompt-templates/README.md) |
+| **质量** | 合并前依据统一清单执行 PR Review 或自检 | [05 Review Checklist](./05-review-checklist/README.md) |
+
+推荐执行顺序：**工具与维基就绪 → Spec 就位 → 按模板开发与自检 → Review 门禁**。各模块操作规程见对应目录。
+
+---
+
+## 协作流程（标准迭代）
+
+以下为前端 AI 协作的**最小闭环**。原则：**Specs 与 RepoWiki 的更新与代码变更同属一次交付；** 仅以合并表征代码入库，不构成完整交付。
 
 ```
 需求确认
@@ -29,41 +48,46 @@
 同步更新 Specs + RepoWiki   ← 完整的一次改动
 ```
 
-建议把「合并后同步 Specs + RepoWiki」当作 Definition of Done 的一部分，避免文档与实现长期漂移。
+若团队在 Definition of Done 中明确列出「合并后同步 Specs 与 RepoWiki」，可降低文档与代码长期分叉的风险。
 
 ---
 
-## 模块导航
+## 仓库自检（新建与存量对齐）
 
-| 模块 | 说明 | 适用时机 |
-|------|------|----------|
-| [01 Cursor 配置规范](./01-cursor-rules/README.md) | `.cursorrules` 模板、MCP 配置指引 | 项目初始化或新人加入时 |
-| [02 RepoWiki 规范](./02-repowiki/README.md) | 项目知识库模板（7 类文档） | 项目初始化；后续持续维护 |
-| [03 SDD 规范](./03-sdd/README.md) | OpenSpecs 使用指南 | 每次开发新功能或较大改动前 |
-| [04 Prompt 模板库](./04-prompt-templates/README.md) | 6 类场景的 Prompt 模板 | 日常 AI 编码时 |
-| [05 Review Checklist](./05-review-checklist/README.md) | AI 生成代码的审查标准 | PR Review 时 |
+可作为各仓库基线检查的参考项：
 
----
+- [ ] 根目录存在 `.cursorrules`（或等价 Cursor 规则），且与栈一致（模板见 [01](./01-cursor-rules/README.md)）
+- [ ] 具备项目 Wiki（例如 `repowiki/`），章节与 INDEX 完整（规范见 [02](./02-repowiki/README.md)）
+- [ ] 重大或结构性改动前产出可评审的 Spec（见 [03](./03-sdd/README.md)）
+- [ ] 复杂任务在 Prompt 中引用 Wiki 节选，日常可参考 [04](./04-prompt-templates/README.md)
+- [ ] PR 对照 [05](./05-review-checklist/README.md)，🔴 项未闭环前不建议合并
 
-## 新人快速入门
-
-1. **Day 1** — 阅读 [01 Cursor 配置规范](./01-cursor-rules/README.md)，在本地按指引配置 Cursor（含 `.cursorrules` 与可选 MCP），确保 AI 在统一约束下工作。
-2. **Day 2** — 阅读当前业务仓库中的 `repowiki/`，建立对项目结构、规范与业务语料的体感；若项目尚未建库，可参考 [02 RepoWiki 规范](./02-repowiki/README.md) 从模板起步。
-3. **Day 3 及以后** — 新功能前先走 [03 SDD 规范](./03-sdd/README.md) 补齐或更新 Specs，日常编码优先使用 [04 Prompt 模板库](./04-prompt-templates/README.md)，提交前用 [05 Review Checklist](./05-review-checklist/README.md) 自检或互评。
+**落地优先级**：通常先夯实 **01、02**，再收紧 **03、05**；**04** 可与能力建设并行推广。
 
 ---
 
-## 老人对齐 Checklist
+## 新成员 Onboarding（建议节奏）
 
-已有成员可用下面几项快速对齐团队约定（勾选即表示当前仓库/流程已满足）：
-
-- [ ] 项目根目录有 `.cursorrules`？
-- [ ] 项目有 `repowiki/`？
-- [ ] 开发前先生成 / 更新 Specs？
-- [ ] PR 时有 Review Checklist（或等价审查清单）？
-
-全部对齐后，新人 onboarding 与跨项目协作会轻松很多；若有缺口，优先补 [01](./01-cursor-rules/README.md) 与 [02](./02-repowiki/README.md)，再收紧 [03](./03-sdd/README.md) 与 [05](./05-review-checklist/README.md)。
+| 阶段 | 内容 |
+|------|------|
+| 第 1 日 | 阅读 [01](./01-cursor-rules/README.md)，配置本地 Cursor（含 `.cursorrules` 与可选 MCP） |
+| 第 2 日 | 阅读当前业务的 RepoWiki；若尚未建立，可参考 [02](./02-repowiki/README.md) 从模板初始化 |
+| 第 3 日起 | 新功能前先遵循 [03](./03-sdd/README.md)；日常编码使用 [04](./04-prompt-templates/README.md)；提交前依据 [05](./05-review-checklist/README.md) 自检或 Peer Review |
 
 ---
 
-**一句话**：先定规格与上下文，再用模板编码、用清单审查，合并后把 Specs 和 RepoWiki 一并更新——这就是内部 Playbook 期望的一次完整改动。需要深入某一模块时，直接从上方导航表进入对应目录即可。
+## 附录：模块索引
+
+需要复制模板或查阅清单时，从下列入口进入。
+
+| 模块 | 内容摘要 |
+|------|----------|
+| [01 Cursor 配置规范](./01-cursor-rules/README.md) | `.cursorrules` 示例（如 `vue-nuxt-cursorrules.md`）、MCP 配置指引 |
+| [02 RepoWiki 规范](./02-repowiki/README.md) | 撰写原则、`templates/` 下 01–07 模板与 INDEX |
+| [03 SDD 规范](./03-sdd/README.md) | OpenSpec 与 Spec 粒度；操作流程见 [openspecs-frontend-guide.md](./03-sdd/openspecs-frontend-guide.md) |
+| [04 Prompt 模板库](./04-prompt-templates/README.md) | 组件、页面重构、API、样式、单元测试、排障等场景模板 |
+| [05 Review Checklist](./05-review-checklist/README.md) | `frontend-review-checklist.md`；可用于合并前的结构化自检 |
+
+---
+
+**结论**：在规格与上下文明确的前提下，以模板规范化 AI 编码、以清单门禁保障质量，并在合并后一并更新 **Specs** 与 **RepoWiki**，即本 Playbook 所定义的前端变更完整交付。
