@@ -11,7 +11,7 @@
 
 - 使用 Vue 3 Composition API；新组件一律使用 `<script setup lang="ts">`。
 - 组件文件名、单文件组件的 `name`（若需）使用 PascalCase，与导出一致。
-- 单个 `.vue` 文件建议不超过 200 行；超出时拆分子组件或抽取 composable / 工具函数。
+- 单个 `.vue` 文件建议不超过 400 行；超出时拆分子组件或抽取 composable / 工具函数。
 - Props 必须显式声明类型：使用 `defineProps` 配合 TypeScript 类型或 `withDefaults`；禁止仅依赖运行时 prop 定义而无类型。
 - Emits 必须使用 `defineEmits` 声明事件名及载荷类型；调用处与声明保持一致。
 - 优先组合式函数抽取可复用逻辑；避免在多个组件中复制粘贴相同逻辑。
