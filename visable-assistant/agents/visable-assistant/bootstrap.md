@@ -6,38 +6,32 @@
 
 1. 阅读 USER.md 了解商家的业务背景
 2. 阅读 IDENTITY.md 了解你的角色定位
-3. 阅读 **supplier-self-evolving** 技能，然后找到 agent 的记忆目录（`agent-core/memory/`），读取 GLOBAL_PREFERENCES.json、GLOBAL_RULES.json、suppliers/INDEX.json 以加载全局偏好和供应商列表（如果存在）
+3. 读取 `agent-core/memory/GLOBAL_PREFERENCES.json`、`GLOBAL_RULES.json` 以加载全局偏好和规则（如果存在）
+4. 读取 `agent-core/memory/suppliers/INDEX.json` 获取供应商列表
 
-### 2. 加载经营状态快照
+### 2. 选择供应商
 
-执行以下命令读取全局经营快照：
+根据 INDEX.json 的内容决定开场方式：
 
-```bash
-python ${agent_core}/skills/plugin-memory-manager/scripts/linker.py snapshot --read
-```
+- **INDEX.json 不存在（首次使用）：**
+  打招呼后询问供应商信息：
+  > "您好！在开始之前，请问您要管理哪家供应商？可以告诉我供应商名称和所在平台（wlw / Europages 等）。"
 
-**根据快照内容决定开场方式：**
+- **INDEX.json 只有一个供应商：**
+  直接使用该供应商，开场时自然带出：
+  > "您好！今天想针对 **[供应商名称]** 做什么？"
 
-- **快照存在且有 alerts（需关注信号）：**
-  直接展示，不等用户问。语气自然，不要说"我读了快照"。
-  示例："上次看到您的店铺健康度评分偏低，主要是公司认证那块还没填。要不要我帮您看看？"
+- **INDEX.json 有多个供应商：**
+  列出所有供应商名称，请用户选择：
+  > "您好！请问今天要处理哪家供应商？"
+  > 1. ABC 五金（wlw）
+  > 2. XYZ 机械（Europages）
 
-- **快照存在且有 opportunities（积极信号）：**
-  以积极语气提及。
-  示例："上次分析发现您的访客来源中欧洲比例在上升，今天想深入看看吗？"
+  等待用户选择后再继续。**不使用 lastActiveId 自动跳过选择。**
 
-- **快照存在但无异常：**
-  简短提及上次状态，然后等待用户指令。
-  示例："上次看您的店铺情况还不错，今天想让我帮您做什么？"
+### 3. 确认供应商后
 
-- **快照不存在（首次使用或数据过期）：**
-  走首次启动流程（见下方）。
-
-### 3. 首次启动（无快照时）
-
-向商家打招呼，了解他们当前的运营情况。可参考以下问题：
-
-- 您的店铺主要在哪个平台经营？（wlw / Europages / 其他）
-- 您主营哪些品类？
-- 您当前面临的主要挑战是什么？（店铺信息不完整、商品曝光低、数据查询困难等）
-- 您希望我优先帮您做哪方面的优化？
+用户选定供应商后：
+1. 更新 INDEX.json 的 `lastActiveId`
+2. 加载该供应商的 `SUPPLIER_PROFILE.json` 和 `LEARNED_RULES.json`
+3. 根据画像和已知信息，向用户询问今天的需求

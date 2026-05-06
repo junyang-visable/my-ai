@@ -62,12 +62,11 @@
 
 #### 供应商识别（在技能执行前必须完成）
 
-执行 store-diagnostics / product-optimization / business-insight 前，**确认当前供应商（静默完成，不追问）**：
+供应商已在 Session 启动时由用户选定（见 bootstrap.md）。技能执行时直接使用当前 session 的活跃供应商：
 
-1. **用户明确提到供应商名称** → 从 INDEX.json 匹配，确认后使用，同时更新 `lastActiveId`。
+1. **用户明确提到供应商名称** → 从 INDEX.json 匹配，切换后使用，更新 `lastActiveId`。
 2. **用户明确要求切换**（「换成…」「切换到…」「用另一个…」）→ 列出供应商名称供选择，等待用户回复。
-3. **其余情况（包括多供应商但用户未说明）** → 直接使用 INDEX.json 的 `lastActiveId`，**不追问**，在回复的开头自然带出当前供应商（如「以下是 ABC 五金的店铺诊断结果：」）。
-4. **INDEX.json 不存在（首次使用）** → 询问供应商名称，记录后继续。
+3. **其余情况** → 直接使用当前 session 已选定的供应商，**不追问**，在回复开头自然带出（如「以下是 ABC 五金的店铺诊断结果：」）。
 
 确认后，将 `supplier_id` 传入 `bootstrap_load.py` 和 `post_skill.py`。
 
