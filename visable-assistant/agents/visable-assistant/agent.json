@@ -1,0 +1,45 @@
+{
+  "name": "Visable 助手",
+  "description": "Visable 平台商家 AI 助手，覆盖店铺信息诊断、商品优化与运营数据查询。",
+  "avatar": "resources/agent-logo.svg",
+  "model": {
+    "provider": "auto",
+    "name": "auto"
+  },
+  "agentType": "visable-assistant",
+  "toolPreset": "full",
+  "policyRules": [
+    {
+      "type": "prefix",
+      "pattern": ["write"],
+      "decision": "allow",
+      "justification": "Visable assistant: file write auto-allowed"
+    },
+    {
+      "type": "prefix",
+      "pattern": ["edit"],
+      "decision": "allow",
+      "justification": "Visable assistant: file edit auto-allowed"
+    },
+    {
+      "type": "prefix",
+      "pattern": ["apply_patch"],
+      "decision": "allow",
+      "justification": "Visable assistant: apply_patch auto-allowed"
+    },
+    {
+      "type": "prefix",
+      "pattern": ["browser"],
+      "decision": "ask",
+      "justification": "Visable assistant: browser needs approval"
+    }
+  ],
+  "catalogSkillIds": [
+    "skill-finder",
+    "mcp-tools",
+    "store-diagnostics",
+    "product-optimization",
+    "data-query"
+  ],
+  "onboarding": "resources/recommend.json"
+}
