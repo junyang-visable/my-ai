@@ -1,0 +1,63 @@
+{
+  "version": "1.0",
+  "description": "JIT 模式配置。控制哪些 skill 支持 JIT 快照复用、outcome 写入和跨 skill 联动。",
+
+  "global": {
+    "snapshot_path": "memory/state_snapshot.json",
+    "default_outcome_enabled": true,
+    "default_jit_enabled": false,
+    "default_linkage_enabled": true
+  },
+
+  "skills": {
+    "store-diagnostics": {
+      "jit": {
+        "enabled": false
+      },
+      "outcome": {
+        "enabled": true,
+        "ttl_days": 7,
+        "extract_fields": ["summary", "alerts"]
+      },
+      "linkage": {
+        "enabled": true,
+        "reads_from": ["business-insight"]
+      }
+    },
+
+    "product-optimization": {
+      "jit": {
+        "enabled": false
+      },
+      "outcome": {
+        "enabled": true,
+        "ttl_days": 30,
+        "extract_fields": ["summary"]
+      },
+      "linkage": {
+        "enabled": true,
+        "reads_from": ["business-insight", "store-diagnostics"]
+      }
+    },
+
+    "business-insight": {
+      "jit": {
+        "enabled": true,
+        "max_age_hours": 24,
+        "trigger_phrases": ["最近怎么样", "店铺数据", "经营情况", "订单", "访客", "转化"],
+        "full_report_phrases": ["详细分析", "完整报告", "重新查询"],
+        "jit_supplement_tools": [],
+        "jit_template": "snapshot_brief"
+      },
+      "outcome": {
+        "enabled": true,
+        "ttl_days": 7,
+        "extract_fields": ["summary", "metrics", "alerts", "opportunities"]
+      },
+      "linkage": {
+        "enabled": true,
+        "reads_from": ["store-diagnostics", "product-optimization"]
+      }
+    }
+  }
+}

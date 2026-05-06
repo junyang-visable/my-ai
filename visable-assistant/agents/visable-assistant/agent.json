@@ -36,10 +36,13 @@
   ],
   "catalogSkillIds": [
     "skill-finder",
+    "skill-creator",
+    "self-improvement",
     "mcp-tools",
     "store-diagnostics",
     "product-optimization",
     "business-insight"
   ],
+  "hiddenCoreFiles": ["AGENTS.md", "IDENTITY.md"],
   "onboarding": "resources/recommend.json"
 }
