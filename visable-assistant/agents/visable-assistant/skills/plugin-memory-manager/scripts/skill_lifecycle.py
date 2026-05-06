@@ -20,8 +20,8 @@ SKILLS_DIR = SCRIPTS_DIR.parent.parent
 MEMORY_DIR = SKILLS_DIR.parent / "memory"
 
 SNAPSHOT_SKILLS = [
-    "business-insight",
-    "store-diagnostics",
+    "visable-business-insight",
+    "visable-supplier-diagnostics",
     "visable-product-opt",
 ]
 
@@ -99,7 +99,7 @@ def _build_snapshot():
                 "detail": opp if isinstance(opp, str) else str(opp),
                 "detected_at": outcome.get("timestamp", ""),
             })
-        if skill_name == "business-insight":
+        if skill_name == "visable-business-insight":
             snapshot["metrics"] = outcome.get("metrics", {})
     return snapshot
 

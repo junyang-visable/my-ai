@@ -2,7 +2,7 @@
   "version": "1.0",
   "description": "各 Skill 的 outcome 写入配置。skill 执行完后根据此配置提取结果摘要。",
   "skills": {
-    "store-diagnostics": {
+    "visable-supplier-diagnostics": {
       "enabled": true,
       "ttl_days": 7,
       "extract_rules": {
@@ -19,7 +19,7 @@
       },
       "example": "{\"summary\": \"优化了'304不锈钢水杯'的标题和描述，新增关键词 insulated tumbler\"}"
     },
-    "business-insight": {
+    "visable-business-insight": {
       "enabled": true,
       "ttl_days": 7,
       "extract_rules": {

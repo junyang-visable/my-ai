@@ -10,7 +10,7 @@
   },
 
   "skills": {
-    "store-diagnostics": {
+    "visable-supplier-diagnostics": {
       "jit": {
         "enabled": false
       },
@@ -21,7 +21,7 @@
       },
       "linkage": {
         "enabled": true,
-        "reads_from": ["business-insight"]
+        "reads_from": ["visable-business-insight"]
       }
     },
 
@@ -36,11 +36,11 @@
       },
       "linkage": {
         "enabled": true,
-        "reads_from": ["business-insight", "store-diagnostics"]
+        "reads_from": ["visable-business-insight", "visable-supplier-diagnostics"]
       }
     },
 
-    "business-insight": {
+    "visable-business-insight": {
       "jit": {
         "enabled": true,
         "max_age_hours": 24,
@@ -56,7 +56,7 @@
       },
       "linkage": {
         "enabled": true,
-        "reads_from": ["store-diagnostics", "product-optimization"]
+        "reads_from": ["visable-supplier-diagnostics", "visable-product-opt"]
       }
     }
   }

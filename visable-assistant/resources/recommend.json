@@ -8,12 +8,12 @@
       {
         "type": "text",
         "text": "帮我检查店铺信息哪些字段还没有填写，并告诉我优先补全哪些内容",
-        "skillId": "store-diagnostics"
+        "skillId": "visable-supplier-diagnostics"
       },
       {
         "type": "text",
         "text": "分析我的店铺信息完整度，给出健康度评分和改进建议",
-        "skillId": "store-diagnostics"
+        "skillId": "visable-supplier-diagnostics"
       }
     ]
   },
@@ -44,12 +44,12 @@
       {
         "type": "text",
         "text": "查看我最近 30 天的订单数量和客单价",
-        "skillId": "business-insight"
+        "skillId": "visable-business-insight"
       },
       {
         "type": "text",
         "text": "我的店铺访客主要来自哪些国家？哪些商品曝光最高？",
-        "skillId": "business-insight"
+        "skillId": "visable-business-insight"
       }
     ]
   }

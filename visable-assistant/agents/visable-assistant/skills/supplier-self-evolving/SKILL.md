@@ -86,7 +86,7 @@ memory/
 
 ### 供应商识别规则
 
-每次执行涉及供应商的技能（store-diagnostics / product-optimization / business-insight）时，按以下顺序确认当前供应商（**不主动追问，静默完成**）：
+每次执行涉及供应商的技能（visable-supplier-diagnostics / visable-product-opt / visable-business-insight）时，按以下顺序确认当前供应商（**不主动追问，静默完成**）：
 
 1. **用户明确提到供应商名称** → 在 INDEX.json 中匹配，确认后使用，更新 `lastActiveId`。
 2. **用户明确要求切换**（「换成…」「切换到…」）→ 列出供应商名称供选择，等待用户回复。

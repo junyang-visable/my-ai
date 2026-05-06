@@ -18,23 +18,23 @@ MEMORY_DIR = SKILLS_DIR.parent / "memory"
 
 # 联动关系映射：当前 skill → 需要查看哪些 skill 的 outcomes
 LINK_MAP = {
-    "store-diagnostics": [
-        ("business-insight", "最近运营数据，结合数据判断店铺问题"),
+    "visable-supplier-diagnostics": [
+        ("visable-business-insight", "最近运营数据，结合数据判断店铺问题"),
     ],
     "visable-product-opt": [
-        ("business-insight", "运营数据，识别曝光/转化低的商品，指导优化方向"),
-        ("store-diagnostics", "店铺诊断结果，关联商品层面的问题"),
+        ("visable-business-insight", "运营数据，识别曝光/转化低的商品，指导优化方向"),
+        ("visable-supplier-diagnostics", "店铺诊断结果，关联商品层面的问题"),
     ],
-    "business-insight": [
-        ("store-diagnostics", "店铺诊断结果，结合数据判断整体健康度"),
+    "visable-business-insight": [
+        ("visable-supplier-diagnostics", "店铺诊断结果，结合数据判断整体健康度"),
         ("visable-product-opt", "最近优化的商品，追踪优化效果"),
     ],
 }
 
 # 快照聚合时关注的 skill 列表（按优先级）
 SNAPSHOT_SKILLS = [
-    "business-insight",
-    "store-diagnostics",
+    "visable-business-insight",
+    "visable-supplier-diagnostics",
     "visable-product-opt",
 ]
 
@@ -137,7 +137,7 @@ def cmd_snapshot(read_only=False):
                 "detected_at": outcome.get("timestamp", ""),
             })
 
-        if skill_name == "business-insight":
+        if skill_name == "visable-business-insight":
             snapshot["metrics"] = outcome.get("metrics", {})
 
     tmp = snapshot_path.with_suffix(".tmp")

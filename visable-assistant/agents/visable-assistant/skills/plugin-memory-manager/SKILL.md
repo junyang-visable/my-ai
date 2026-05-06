@@ -52,9 +52,9 @@ python scripts/outcome_manager.py clean <skill_name>
 
 | Skill | summary 应包含 | 额外字段 | 保留天数 |
 |-------|---------------|---------|---------|
-| store-diagnostics | 健康度评分 + 主要缺失项 | alerts | 7 |
+| visable-supplier-diagnostics | 健康度评分 + 主要缺失项 | alerts | 7 |
 | product-optimization | 优化的商品 + 主要优化点 | 无 | 30 |
-| business-insight | 核心指标（订单/访客/转化）+ 趋势 | metrics, alerts, opportunities | 7 |
+| visable-business-insight | 核心指标（订单/访客/转化）+ 趋势 | metrics, alerts, opportunities | 7 |
 
 ---
 

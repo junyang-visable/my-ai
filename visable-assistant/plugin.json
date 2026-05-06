@@ -2,10 +2,10 @@
   "name": "visable-assistant",
   "displayName": "Visable 助手",
   "version": "0.0.1",
-  "description": "面向 Visable 平台商家的 AI 助手：涵盖店铺信息诊断、商品优化与运营数据查询",
+  "description": "面向 Visable 平台供应商的 AI 助手：涵盖供应商诊断、商品优化与运营数据查询",
   "author": "Visable",
   "icon": "resources/agent-logo.svg",
   "category": "e-commerce",
-  "tags": ["visable", "store-diagnostics", "product-optimization", "data-query", "e-commerce"],
+  "tags": ["visable", "supplier-diagnostics", "product-opt", "business-insight", "e-commerce"],
   "forceUpdate": true
 }
