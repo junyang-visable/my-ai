@@ -1,0 +1,56 @@
+[
+  {
+    "icon": "resources/agent-logo.svg",
+    "type": "text",
+    "title": "店铺诊断",
+    "sectionTitle": "尝试以下提示词",
+    "prompts": [
+      {
+        "type": "text",
+        "text": "帮我检查店铺信息哪些字段还没有填写，并告诉我优先补全哪些内容",
+        "skillId": "store-diagnostics"
+      },
+      {
+        "type": "text",
+        "text": "分析我的店铺信息完整度，给出健康度评分和改进建议",
+        "skillId": "store-diagnostics"
+      }
+    ]
+  },
+  {
+    "icon": "resources/agent-logo.svg",
+    "type": "text",
+    "title": "商品优化",
+    "sectionTitle": "尝试以下提示词",
+    "prompts": [
+      {
+        "type": "text",
+        "text": "帮我优化这款商品的标题和描述，让它更容易被买家搜索到",
+        "skillId": "product-optimization"
+      },
+      {
+        "type": "text",
+        "text": "分析我的商品页面，给出图片和文案的优化建议",
+        "skillId": "product-optimization"
+      }
+    ]
+  },
+  {
+    "icon": "resources/agent-logo.svg",
+    "type": "text",
+    "title": "数据查询",
+    "sectionTitle": "尝试以下提示词",
+    "prompts": [
+      {
+        "type": "text",
+        "text": "查看我最近 30 天的订单数量和客单价",
+        "skillId": "data-query"
+      },
+      {
+        "type": "text",
+        "text": "我的店铺访客主要来自哪些国家？哪些商品曝光最高？",
+        "skillId": "data-query"
+      }
+    ]
+  }
+]
