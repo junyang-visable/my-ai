@@ -1,0 +1,18 @@
+{
+  "mcpServers": {
+    "visable-data-server": {
+      "type": "stream",
+      "url": "https://api.placeholder-visable-mcp.com/mcp"
+    }
+  },
+  "oauth": {
+    "visable": {
+      "adapter": "mcp-oauth",
+      "toolName": "start_visable_oauth",
+      "enabled": true,
+      "authorization_url": "https://auth.placeholder-visable.com/authorize",
+      "token_url": "https://auth.placeholder-visable.com/token",
+      "scopes": ["openid", "profile"]
+    }
+  }
+}
