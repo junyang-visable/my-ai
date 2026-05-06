@@ -44,12 +44,12 @@
       {
         "type": "text",
         "text": "查看我最近 30 天的订单数量和客单价",
-        "skillId": "data-query"
+        "skillId": "business-insight"
       },
       {
         "type": "text",
         "text": "我的店铺访客主要来自哪些国家？哪些商品曝光最高？",
-        "skillId": "data-query"
+        "skillId": "business-insight"
       }
     ]
   }

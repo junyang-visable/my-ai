@@ -39,7 +39,7 @@
     "mcp-tools",
     "store-diagnostics",
     "product-optimization",
-    "data-query"
+    "business-insight"
   ],
   "onboarding": "resources/recommend.json"
 }
