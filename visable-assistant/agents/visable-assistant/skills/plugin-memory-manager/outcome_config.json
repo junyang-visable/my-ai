@@ -11,7 +11,7 @@
       },
       "example": "{\"summary\": \"店铺健康度 72分，缺少公司认证和产品主图\", \"alerts\": [\"公司认证未填写\", \"3个商品缺少主图\"]}"
     },
-    "product-optimization": {
+    "visable-product-opt": {
       "enabled": true,
       "ttl_days": 30,
       "extract_rules": {

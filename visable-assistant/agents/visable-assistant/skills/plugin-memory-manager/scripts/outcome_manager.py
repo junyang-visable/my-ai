@@ -19,7 +19,7 @@ CONFIG_FILE = Path(__file__).parent.parent / "outcome_config.json"
 
 DEFAULT_TTL_DAYS = {
     "store-diagnostics": 7,
-    "product-optimization": 30,
+    "visable-product-opt": 30,
     "business-insight": 7,
 }
 FALLBACK_TTL_DAYS = 14

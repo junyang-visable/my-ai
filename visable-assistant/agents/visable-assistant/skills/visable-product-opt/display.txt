@@ -1,0 +1,4 @@
+name: Visable Product Optimization
+icon: 🔍
+description: Diagnose and optimize product listings — titles, descriptions, attributes, price, MOQ
+version: 1.1.0

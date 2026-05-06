@@ -21,13 +21,13 @@ LINK_MAP = {
     "store-diagnostics": [
         ("business-insight", "最近运营数据，结合数据判断店铺问题"),
     ],
-    "product-optimization": [
+    "visable-product-opt": [
         ("business-insight", "运营数据，识别曝光/转化低的商品，指导优化方向"),
         ("store-diagnostics", "店铺诊断结果，关联商品层面的问题"),
     ],
     "business-insight": [
         ("store-diagnostics", "店铺诊断结果，结合数据判断整体健康度"),
-        ("product-optimization", "最近优化的商品，追踪优化效果"),
+        ("visable-product-opt", "最近优化的商品，追踪优化效果"),
     ],
 }
 
@@ -35,7 +35,7 @@ LINK_MAP = {
 SNAPSHOT_SKILLS = [
     "business-insight",
     "store-diagnostics",
-    "product-optimization",
+    "visable-product-opt",
 ]
 
 

@@ -22,7 +22,7 @@ MEMORY_DIR = SKILLS_DIR.parent / "memory"
 SNAPSHOT_SKILLS = [
     "business-insight",
     "store-diagnostics",
-    "product-optimization",
+    "visable-product-opt",
 ]
 
 
