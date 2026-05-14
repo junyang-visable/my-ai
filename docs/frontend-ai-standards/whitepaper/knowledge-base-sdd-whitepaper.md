@@ -113,13 +113,13 @@ Step 6  若读了代码回答了函数问题 → 触发 refine-knowledge-base（
 
 导航路由按问题类型分流：
 
-| 问题类型 | 路由路径 |
-|----------|----------|
-| 项目做什么 | `00_overview/big_picture.md` → `01_maps/system_map.md` |
-| 功能 X 在哪 | `01_maps/feature_map.md` → `04_modules/<name>.md` |
-| 文件路径 X 做什么 | `03_index/file_index.md` → Scope Table → `feature_map.md` |
-| 函数/符号 X 做什么 | `05_symbols/<slug>.md` → 有则直接答，无则读源码后 refine |
-| 如何运行/部署 | `02_guides/dev.md` / `deploy.md` / `debug.md` |
+| 问题类型           | 路由路径                                                  |
+| ------------------ | --------------------------------------------------------- |
+| 项目做什么         | `00_overview/big_picture.md` → `01_maps/system_map.md`    |
+| 功能 X 在哪        | `01_maps/feature_map.md` → `04_modules/<name>.md`         |
+| 文件路径 X 做什么  | `03_index/file_index.md` → Scope Table → `feature_map.md` |
+| 函数/符号 X 做什么 | `05_symbols/<slug>.md` → 有则直接答，无则读源码后 refine  |
+| 如何运行/部署      | `02_guides/dev.md` / `deploy.md` / `debug.md`             |
 
 ### 3.2 initialize-knowledge-base：全量建库
 
@@ -129,16 +129,16 @@ Step 6  若读了代码回答了函数问题 → 触发 refine-knowledge-base（
 
 九步顺序不可跳越、不可乱序：
 
-| 步骤 | 执行者 | 产出 |
-|------|--------|------|
-| Step 1+2 | Subagent（Stack & Structure Scanner） | TECH_STACK / SYSTEM_LAYERS / FEATURE_CLUSTERS / MODULE_BOUNDARIES |
-| Step 3 | Main agent | `00_overview/big_picture.md` + `tech_stack.md` |
-| Step 4 | Main agent | `01_maps/system_map.md` + `feature_map.md` + `module_map.md` |
-| Step 5 | Subagent（File Indexer） | `03_index/file_index.md` + `api_index.md` |
-| Step 6 | Subagent × N（Module Extractors，并行） | `04_modules/<name>.md`（每模块一个） |
-| Step 7 | Subagent（Guide Extractor） | `02_guides/dev.md` + `deploy.md` + `debug.md` |
-| Step 8 | Main agent | `RUNBOOK.md` |
-| Step 9 | Main agent | `META.md`（写入 last_commit SHA） |
+| 步骤     | 执行者                                  | 产出                                                              |
+| -------- | --------------------------------------- | ----------------------------------------------------------------- |
+| Step 1+2 | Subagent（Stack & Structure Scanner）   | TECH_STACK / SYSTEM_LAYERS / FEATURE_CLUSTERS / MODULE_BOUNDARIES |
+| Step 3   | Main agent                              | `00_overview/big_picture.md` + `tech_stack.md`                    |
+| Step 4   | Main agent                              | `01_maps/system_map.md` + `feature_map.md` + `module_map.md`      |
+| Step 5   | Subagent（File Indexer）                | `03_index/file_index.md` + `api_index.md`                         |
+| Step 6   | Subagent × N（Module Extractors，并行） | `04_modules/<name>.md`（每模块一个）                              |
+| Step 7   | Subagent（Guide Extractor）             | `02_guides/dev.md` + `deploy.md` + `debug.md`                     |
+| Step 8   | Main agent                              | `RUNBOOK.md`                                                      |
+| Step 9   | Main agent                              | `META.md`（写入 last_commit SHA）                                 |
 
 Step 1+2 的 subagent 由 `heuristics.md` 驱动：根据项目文件（`package.json`、`go.mod`、`requirements.txt`、`pom.xml`、`Cargo.toml` 等）自动识别后端框架、前端框架、样式方案、UI 库、数据库、CI/CD、基础设施，无需人工配置。
 
@@ -221,11 +221,11 @@ archive-knowledge-base
 
 ### 4.2 RepoWiki 的三个关键读取节点
 
-| 节点 | 读取目标 | 目的 |
-|------|----------|------|
-| **Spec 产出前** | `00_overview/` + 相关 `04_modules/` | 确认功能边界与模块约束，避免 Spec 与现有架构冲突 |
+| 节点                   | 读取目标                                           | 目的                                               |
+| ---------------------- | -------------------------------------------------- | -------------------------------------------------- |
+| **Spec 产出前**        | `00_overview/` + 相关 `04_modules/`                | 确认功能边界与模块约束，避免 Spec 与现有架构冲突   |
 | **writing-plans 阶段** | `01_maps/module_map.md` + `03_index/file_index.md` | 生成含真实文件路径的分步计划，而非凭空编写文件清单 |
-| **实施过程中** | `05_symbols/<slug>.md` + `06_features/` | 确认函数签名与已有功能约束，避免引入不一致的实现 |
+| **实施过程中**         | `05_symbols/<slug>.md` + `06_features/`            | 确认函数签名与已有功能约束，避免引入不一致的实现   |
 
 ### 4.3 Definition of Done
 
@@ -281,3 +281,5 @@ archive-knowledge-base
 2. **gap 是信号，不是故障**：每次 `refine-knowledge-base` 填补一个 gap，都说明有一块知识之前未被显式化。把 gap 写入 RepoWiki 后，它就永久消失了——下次同样问题不会再触发 gap 检测。
 
 3. **`05_symbols/` 按需生长**：函数级索引不预生成，只在实际读过某个函数后写入。这保证 `05_symbols/` 中的每一条记录都经过 agent 的实际阅读验证，而不是机械推断。随着项目演进，`05_symbols/` 会自然积累高频被访问的核心符号，形成项目最有价值的精炼知识层。
+
+4. **Skill 收敛为 Plugin，流程能力统一交付**：单个 skill 解决单个环节的问题（初始化、探索、归档、填补、审查），但分散的 skill 需要工程师手动拼接，接入成本高且容易遗漏。随着 skill 体系趋于成熟，下一步是将一组协作 skill 打包为**可安装的 Plugin**——Plugin 作为整体发布、整体版本化、整体安装到项目中。安装后，流程中每个环节对应的 skill 自动就位，无需逐一配置。Plugin 的演进节奏与单个 skill 解耦：某个 skill 升级时，只需发布新版 Plugin，存量项目按需升级，而不是每个项目单独修改 skill 文件。
