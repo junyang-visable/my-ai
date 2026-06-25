@@ -61,8 +61,16 @@ Phase 5: 按变动类型汇总输出
 
 产出：
 
-- `start_iso` / `end_iso`：过滤 changelog、comment、`created` 用
-- `start_jql` / `end_jql`：`YYYY-MM-DD`，候选池 JQL 用
+- `start_iso` / `end_iso`：过滤 changelog、comment、`created` 用（闭区间，含 end 当日全天）
+- `start_jql`：`YYYY-MM-DD`，候选池 JQL 下界
+- `end_jql_exclusive`：`end` 次日 `YYYY-MM-DD`，候选池 JQL 上界（见下方说明）
+
+**JQL 日期上界**：禁止 `updated <= "{end}"` / `created <= "{end}"`。在 Jira 中这表示「≤ 当日 00:00」，会漏掉 end 当天全天的更新（FE-837 即因此漏采：6-25 11:14 变更不满足 `updated <= "2026-06-25"`）。应使用 **次日作为上界**：
+
+```
+updated >= "{start_jql}" AND updated < "{end_jql_exclusive}"
+created >= "{start_jql}" AND created < "{end_jql_exclusive}"
+```
 
 ---
 
@@ -79,8 +87,8 @@ Phase 5: 按变动类型汇总输出
   OR assignee was currentUser()
 )
 AND (
-  updated >= "{start_jql}" AND updated <= "{end_jql}"
-  OR created >= "{start_jql}" AND created <= "{end_jql}"
+  updated >= "{start_jql}" AND updated < "{end_jql_exclusive}"
+  OR created >= "{start_jql}" AND created < "{end_jql_exclusive}"
 )
 ORDER BY updated DESC
 ```
