@@ -1,44 +1,59 @@
 ---
 name: jira-work-summary
 description: >-
-  Queries Jira via Atlassian MCP and aggregates ticket change events (created,
-  status transitions, assignee/priority changes) that occurred within a user-
-  specified date range on the current user's tickets, then synthesizes a work
-  summary. Use for work summaries, weekly reports, sprint recaps, Jira changelog
-  analysis, or when the user mentions ticket changes, status updates, new issues,
-  or a time range (本周、上周、本月、最近N天).
+  Queries Jira via Atlassian MCP and tracks status transitions and worklog
+  (timespent) on the current user's tickets within a date range to synthesize a
+  work progress summary. Ignores metadata edits (description, links, etc.) as
+  non-progress noise. Use for work summaries, weekly reports, sprint recaps,
+  status or worklog tracking, or Jira + time range (本周、上周、本月、最近N天).
 ---
 
-# Jira 工作总结（按变动事件统计）
+# Jira 工作总结（状态变更 + 工时 = 工作进展）
 
-通过 `user-atlassian-visable` MCP，统计**用户给定时间范围内实际发生的 ticket 变动**（新增、状态变更、指派变更等），并生成工作总结。
+通过 `user-atlassian-visable` MCP，统计**用户给定时间范围内 ticket 的状态变更与工时登记**，作为工作进展总结。description、Link 等字段编辑属于日常维护，**不计入工作进展**。
 
 ## 核心原则
 
-**统计对象是「变动事件」，不是 ticket 当前快照。**
+### 什么算「工作进展」
+
+| 计入 | 不计入（changelog 中忽略，不出现在报告） |
+|------|----------------------------------------|
+| `status` 流转（`status_change`） | `description`、`summary`、评论正文 |
+| `timespent` 增加（`worklog_logged`） | `timeestimate`（登记工时时常联动调整，不单独列） |
+| 期内**新建** ticket（`created`，默认保留） | `assignee`、`priority`、Sprint |
+| | `resolution`（通常与 status→Done 同批，不单独列） |
+| | `Link`、`IssueParentAssociation`、labels、components |
+| | 其余 `field_change` |
+
+**统计对象**是期内 changelog 中的 **`status_change` 与 `worklog_logged` 事件**，不是 ticket 当前快照，也不是任意 `updated` 编辑。
+
+MCP 无独立读 worklog API；**工时从 changelog `field=timespent` 的增量推断**（与 Jira UI 登记工时的记录方式一致）。
+
+### 事件时间边界
 
 | 正确 | 错误 |
 |------|------|
-| 6 月 3 日 status 从 In Progress → Done | ticket 当前是 Done，故计入本周期 |
-| 6 月 1 日新建的 FE-123 | 指派给我且 `updated` 在范围内，但期内无实质变更 |
-| changelog `created` 落在 `[start, end]` 内的每条变更 | 仅用 JQL `updated` 作为最终统计依据 |
+| changelog 中 status 变更的 `created` 落在 `[start, end]` | ticket 当前是 Done 即计入本周期 |
+| 6 月 25 日 Backlog → In Progress 记入报告 | description 在 6/25 更新记入工作进展 |
+| 6 月 23 日登记 4h 工时（timespent +14400）记入报告 | 仅 timeestimate 联动变化记入报告 |
+| 用 `updated < end+1天` 召回候选池 | 用 `updated <= end` 作上界（漏掉结束日当天） |
 
-JQL `updated` / `created` 仅用于**缩小候选 ticket 集合**；最终计数与归类必须以 **changelog 时间戳** 或 **issue.created** 为准。
+JQL 仅用于**候选 ticket 池**；进展计数以 changelog 中 `status` / `timespent` 的时间戳为准。
 
 ## 前置条件
 
 1. MCP `user-atlassian-visable` 已启用且已认证。
-2. 调用 MCP 工具前先读取 schema（`mcps/user-atlassian-visable/tools/*.json`）。
-3. 只读：不创建、编辑、流转 ticket，不写 worklog。
+2. 调用 MCP 工具前先读取 schema。
+3. 只读：不创建、编辑、流转 ticket。
 
 ## 编排流程
 
 ```
 Phase 1: 身份与连接
-Phase 2: 时间范围 → start / end（事件过滤边界）
-Phase 3: JQL 候选 ticket 池（宽召回）
-Phase 4: 变动事件抽取与分类（changelog + created）
-Phase 5: 按变动类型汇总输出
+Phase 2: 时间范围
+Phase 3: JQL 候选 ticket 池
+Phase 4: 抽取 status_change + worklog_logged（+ 可选 created）
+Phase 5: 按进展类型汇总输出
 ```
 
 ---
@@ -51,7 +66,7 @@ Phase 5: 按变动类型汇总输出
 
 ## Phase 2：时间范围
 
-解析闭区间 `[start, end]`（含首尾日）。默认时区 `Asia/Shanghai`（报告中标注）。
+闭区间 `[start, end]`（含首尾日）。默认时区 `Asia/Shanghai`。
 
 | 用户表述 | 规则 |
 |----------|------|
@@ -61,11 +76,11 @@ Phase 5: 按变动类型汇总输出
 
 产出：
 
-- `start_iso` / `end_iso`：过滤 changelog、comment、`created` 用（闭区间，含 end 当日全天）
-- `start_jql`：`YYYY-MM-DD`，候选池 JQL 下界
-- `end_jql_exclusive`：`end` 次日 `YYYY-MM-DD`，候选池 JQL 上界（见下方说明）
+- `start_iso` / `end_iso`：过滤 status / timespent changelog、`created`
+- `start_jql`：下界 `YYYY-MM-DD`
+- `end_jql_exclusive`：结束日 **次日** `YYYY-MM-DD`
 
-**JQL 日期上界**：禁止 `updated <= "{end}"` / `created <= "{end}"`。在 Jira 中这表示「≤ 当日 00:00」，会漏掉 end 当天全天的更新（FE-837 即因此漏采：6-25 11:14 变更不满足 `updated <= "2026-06-25"`）。应使用 **次日作为上界**：
+**禁止** `updated <= "{end}"` / `created <= "{end}"`（Jira 视为 ≤ 当日 00:00，会漏掉结束日当天变更）。使用：
 
 ```
 updated >= "{start_jql}" AND updated < "{end_jql_exclusive}"
@@ -74,11 +89,9 @@ created >= "{start_jql}" AND created < "{end_jql_exclusive}"
 
 ---
 
-## Phase 3：候选 ticket 池（宽召回）
+## Phase 3：候选 ticket 池
 
-用 JQL 拉取「期内**可能**有变动」的 ticket，避免漏掉「很久未更新但期内有状态变更」的 edge case（`updated` 与 changelog 通常一致，但召回要宽）。
-
-### 默认候选 JQL
+宽召回「期内可能有状态变更」的 ticket：
 
 ```
 (
@@ -93,126 +106,127 @@ AND (
 ORDER BY updated DESC
 ```
 
-用户指定项目时加 `AND project = {KEY}`。更多模式见 [references/jql-patterns.md](references/jql-patterns.md)。
+补充召回（可选）：`status changed AFTER "{start_jql}" BEFORE "{end_jql_exclusive}"` — 见 [references/jql-patterns.md](references/jql-patterns.md)。
 
-### 检索
+`searchJiraIssuesUsingJql`：`maxResults` 100，分页至结束。fields 无需 `comment`。
 
-`searchJiraIssuesUsingJql`：`maxResults` 100，分页至结束。
-
-```json
-{
-  "fields": ["summary", "status", "issuetype", "priority", "project", "assignee", "reporter", "created", "updated", "resolution", "comment"],
-  "responseContentFormat": "markdown"
-}
-```
-
-候选数 > 50 时提示用户是否缩小项目范围，或继续全量。
+候选数 > 50 时提示是否缩小项目范围。
 
 ---
 
-## Phase 4：变动事件抽取
+## Phase 4：进展事件抽取
 
-对每个候选 ticket 调用 `getJiraIssue`：`expand=changelog`，`responseContentFormat=markdown`。
+对每个候选 ticket：`getJiraIssue`，`expand=changelog`。
 
-### 4.1 新增（Created）
+遍历 `changelog.histories`，`history.created` ∈ `[start_iso, end_iso]`，在 `items[]` 中按 field 提取：
 
-若 `fields.created` ∈ `[start_iso, end_iso]`，记为 **新增事件**：
+### 4.1 状态变更（`status_change`）
 
-| 字段 | 值 |
-|------|-----|
-| type | `created` |
-| at | `created` |
-| ticket | key, summary, issuetype, project |
-| actor | `reporter`（创建人） |
-| 与我关系 | reporter=我 / assignee=我 / 仅创建 |
+`field === "status"`（或 `fieldId === "status"`）：
 
-### 4.2 Changelog 事件
-
-遍历 `changelog.histories`，仅保留 `history.created` ∈ `[start_iso, end_iso]`。
-
-对每条 `history`，遍历 `items[]`，按 `field` 拆成独立事件（一条 history 含多个 field 则多条事件）：
-
-| field（常见） | type | 记录内容 |
-|---------------|------|----------|
-| `status` | `status_change` | `fromString` → `toString`，时间、操作人 |
-| `assignee` | `assignee_change` | 原指派人 → 新指派人；是否指派给我 |
-| `priority` | `priority_change` | from → to |
-| Sprint 相关 | `sprint_change` | from → to |
-| `resolution` | `resolution_change` | from → to |
-| 其他 | `field_change` | field + from → to |
-
-每条事件附带：`at`、`author`、`ticket` 上下文。
-
-### 4.3 用户相关过滤（默认）
-
-默认只统计与**当前用户**相关的变动：
-
-| 事件类型 | 计入条件（满足任一） |
-|----------|----------------------|
-| `created` | 我创建的，或创建时指派给我，或当前指派给我 |
-| `status_change` 等 changelog | `author.accountId` = 我，**或** 变更发生时我是 assignee（指派给我后的变更） |
-| `assignee_change` | 新 assignee 是我（指派给我），或 author 是我 |
-
-用户明确要求「我操作过的全部」→ 仅 `author` = 我。  
-用户明确要求「我名下 ticket 的全部变动」→ 候选池内 ticket 的期内所有 changelog 均计入。
-
-### 4.4 状态变更子类（工作总结常用）
-
-在 `status_change` 上进一步标记：
-
-| 子类 | 判定 |
+| 记录 | 内容 |
 |------|------|
-| `completed` | `toString` 为 Done / Closed / Resolved / 已完成 等完成态 |
-| `reopened` | 从完成态回到进行中 |
-| `started` | 从 Open / To Do / 待办 → In Progress / 进行中 |
-| `other_transition` | 其余状态流转 |
+| type | `status_change` |
+| at | `history.created` |
+| from / to | `fromString` → `toString` |
+| author | 操作人 |
+| ticket | key, summary, issuetype, project |
 
-完成态名称因实例而异，以 changelog 原文匹配。
+### 4.2 工时登记（`worklog_logged`）
 
-### 4.5 评论（可选）
+`field === "timespent"`：
 
-仅当用户要求「评论/协作」时：过滤 `comment.created` ∈ 范围。默认报告可不单独成章，合并进协作备注。
+| 记录 | 内容 |
+|------|------|
+| type | `worklog_logged` |
+| at | `history.created`（登记操作时间） |
+| delta | `to` 秒 − `from` 秒（`fromString`/`toString` 为秒数字符串；`from` 为空视为 0） |
+| delta_human | 人类可读，如 `4h`、`30m`（`delta` 秒换算） |
+| total_after | 登记后累计 `timespent`（可选展示） |
+| author | 操作人（登记人） |
+| ticket | key, summary, … |
 
-### 4.6 降级
+**仅当 `delta > 0`** 时计入（忽略误删/调减工时）。同一 `history` 若含 `timespent` + `timeestimate`，**只记 timespent**，跳过 `timeestimate`。
 
-`changelog` 不可用：标注该 key，**不臆造**状态变更；若 `created` 在范围内仍可记新增。
+默认**只统计本人登记的工时**（`author.accountId` = 我）。用户要求「我名下 ticket 全部工时」时，可计入他人代登但 assignee 为我的记录（报告中标注登记人）。
+
+### 4.3 同一 history 多字段
+
+一条 changelog 可能同时含 `status` 与 `timespent`（如关单并登记工时）：**分别提取为独立事件**，各计一条。
+
+### 4.4 显式跳过
+
+description、assignee、priority、resolution、timeestimate、Link、IssueParentAssociation、Sprint、labels、components 及一切非 status / timespent 字段。
+
+### 4.5 新建 ticket
+
+若 `fields.created` ∈ `[start_iso, end_iso]` 且与我相关，记为 `created`。默认报告保留「新增任务」；用户要求「仅状态+工时」时可省略 created 章节。
+
+### 4.6 用户相关过滤（默认）
+
+| 事件 | 计入条件（满足任一） |
+|------|----------------------|
+| `status_change` | `author` = 我；或变更时我是 assignee |
+| `worklog_logged` | **默认** `author` = 我（本人登记） |
+| `created` | 我 reporter；或 assignee = 我 |
+
+### 4.7 状态子类
+
+| subtype | 判定 |
+|---------|------|
+| `completed` | to ∈ Done, Closed, Resolved, 已完成, … |
+| `reopened` | from 完成态 → to 进行中 |
+| `started` | from ∈ Backlog, To Do, Open, 待办 → to ∈ In Progress, 进行中 |
+| `other_transition` | 其余 |
+
+### 4.8 不采集
+
+评论（除非用户明确要求）；非 status/timespent 的 changelog。
+
+### 4.9 降级
+
+changelog 不可用：标注该 key，不臆造状态或工时。
 
 ---
 
 ## Phase 5：汇总输出
 
-### 统计口径（概览表）
+### 概览表（仅进展相关）
 
 | 指标 | 含义 |
 |------|------|
-| 新增 ticket | `created` 事件数 |
-| 状态变更 | `status_change` 事件数 |
-| 其中：完成 | 子类 `completed` |
-| 其中：重新打开 | 子类 `reopened` |
-| 指派变更 | `assignee_change`（含指派给我） |
-| 其他字段变更 | priority / sprint / resolution / field_change |
-| 涉及 ticket 数 | 至少有一条期内事件的去重 key 数 |
+| 状态变更 | `status_change` 事件总数 |
+| ├ 完成 | subtype `completed` |
+| ├ 重新打开 | `reopened` |
+| ├ 启动/进行中 | `started` |
+| └ 其他流转 | `other_transition` |
+| 工时登记 | `worklog_logged` 条数 |
+| 登记工时合计 | 各 `delta` 之和（人类可读，如 `12h 30m`） |
+| 新增任务 | `created` 事件数 |
+| 涉及 ticket | 有 status_change、worklog_logged 或 created 的去重 key 数 |
 
-**禁止**用「候选 JQL 返回条数」或「当前 status=Done 的数量」代替上表。
+**禁止**将 description、`timeestimate` 单独变动等计入上表。
 
 ### 输出结构
 
-使用 [references/summary-template.md](references/summary-template.md)。章节按**变动类型**组织，而非仅「已完成 / 进行中」：
+见 [references/summary-template.md](references/summary-template.md)：
 
-1. 概览（上表）
-2. **新增 ticket**（期内创建）
-3. **状态变更**（按子类或按目标状态分组，附 from → to）
-4. **其他变动**（指派、优先级、Sprint 等）
-5. 按项目分布（各类型事件数）
-6. 数据说明（时间范围、过滤规则、候选 JQL、事件总数）
+1. 概览
+2. **状态变更明细**
+3. **工时登记明细**（时间、key、登记量、登记人）
+4. **新增任务**（可省略）
+5. 按项目分布
+6. 工作要点（状态流转 + 工时投入 + 新建任务）
+7. 数据说明
 
 ### 呈现要求
 
-- 每条事件：`[KEY]` + 摘要 + 变动描述 + 时间 + 操作人（若非本人且相关则标注）
-- 状态变更写清 **from → to**，不写仅「已更新」
-- 保存文件：`jira-work-summary-{start}-{end}.md`
+- 状态变更写 **from → to** 与时间
+- 工时写 **+{delta_human}**（如 `+4h`），附 ticket key
+- 不写 description、Epic 关联、blocked by 等
+- 保存：`jira-work-summary-{start}-{end}.md`
 
-变动类型细则见 [references/change-types.md](references/change-types.md)。
+细则见 [references/change-types.md](references/change-types.md)。
 
 ---
 
@@ -220,13 +234,13 @@ ORDER BY updated DESC
 
 | 情况 | 处理 |
 |------|------|
-| MCP 认证失败 | 提示检查 Atlassian MCP 连接 |
-| JQL 失败 | 简化为 `assignee = currentUser() AND updated >= ...` 重试 |
-| 单条 issue 失败 | 记入失败列表，继续其余 |
-| 零事件 | 说明可能原因（范围过窄、过滤过严），建议放宽用户相关条件或扩大日期 |
+| MCP 认证失败 | 提示检查 Atlassian 连接 |
+| JQL 失败 | 简化为 `assignee = currentUser() AND updated >= ...` |
+| 单条 issue 失败 | 记入失败列表 |
+| 零条进展事件 | 说明范围内无状态流转且无本人工时登记；勿用 description 充数 |
 
 ## 附加资源
 
-- [references/change-types.md](references/change-types.md) — 变动类型与分类规则
-- [references/jql-patterns.md](references/jql-patterns.md) — 候选池 JQL
-- [references/summary-template.md](references/summary-template.md) — 报告模板
+- [references/change-types.md](references/change-types.md)
+- [references/jql-patterns.md](references/jql-patterns.md)
+- [references/summary-template.md](references/summary-template.md)

@@ -1,6 +1,6 @@
 # Jira JQL 参考（候选 ticket 池）
 
-JQL 只用于**召回候选 ticket**，最终统计以 changelog / `created` 时间为准。
+JQL 只用于**召回候选 ticket**。报告统计 changelog 中 `status` 与 `timespent`（及可选 `created`）；description 等维护性编辑不写入报告。
 
 ## 默认候选池（推荐）
 
