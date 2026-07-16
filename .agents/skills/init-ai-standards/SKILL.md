@@ -7,7 +7,7 @@ description: Initializes a frontend project's AI engineering standards: generate
 
 初始化前端项目 AI 工程标准三件套：**.cursorrules + repowiki/ + SDD specs/**。
 
-所有模板位于本 skill 目录的 `templates/` 下，skill 完全自包含，可复制到任意项目的 `.cursor/skills/` 或 `~/.cursor/skills/` 使用。
+所有模板位于本 skill 目录的 `templates/` 下，skill 完全自包含，可复制到任意项目的 `.agents/skills/` 或 `~/.agents/skills/` 使用。
 
 ---
 
