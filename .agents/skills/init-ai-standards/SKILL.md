@@ -92,7 +92,7 @@ description: Initializes a frontend project's AI engineering standards: generate
        (a) 追加到末尾  (b) 覆盖替换  (c) 跳过，保持不变
        ```
        等待用户选择后按选择执行；选 (c) 则跳过本 Phase。
-2. 读取模板：`.cursor/skills/init-ai-standards/templates/cursorrules.md`
+2. 读取模板：`.agents/skills/init-ai-standards/templates/cursorrules.md`
 3. 替换占位符：
    - `[替换: 项目中文/英文名称]` → 仓库快照中的项目名
    - `[替换: 例如 Element Plus / Naive UI / 自研组件库]` → 扫描到的 UI 库
