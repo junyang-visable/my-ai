@@ -100,7 +100,7 @@ AI 编码工具已在各项目中独立使用，但团队普遍遇到三类问�
 
 ### 项目 Owner
 
-1. 用 `init-ai-standards` skill 一键初始化 `.cursorrules` + `repowiki/` + `specs/`（见 `.cursor/skills/init-ai-standards/`）
+1. 用 `init-ai-standards` skill 一键初始化 `.cursorrules` + `repowiki/` + `specs/`（见 `.agents/skills/init-ai-standards/`）
 2. 评审并完善 `repowiki/` 中业务知识与路由章节（04、06 章节需人工填写）
 3. 将「合并后同步 Specs + RepoWiki」写入团队 Definition of Done
 

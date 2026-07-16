@@ -118,7 +118,7 @@ repowiki/
 
 **`v-ai-frontend`** 定位为团队前端的 **Skill Hub（技能枢纽）**：在统一版本与管理面下分发与前端 SDD 相关的 Custom Skills（含 RepoWiki / OpenSpec 提示模版、Superpower 链、sdd-flow 资产、前端 CR、埋点校验等）。
 
-- **使用方式**：各业务仓通过 Hub 约定的安装路径（Plugin / `.cursor/skills` / AGENTS 声明）挂载同一批技能版本，避免「每人拷贝一份 SKILL.md」导致漂移。
+- **使用方式**：各业务仓通过 Hub 约定的安装路径（Plugin / `.agents/skills` / AGENTS 声明）挂载同一批技能版本，避免「每人拷贝一份 SKILL.md」导致漂移。
 - **与 Plugin 演进**：白皮 **§六** 提出将协作 skill **打包为可安装 Plugin**；Hub 可作为 Plugin 清单与 semver 的来源，滚动升级而不逐仓改文件名。
 
 本地 Playbook（模板与 SDD README）与本白皮书保持 **引用关系**；Hub 负责 **编排哪些技能进入默认包、版本号与变更说明**。
