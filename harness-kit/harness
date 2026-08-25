@@ -1,0 +1,204 @@
+#!/usr/bin/env bash
+# =============================================================================
+# harness — workspace 模式控制台
+# -----------------------------------------------------------------------------
+# 在 harness-kit 目录里直接注册、切换、驱动任意仓库，仓库本身零安装。
+# 每个仓库一份配置：workspaces/<alias>.conf.sh；每仓库独立的任务目录、断言锁基线。
+#
+# 用法:
+#   ./harness add <alias> <repo-path>   注册仓库（生成配置模板并设为活跃）
+#   ./harness use <alias>               切换活跃仓库
+#   ./harness list                      列出全部 workspace
+#   ./harness current                   显示当前活跃仓库
+#   ./harness validate [selfcheck|--strict|--stage X]   对活跃仓库跑统一验证
+#   ./harness lock <update|verify|list> 断言锁（作用域=活跃仓库的冒烟集）
+#   ./harness evidence <任务名> [layout|api|render|generic]  收集失败证据
+#   ./harness task new <name>           建任务目录（current/result/history/evidence）
+#   ./harness task list                 列出任务
+#   ./harness context                   打印契约层文本（贴进 agent 会话或落成 AGENTS.md）
+#   ./harness doctor                    体检活跃 workspace
+# =============================================================================
+set -euo pipefail
+
+KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+WS="$KIT/workspaces"
+ACTIVE_F="$WS/.active"
+ENGINE="$KIT/.harness/feedback"
+TPL="$KIT/.harness/tasks/_template"
+
+c_grn=$'\033[32m'; c_dim=$'\033[2m'; c_red=$'\033[31m'; c_rst=$'\033[0m'
+
+die() { echo "${c_red}$*${c_rst}" >&2; exit 1; }
+
+conf_of()   { echo "$WS/$1.conf.sh"; }
+active()    { [ -f "$ACTIVE_F" ] && cat "$ACTIVE_F" || return 1; }
+
+require_active() {
+  local a; a="$(active)" || die "还没有活跃 workspace。先跑: ./harness add <alias> <repo-path>"
+  [ -f "$(conf_of "$a")" ] || die "活跃 workspace '$a' 的配置丢失: $(conf_of "$a")"
+  echo "$a"
+}
+
+# 加载活跃 workspace 并注入环境变量；之后 exec 引擎脚本即可
+load_env() {
+  local a="$1" conf repo
+  conf="$(conf_of "$a")"
+  # shellcheck source=/dev/null
+  source "$conf"
+  repo="${HARNESS_REPO:-}"
+  [ -n "$repo" ] && [ -d "$repo" ] || die "workspace '$a' 的仓库不存在: ${repo:-<未配置 HARNESS_REPO>}"
+  export HARNESS_REPO="$repo"
+  export HARNESS_CONF="$conf"
+  export HARNESS_TASKS_DIR="$WS/$a/tasks"
+  export HARNESS_LOCK_BASELINE="$WS/$a/.lock-baseline.json"
+  # lock/evidence 直接调 python/脚本时也要能看到这些值
+  export HARNESS_SMOKE_GLOB="${HARNESS_SMOKE_GLOB:-cypress/e2e/smoke/**/*.cy.*}"
+  export HARNESS_E2E_CMD="${HARNESS_E2E_CMD:-}"
+  export HARNESS_EVIDENCE_DIR="${HARNESS_EVIDENCE_DIR:-}"
+  mkdir -p "$HARNESS_TASKS_DIR"
+}
+
+usage() { sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; }
+
+cmd="${1:-}"; shift || true
+case "$cmd" in
+
+  add)
+    alias="${1:?用法: ./harness add <alias> <repo-path>}"
+    repo_path="${2:?用法: ./harness add <alias> <repo-path>}"
+    [ -d "$repo_path" ] || die "目录不存在: $repo_path"
+    repo="$(cd "$repo_path" && pwd)"
+    mkdir -p "$WS"
+    conf="$(conf_of "$alias")"
+    if [ -e "$conf" ]; then die "已存在同名 workspace: $alias（$conf）"; fi
+    cat > "$conf" <<EOF
+# workspace: $alias —— 仓库专属配置（覆盖 .harness/config.sh 的默认值）
+HARNESS_REPO="$repo"
+
+# 阻断级命令，按这个仓库的栈填；留空的阶段自动跳过
+HARNESS_LINT_CMD=""            # 例: "pnpm -s lint"
+HARNESS_TYPECHECK_CMD=""       # 例: "pnpm -s tsc --noEmit"
+HARNESS_BUILD_CMD=""           # 例: "pnpm -s build"（前端硬门禁，不可跳过）
+HARNESS_TEST_CMD=""            # 例: "pnpm -s test -- --run"
+
+# 警告级
+HARNESS_STYLE_CMD=""
+
+# E2E / 冒烟集（断言锁作用域，相对仓库根；空格分隔可多条）
+HARNESS_E2E_CMD=""             # 例: "pnpm -s cypress run --spec 'cypress/e2e/smoke/**'"
+HARNESS_SMOKE_GLOB="cypress/e2e/smoke/**/*.cy.*"
+EOF
+    echo "$alias" > "$ACTIVE_F"
+    echo "${c_grn}已注册并激活 workspace: $alias → $repo${c_rst}"
+    echo "下一步: 编辑 $(conf_of "$alias") 填命令，然后 ./harness validate selfcheck"
+    ;;
+
+  use)
+    alias="${1:?用法: ./harness use <alias>}"
+    [ -f "$(conf_of "$alias")" ] || die "不存在 workspace: $alias（先 ./harness add）"
+    echo "$alias" > "$ACTIVE_F"
+    echo "已切换到 ${c_grn}$alias${c_rst}"
+    ;;
+
+  list)
+    [ -d "$WS" ] || { echo "(还没有 workspace)"; exit 0; }
+    cur="$(active || true)"
+    found=0
+    for f in "$WS"/*.conf.sh; do
+      [ -e "$f" ] || continue
+      found=1
+      a="$(basename "$f" .conf.sh)"
+      repo="$(source "$f" 2>/dev/null; echo "${HARNESS_REPO:-?}")"
+      mark=" "; [ "$a" = "$cur" ] && mark="*"
+      printf "%s %-16s %s\n" "$mark" "$a" "$repo"
+    done
+    if [ "$found" -eq 0 ]; then echo "(还没有 workspace)"; fi
+    ;;
+
+  current)
+    a="$(require_active)"; load_env "$a"
+    echo "$a → $HARNESS_REPO"
+    echo "${c_dim}tasks:    $HARNESS_TASKS_DIR${c_rst}"
+    echo "${c_dim}baseline: $HARNESS_LOCK_BASELINE${c_rst}"
+    ;;
+
+  validate)
+    a="$(require_active)"; load_env "$a"
+    exec bash "$ENGINE/validate.sh" "$@"
+    ;;
+
+  lock)
+    a="$(require_active)"; load_env "$a"
+    cd "$HARNESS_REPO"
+    exec python3 "$ENGINE/lock-tests.py" "${1:-verify}"
+    ;;
+
+  evidence)
+    a="$(require_active)"; load_env "$a"
+    exec bash "$ENGINE/collect-evidence.sh" "$@"
+    ;;
+
+  task)
+    sub="${1:?用法: ./harness task new|list <name>}"; shift || true
+    a="$(require_active)"; load_env "$a"
+    case "$sub" in
+      new)
+        name="${1:?用法: ./harness task new <name>}"
+        dst="$HARNESS_TASKS_DIR/$name"
+        [ -e "$dst" ] && die "任务已存在: $dst"
+        mkdir -p "$dst/evidence"
+        cp "$TPL/current.md" "$TPL/result.md" "$TPL/history.md" "$dst/"
+        echo "已创建任务: $dst"
+        echo "编辑 current.md 写清当前阶段与唯一下一步；history.md 只追加。"
+        ;;
+      list)
+        ls -1 "$HARNESS_TASKS_DIR" 2>/dev/null | grep -v '^_template$' || echo "(无任务)"
+        ;;
+      *) die "未知子命令: task $sub" ;;
+    esac
+    ;;
+
+  context)
+    a="$(require_active)"; load_env "$a"
+    echo "# 给 agent 的会话开场（也可存为仓库根的 AGENTS.md）"
+    echo
+    echo "你正在仓库 $HARNESS_REPO 工作，验证由外部 harness-kit 提供："
+    echo "- 唯一验证入口（在 kit 目录执行）: ./harness validate"
+    echo "- 完成后按证据模板申报: harness-kit/.harness/rubric/evidence-template.md"
+    echo "- 红线: 禁止删断言/改测试预期/@ts-ignore 凑绿；build 不可跳过。"
+    echo "- 冒烟测试受断言锁保护: ./harness lock verify"
+    echo
+    echo "${c_dim}完整契约层见 templates/AGENTS.md；希望 agent 每次自动读到，可把它复制为仓库根的 AGENTS.md。${c_rst}"
+    ;;
+
+  doctor)
+    a="$(require_active)"; load_env "$a"
+    echo "== doctor: $a =="
+    echo "repo:     $HARNESS_REPO"
+    if git -C "$HARNESS_REPO" rev-parse --git-dir >/dev/null 2>&1; then
+      if git -C "$HARNESS_REPO" rev-parse --short HEAD >/dev/null 2>&1; then
+        echo "git:      $(git -C "$HARNESS_REPO" rev-parse --short HEAD) @ $(git -C "$HARNESS_REPO" branch --show-current 2>/dev/null || echo '?')"
+      else
+        echo "git:      (仓库已 init，但还没有任何提交)"
+      fi
+    else
+      echo "git:      (非 git 仓库，建议纳入版本控制)"
+    fi
+    for v in HARNESS_LINT_CMD HARNESS_TYPECHECK_CMD HARNESS_BUILD_CMD HARNESS_TEST_CMD; do
+      if [ -n "${!v:-}" ]; then echo "${c_grn}✓${c_rst} $v = ${!v}"; else echo "${c_dim}○${c_rst} $v 未配置（该阶段会被跳过）"; fi
+    done
+    n=0; for g in $HARNESS_SMOKE_GLOB; do
+      base="${g##*/}"
+      dir="${g%/*}"; [ "$dir" = "$g" ] && dir="."
+      dir="${dir%%\*\**}"                  # 去掉 ** 及之后，取起始目录
+      dir="${dir%/}"; [ -z "$dir" ] && dir="."
+      cnt="$(find "$HARNESS_REPO/$dir" -type f -name "$base" 2>/dev/null | wc -l | tr -d ' ')"
+      echo "smoke:    $g → $cnt 个文件"; n=$((n+cnt))
+    done
+    [ "$n" -eq 0 ] && echo "${c_red}!${c_rst} 冒烟集为空：断言锁暂无保护对象，先建 cypress/e2e/smoke/ 用例"
+    [ -f "$HARNESS_LOCK_BASELINE" ] && echo "baseline: 已存在（$HARNESS_LOCK_BASELINE）" || echo "baseline: 未建立（冒烟集稳定后跑 ./harness lock update）"
+    ;;
+
+  ""|-h|--help|help) usage ;;
+  *) die "未知命令: $cmd（./harness help）" ;;
+esac

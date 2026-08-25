@@ -1,0 +1,5 @@
+# 运行时状态，不随 kit 分发
+workspaces/*/evidence/
+workspaces/*/tasks/*/evidence/
+.harness/feedback/.lock-baseline.json
+.harness/feedback/__pycache__/

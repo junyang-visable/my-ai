@@ -1,0 +1,91 @@
+# harness-kit
+
+一套**可复用、不限栈**的编排层脚手架，把「Coding Harness + Testing Harness（E2E 优先）」
+接入任意仓库。它不是自研引擎，而是在现有 agent CLI（Qoder / Claude Code）之上，用
+**契约 + 命令 + 钩子 + 上下文约定 + 机械化验证**把「模型能力 × 环境能力」里的环境这一半补齐。
+
+> 配套调研见 Obsidian 笔记《Coding 与 Testing Harness 自建方案》。本 kit 实现其中 P0–P2。
+
+## 五层结构
+
+| 层 | 作用 | 本 kit 对应 |
+| --- | --- | --- |
+| 契约层 | 30 秒讲清边界，常驻且短 | `templates/AGENTS.md`（~100 行，只做索引与红线） |
+| 上下文层 | 按需加载的知识 | `templates/docs/`、`.harness/context/` |
+| 工具层 | 可复用技能/命令/钩子 | `adapters/{qoder,claude-code}/`、`.harness/hooks/` |
+| 验证层 | 机械化执法，不靠提示词 | `.harness/feedback/`（validate / lint-arch / lock-tests / collect-evidence） |
+| 循环层 | 状态与续跑 | `.harness/tasks/<需求>/{current,result,history}.md + evidence/` |
+
+## 快速开始（workspace 模式：在 kit 目录直接驱动仓库，仓库零安装）
+
+```bash
+# 1) 注册一个仓库，生成它的专属配置
+./harness add my-app /path/to/your-repo
+
+# 2) 填这个仓库的命令（按栈）
+$EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD / E2E_CMD ...
+
+# 3) 先验证护栏本身，再跑全套
+./harness validate selfcheck
+./harness validate
+```
+
+日常都在 kit 目录里完成，命令都作用于当前活跃仓库：
+
+```bash
+./harness list                      # 看注册了哪些仓库，* 是当前活跃
+./harness use another-repo          # 切换活跃仓库
+./harness doctor                    # 体检：命令是否配置、冒烟集、断言锁基线
+./harness validate --strict         # 三级门禁全套（阻断/警告/提示）
+./harness lock update               # 冒烟集稳定后记基线；verify 校验是否被篡改
+./harness evidence 需求名 api       # 失败后收集证据，产出下一轮修复的 prompt
+./harness task new 需求名           # 建循环层任务目录（current/result/history/evidence）
+./harness context                   # 打印契约层文本，贴进 agent 会话开场
+```
+
+每仓库的配置、断言锁基线、任务与证据都在 `workspaces/<alias>/` 下，互不干扰。
+
+### 可选：install 模式
+
+如果你希望某个仓库自带 harness（agent 进仓库即读到 AGENTS.md），也可 `./install.sh <repo>`。
+两种模式可共存；workspace 模式不在目标仓库写任何文件。
+
+## 覆盖范围（P0–P2）
+
+- **P0**：契约层 `AGENTS.md`；`validate.sh` 合成 lint→typecheck→arch→build→test 并分三级门禁；
+  `selfcheck` 故意造违规确认护栏不是纸糊的。
+- **P1**：`post-edit.sh` 编辑后增量快检 + 输出截断；`evidence-template.md` 完成证据模板。
+- **P2**：E2E 用例上下文库、四级 Rubric、防谎报三件套、断言锁 `lock-tests.py`、
+  失败证据自动收集 `collect-evidence.sh`。
+
+## 不限栈怎么做到的
+
+所有脚本只读 `.harness/config.sh` 里的命令变量；留空的阶段自动跳过。换栈只改 config，
+不动引擎。CLI 差异全部收敛在 `adapters/`，`.harness/` 本身是纯 shell + markdown。
+
+## 目录
+
+```
+harness-kit/
+├── harness                    workspace 模式控制台（add/use/validate/lock/evidence/task/...）
+├── workspaces/                每仓库一份配置 + 独立的任务/基线/证据（add 时生成）
+├── install.sh                 可选：把 harness 装进仓库（引擎软链 / 配置拷贝）
+├── templates/                 契约层与 docs 模板
+│   ├── AGENTS.md
+│   └── docs/{ARCHITECTURE,DEVELOPMENT}.md
+├── .harness/
+│   ├── config.sh              默认接线点（workspace 模式下被 workspaces/*.conf.sh 覆盖）
+│   ├── feedback/              validate / lint-arch / lock-tests / collect-evidence
+│   ├── hooks/post-edit.sh     编辑后增量快检
+│   ├── context/testing/       E2E 用例上下文库模板
+│   ├── rubric/                四级 Rubric + 防谎报三件套 + 完成证据模板
+│   └── tasks/_template/       循环层状态模板
+└── adapters/
+    ├── qoder/                 skills(harness-coding/testing) + commands
+    └── claude-code/           commands + settings.hooks.json
+```
+
+## 边界
+
+不建议把 harness 变成负担：单文件 bugfix / 加日志 / 改文案直接对话改，别走全套。
+门禁分级（阻断/警告/提示）就是为了避免「所有检查都阻断」引发的绕过冲动。
