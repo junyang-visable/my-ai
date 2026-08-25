@@ -1,5 +1,8 @@
-# 运行时状态，不随 kit 分发
-workspaces/*/evidence/
-workspaces/*/tasks/*/evidence/
+# harness-kit 自身：配置、任务状态、经验笔记入库；大二进制证据不入库
+workspaces/*/tasks/*/evidence/*
+!workspaces/*/tasks/*/evidence/.gitkeep
+workspaces/*/context/cypress-artifacts/
+
+# 引擎目录内的运行时产物（install 模式基线落在目标仓库；kit 内仅防御性忽略）
 .harness/feedback/.lock-baseline.json
 .harness/feedback/__pycache__/

@@ -6,14 +6,15 @@
 # 每个仓库一份配置：workspaces/<alias>.conf.sh；每仓库独立的任务目录、断言锁基线。
 #
 # 用法:
-#   ./harness add <alias> <repo-path>   注册仓库（生成配置模板并设为活跃）
+#   ./harness add <alias> <repo-path>   注册仓库（生成配置/notes/e2e-context 并设为活跃）
+#   ./harness link [skills目录]         把 kit 的 Qoder 技能软链进技能目录（默认 ../.agents/skills）
 #   ./harness use <alias>               切换活跃仓库
 #   ./harness list                      列出全部 workspace
 #   ./harness current                   显示当前活跃仓库
 #   ./harness validate [selfcheck|--strict|--stage X]   对活跃仓库跑统一验证
 #   ./harness lock <update|verify|list> 断言锁（作用域=活跃仓库的冒烟集）
 #   ./harness evidence <任务名> [layout|api|render|generic]  收集失败证据
-#   ./harness task new <name>           建任务目录（current/result/history/evidence）
+#   ./harness task new <name>           建任务目录（spec/current/result/history/evidence）
 #   ./harness task list                 列出任务
 #   ./harness context                   打印契约层文本（贴进 agent 会话或落成 AGENTS.md）
 #   ./harness doctor                    体检活跃 workspace
@@ -88,9 +89,54 @@ HARNESS_STYLE_CMD=""
 HARNESS_E2E_CMD=""             # 例: "pnpm -s cypress run --spec 'cypress/e2e/smoke/**'"
 HARNESS_SMOKE_GLOB="cypress/e2e/smoke/**/*.cy.*"
 EOF
+
+    # 每仓库的知识落点：经验笔记 + E2E 用例上下文（install 模式的对应物在仓库 .harness/ 下）
+    wsn="$WS/$alias"
+    mkdir -p "$wsn/context"
+    cp "$KIT/.harness/context/testing/e2e-context.md" "$wsn/context/e2e-context.md"
+    cat > "$wsn/notes.md" <<NOTES_EOF
+# $alias 仓库经验笔记
+
+> 该仓库的栈、命令实测、坑与约定。任务级过程写 tasks/<需求名>/history.md，
+> 跨仓库通用的经验提练到 kit 的 playbooks/<主题>.md。
+
+## 栈与命令实测
+- （记录实际可跑的 lint / typecheck / build / test 命令与已知坑）
+
+## 坑与约定
+- （选择器约定、环境变量、部署方式、必须绕开的雷区…）
+NOTES_EOF
+
     echo "$alias" > "$ACTIVE_F"
     echo "${c_grn}已注册并激活 workspace: $alias → $repo${c_rst}"
-    echo "下一步: 编辑 $(conf_of "$alias") 填命令，然后 ./harness validate selfcheck"
+    echo "下一步: 编辑 $(conf_of "$alias") 填命令；顺手把栈与坑记进 $wsn/notes.md"
+    echo "        然后跑 ./harness validate selfcheck 验证护栏本身"
+    ;;
+
+  link)
+    # 把 kit 的 Qoder 技能软链进技能目录，让 agent 会话能直接调用（个人工具集跟仓库走）
+    if [ $# -ge 1 ]; then
+      dest="$1"
+    elif [ -d "$KIT/../.agents" ]; then
+      dest="$KIT/../.agents/skills"
+    else
+      die "未找到默认技能目录（$KIT/../.agents/skills）。用法: ./harness link <qoder skills 目录>"
+    fi
+    mkdir -p "$dest"
+    dest="$(cd "$dest" && pwd)"
+    for srcd in "$KIT"/adapters/qoder/skills/*/; do
+      [ -d "$srcd" ] || continue
+      name="$(basename "$srcd")"
+      target="$dest/$name"
+      if [ -e "$target" ] && [ ! -L "$target" ]; then
+        echo "  skip  $target（已存在且非软链，如需覆盖请手动处理）" >&2
+        continue
+      fi
+      [ -L "$target" ] && rm "$target"
+      ln -s "$KIT/adapters/qoder/skills/$name" "$target"
+      echo "  link  $dest/$name → adapters/qoder/skills/$name"
+    done
+    echo "${c_grn}完成。重启 Qoder（或新开会话）后技能生效。${c_rst}"
     ;;
 
   use)
@@ -147,9 +193,9 @@ EOF
         dst="$HARNESS_TASKS_DIR/$name"
         [ -e "$dst" ] && die "任务已存在: $dst"
         mkdir -p "$dst/evidence"
-        cp "$TPL/current.md" "$TPL/result.md" "$TPL/history.md" "$dst/"
+        cp "$TPL/spec.md" "$TPL/current.md" "$TPL/result.md" "$TPL/history.md" "$dst/"
         echo "已创建任务: $dst"
-        echo "编辑 current.md 写清当前阶段与唯一下一步；history.md 只追加。"
+        echo "跨文件任务先填 spec.md（需求边界/方案/计划）再动手；current.md 写清当前阶段与唯一下一步；history.md 只追加。"
         ;;
       list)
         ls -1 "$HARNESS_TASKS_DIR" 2>/dev/null | grep -v '^_template$' || echo "(无任务)"
@@ -167,6 +213,7 @@ EOF
     echo "- 完成后按证据模板申报: harness-kit/.harness/rubric/evidence-template.md"
     echo "- 红线: 禁止删断言/改测试预期/@ts-ignore 凑绿；build 不可跳过。"
     echo "- 冒烟测试受断言锁保护: ./harness lock verify"
+    echo "- 仓库专属经验与 E2E 上下文: workspaces/$a/notes.md 与 workspaces/$a/context/e2e-context.md"
     echo
     echo "${c_dim}完整契约层见 templates/AGENTS.md；希望 agent 每次自动读到，可把它复制为仓库根的 AGENTS.md。${c_rst}"
     ;;

@@ -5,15 +5,21 @@ CLI 无关**。这里只放两家 CLI 各自的接线方式。
 
 ## 先选工作模式
 
-- **workspace 模式（默认，仓库零安装）**：在 kit 目录用 `./harness add/use/validate ...`
-  驱动任意仓库。此时 agent 会话开场贴 `./harness context` 的输出即可，不强制在仓库放文件。
+- **workspace 模式（默认，仓库零安装）**：在 kit 目录跑 `./harness link` 接好技能后，
+  在工具集仓库（my-ai）会话里直接调 harness-dev / harness-coding / harness-testing
+  驱动任意仓库；命令行则用 `./harness add/use/validate ...`。会话开场也可贴
+  `./harness context` 的输出，不强制在仓库放文件。
 - **install 模式**：`install.sh` 按所选 CLI 把命令/钩子/技能接进目标仓库，适合希望
-  agent 一进仓库就自动读到 `AGENTS.md` 的场景。
+  agent 一进仓库就自动读到 `AGENTS.md` 的场景。两种模式的命令对照见各 SKILL.md 的
+  「第 0 步：定位」表格。
 
 ## Qoder / QoderWork
 
-- **技能**：`adapters/qoder/skills/{harness-coding,harness-testing}` → 软链到
-  `~/.qoderwork/skills/`（或 `~/.agents/skills/`）。两个角色对应防谎报的角色信息隔离。
+- **技能**：`adapters/qoder/skills/{harness-dev,harness-coding,harness-testing}`。
+  推荐用 kit 目录的 `./harness link` 软链到工具集仓库的 `.agents/skills/`
+  （个人工具集跟仓库走，换机 clone 后重跑一次 link 即恢复）；也可手动软链到
+  `~/.qoderwork/skills/` 全局生效。harness-dev 是跨仓库开发总控入口；
+  coding/testing 两个角色对应防谎报的角色信息隔离，均已适配双模式。
 - **命令**：`adapters/qoder/commands/*.md` → 项目内命令目录，触发 `/harness-validate`、`/harness-verify`。
 - **钩子**：Qoder 侧在项目 hook 配置里，让编辑类工具后执行
   `bash .harness/hooks/post-edit.sh <file>`。

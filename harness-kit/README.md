@@ -5,6 +5,9 @@
 **契约 + 命令 + 钩子 + 上下文约定 + 机械化验证**把「模型能力 × 环境能力」里的环境这一半补齐。
 
 > 配套调研见 Obsidian 笔记《Coding 与 Testing Harness 自建方案》。本 kit 实现其中 P0–P2。
+>
+> 定位：**个人开发 harness 工具集**。kit 随本仓库（my-ai）走，任意目标仓库零安装即可被驱动；
+> 引擎、任务状态与经验都沉淀在本仓库，换机 clone 后重跑一次 `./harness link` 即恢复。
 
 ## 五层结构
 
@@ -14,12 +17,15 @@
 | 上下文层 | 按需加载的知识 | `templates/docs/`、`.harness/context/` |
 | 工具层 | 可复用技能/命令/钩子 | `adapters/{qoder,claude-code}/`、`.harness/hooks/` |
 | 验证层 | 机械化执法，不靠提示词 | `.harness/feedback/`（validate / lint-arch / lock-tests / collect-evidence） |
-| 循环层 | 状态与续跑 | `.harness/tasks/<需求>/{current,result,history}.md + evidence/` |
+| 循环层 | 状态与续跑 | `.harness/tasks/<需求>/{spec,current,result,history}.md + evidence/`（spec=实现者技术方案） |
 
-## 快速开始（workspace 模式：在 kit 目录直接驱动仓库，仓库零安装）
+## 快速开始（workspace 模式：在 kit 所在仓库直接驱动任意仓库，目标仓库零安装）
 
 ```bash
-# 1) 注册一个仓库，生成它的专属配置
+# 0) 一次性：把 kit 的 Qoder 技能软链进本仓库的技能目录（换机后重跑一次）
+./harness link
+
+# 1) 注册一个仓库，生成它的专属配置 + 经验笔记 + E2E 上下文
 ./harness add my-app /path/to/your-repo
 
 # 2) 填这个仓库的命令（按栈）
@@ -30,7 +36,15 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 ./harness validate
 ```
 
-日常都在 kit 目录里完成，命令都作用于当前活跃仓库：
+日常开发**优先在本仓库会话里直接调技能**，说人话即可：
+
+> “用 harness-dev 给 my-app 加一个 XX 功能” / “harness-dev，切到 another-repo 继续 XX 任务”
+
+技能会自己定位 kit、确认活跃仓库、建任务、进编码循环、收尾沉淀经验；
+实现完成后另开会话说“用 harness-testing 验收 XX”（角色信息隔离）。
+注意：目标仓库需已加入 Qoder 工作区，否则写文件会被沙箱拦。
+
+命令行操作也都作用于当前活跃仓库：
 
 ```bash
 ./harness list                      # 看注册了哪些仓库，* 是当前活跃
@@ -43,7 +57,19 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 ./harness context                   # 打印契约层文本，贴进 agent 会话开场
 ```
 
-每仓库的配置、断言锁基线、任务与证据都在 `workspaces/<alias>/` 下，互不干扰。
+每仓库的配置、断言锁基线、任务与证据、经验笔记都在 `workspaces/<alias>/` 下，互不干扰。
+
+## 经验沉淀（工具集的核心价值）
+
+| 层 | 落点 | 放什么 |
+| --- | --- | --- |
+| 仓库专属 | `workspaces/<alias>/notes.md` | 该仓库的栈、命令实测、坑与约定（add 时生成） |
+| 跨仓库通用 | `playbooks/<主题>.md` | 换个仓库仍成立的方法论，一主题一文件，可回溯来源任务 |
+| 任务过程 | `workspaces/<alias>/tasks/<需求名>/history.md` | 只追加的过程记录 |
+
+技能（harness-dev / harness-coding / harness-testing）收尾都会回写这三层。
+与 agent 内置 memory 的分工：memory 按会话项目隔离、开发其他仓库时读不到；
+本库是纯文件、进 git、跟着仓库走——这正是把经验放在这里的原因。
 
 ### 可选：install 模式
 
@@ -67,9 +93,10 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 
 ```
 harness-kit/
-├── harness                    workspace 模式控制台（add/use/validate/lock/evidence/task/...）
-├── workspaces/                每仓库一份配置 + 独立的任务/基线/证据（add 时生成）
+├── harness                    workspace 模式控制台（add/use/link/validate/lock/evidence/task/...）
+├── workspaces/                每仓库一份：conf.sh 配置 + notes.md 经验 + context/ + 任务/基线/证据
 ├── install.sh                 可选：把 harness 装进仓库（引擎软链 / 配置拷贝）
+├── playbooks/                 跨仓库通用经验库（一主题一文件，可回溯来源任务）
 ├── templates/                 契约层与 docs 模板
 │   ├── AGENTS.md
 │   └── docs/{ARCHITECTURE,DEVELOPMENT}.md
@@ -81,7 +108,7 @@ harness-kit/
 │   ├── rubric/                四级 Rubric + 防谎报三件套 + 完成证据模板
 │   └── tasks/_template/       循环层状态模板
 └── adapters/
-    ├── qoder/                 skills(harness-coding/testing) + commands
+    ├── qoder/                 skills(harness-dev/coding/testing) + commands
     └── claude-code/           commands + settings.hooks.json
 ```
 
