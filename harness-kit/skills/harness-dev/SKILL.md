@@ -52,13 +52,13 @@ cd "$(dirname "$(readlink -f <本SKILL.md路径>)")/../.." && pwd
 
 ## 5. 路由（总控只调度，重活交给专职技能）
 
-| 需求形态 | 路由 |
-| --- | --- |
-| 新需求 / 需求模糊 | harness-spec（澄清→spec.md→用户确认 confirmed）→ harness-plan |
-| spec 已 confirmed、有 plan.md | harness-coding（读 spec+plan 逐 Task 执行勾选） |
-| 单文件小改 / 加日志 / 改文案 | 直接走下方编码循环，跳过 spec/plan |
-| 需求变更 | harness-change（spec 降级 draft、标记受影响 Task） |
-| 验收 | 另开会话用 harness-testing（角色隔离） |
+| 需求形态                      | 路由                                                          |
+| ----------------------------- | ------------------------------------------------------------- |
+| 新需求 / 需求模糊             | harness-spec（澄清→spec.md→用户确认 confirmed）→ harness-plan |
+| spec 已 confirmed、有 plan.md | harness-coding（读 spec+plan 逐 Task 执行勾选）               |
+| 单文件小改 / 加日志 / 改文案  | 直接走下方编码循环，跳过 spec/plan                            |
+| 需求变更                      | harness-change（spec 降级 draft、标记受影响 Task）            |
+| 验收                          | 另开会话用 harness-testing（角色隔离）                        |
 
 ## 6. 编码循环（实现者角色）
 

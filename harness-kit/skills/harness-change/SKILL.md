@@ -35,5 +35,5 @@ kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-change`，软链�
 
 - 只追加历史（变更记录 / history.md），不删旧内容——回滚依据全靠它。
 - 状态降回 draft 是机械 gate：coding 侧见到 draft 会拒绝续跑跨文件任务，
-   不要试图绕过。
+  不要试图绕过。
 - 你不写实现代码，不替用户决定已写代码的取舍。

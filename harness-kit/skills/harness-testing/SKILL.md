@@ -17,15 +17,15 @@ version: 1.1.0
 2. **目标仓库与模式**：目标仓库根存在 `.harness/config.sh` → **install 模式**（下表右列，
    命令在目标仓库根执行）；否则 → **workspace 模式**：`bash <kit>/harness current` 确认活跃仓库。
 
-| 动作 | workspace 模式（kit 会话） | install 模式（目标仓库内） |
-| --- | --- | --- |
-| E2E 用例上下文 | `<kit>/workspaces/<alias>/context/e2e-context.md` | `.harness/context/testing/e2e-context.md` |
-| Rubric 模板 | `<kit>/.harness/rubric/rubric-template.md` | `.harness/rubric/rubric-template.md` |
-| 任务目录（Rubric 落点） | `<kit>/workspaces/<alias>/tasks/<需求名>/rubric.md` | `.harness/tasks/<需求名>/rubric.md` |
-| build 硬门禁 | `bash <kit>/harness validate --stage build` | `bash .harness/feedback/validate.sh --stage build` |
-| E2E 执行 | 由 `workspaces/<alias>.conf.sh` 的 HARNESS_E2E_CMD 驱动 | 由 `.harness/config.sh` 的 HARNESS_E2E_CMD 驱动 |
-| 断言锁 | `bash <kit>/harness lock verify` | `python3 .harness/feedback/lock-tests.py verify` |
-| 收失败证据 | `bash <kit>/harness evidence <需求名> <类别>` | `bash .harness/feedback/collect-evidence.sh <需求名> <类别>` |
+| 动作                    | workspace 模式（kit 会话）                              | install 模式（目标仓库内）                                   |
+| ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------ |
+| E2E 用例上下文          | `<kit>/workspaces/<alias>/context/e2e-context.md`       | `.harness/context/testing/e2e-context.md`                    |
+| Rubric 模板             | `<kit>/.harness/rubric/rubric-template.md`              | `.harness/rubric/rubric-template.md`                         |
+| 任务目录（Rubric 落点） | `<kit>/workspaces/<alias>/tasks/<需求名>/rubric.md`     | `.harness/tasks/<需求名>/rubric.md`                          |
+| build 硬门禁            | `bash <kit>/harness validate --stage build`             | `bash .harness/feedback/validate.sh --stage build`           |
+| E2E 执行                | 由 `workspaces/<alias>.conf.sh` 的 HARNESS_E2E_CMD 驱动 | 由 `.harness/config.sh` 的 HARNESS_E2E_CMD 驱动              |
+| 断言锁                  | `bash <kit>/harness lock verify`                        | `python3 .harness/feedback/lock-tests.py verify`             |
+| 收失败证据              | `bash <kit>/harness evidence <需求名> <类别>`           | `bash .harness/feedback/collect-evidence.sh <需求名> <类别>` |
 
 ## 顺序（务必按此）
 

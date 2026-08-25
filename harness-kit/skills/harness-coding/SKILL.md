@@ -22,13 +22,13 @@ version: 1.1.0
 3. **写权限**（仅 workspace 模式）：目标仓库不在当前 Qoder 工作区时，写文件会被沙箱拦——
    先提醒用户把它加入工作区（Add Folder to Workspace），不要反复试错。
 
-| 动作 | workspace 模式（kit 会话） | install 模式（目标仓库内） |
-| --- | --- | --- |
-| 全套验证 | `bash <kit>/harness validate [--strict]` | `bash .harness/feedback/validate.sh [--strict]` |
-| 任务目录 | `<kit>/workspaces/<alias>/tasks/<需求名>/` | `.harness/tasks/<需求名>/` |
-| 断言锁 | `bash <kit>/harness lock verify` | `python3 .harness/feedback/lock-tests.py verify` |
+| 动作       | workspace 模式（kit 会话）                    | install 模式（目标仓库内）                                   |
+| ---------- | --------------------------------------------- | ------------------------------------------------------------ |
+| 全套验证   | `bash <kit>/harness validate [--strict]`      | `bash .harness/feedback/validate.sh [--strict]`              |
+| 任务目录   | `<kit>/workspaces/<alias>/tasks/<需求名>/`    | `.harness/tasks/<需求名>/`                                   |
+| 断言锁     | `bash <kit>/harness lock verify`              | `python3 .harness/feedback/lock-tests.py verify`             |
 | 收失败证据 | `bash <kit>/harness evidence <需求名> <类别>` | `bash .harness/feedback/collect-evidence.sh <需求名> <类别>` |
-| 证据模板 | `<kit>/.harness/rubric/evidence-template.md` | `.harness/rubric/evidence-template.md` |
+| 证据模板   | `<kit>/.harness/rubric/evidence-template.md`  | `.harness/rubric/evidence-template.md`                       |
 
 ## 开工前
 

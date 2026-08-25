@@ -5,7 +5,7 @@
 > 验收侧另有独立判定；两侧事后对照，不一致即澄清信号。
 
 - 需求名 / ID：
-- 状态：draft   # draft / confirmed——confirmed 必须来自用户明确同意；变更由 harness-change 降回
+- 状态：draft # draft / confirmed——confirmed 必须来自用户明确同意；变更由 harness-change 降回
 
 ## 需求边界
 

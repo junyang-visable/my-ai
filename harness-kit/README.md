@@ -11,13 +11,13 @@
 
 ## 五层结构
 
-| 层 | 作用 | 本 kit 对应 |
-| --- | --- | --- |
-| 契约层 | 30 秒讲清边界，常驻且短 | `templates/AGENTS.md`（~100 行，只做索引与红线） |
-| 上下文层 | 按需加载的知识 | `templates/docs/`、`.harness/context/` |
-| 工具层 | 可复用技能/命令/钩子 | `skills/`、`commands/`（agent 通用 markdown）、`.harness/hooks/` |
-| 验证层 | 机械化执法，不靠提示词 | `.harness/feedback/`（validate / lint-arch / lock-tests / collect-evidence） |
-| 循环层 | 状态与续跑 | `.harness/tasks/<需求>/{spec,plan,current,result,history}.md + evidence/`（spec=边界契约，plan=可验证任务分解） |
+| 层       | 作用                    | 本 kit 对应                                                                                                     |
+| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------- |
+| 契约层   | 30 秒讲清边界，常驻且短 | `templates/AGENTS.md`（~100 行，只做索引与红线）                                                                |
+| 上下文层 | 按需加载的知识          | `templates/docs/`、`.harness/context/`                                                                          |
+| 工具层   | 可复用技能/命令/钩子    | `skills/`、`commands/`（agent 通用 markdown）、`.harness/hooks/`                                                |
+| 验证层   | 机械化执法，不靠提示词  | `.harness/feedback/`（validate / lint-arch / lock-tests / collect-evidence）                                    |
+| 循环层   | 状态与续跑              | `.harness/tasks/<需求>/{spec,plan,current,result,history}.md + evidence/`（spec=边界契约，plan=可验证任务分解） |
 
 ## 快速开始（workspace 模式：在 kit 所在仓库直接驱动任意仓库，目标仓库零安装）
 
@@ -46,14 +46,14 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 
 ### 技能家族（6 个，`./harness link` 一次接线）
 
-| 技能 | 角色 | 何时用 |
-| --- | --- | --- |
-| harness-dev | 总控/路由 + workspace 管理 | 跨仓库开发入口 |
-| harness-spec | 澄清 → spec.md（confirmed gate，可路由 grill 类技能） | 新需求、需求模糊 |
-| harness-plan | spec → plan.md（每步验证命令+预期输出，superpowers 风格） | spec 确认后 |
-| harness-coding | 实现者：TDD + validate + 逐 Step 勾 plan | 编码 |
-| harness-testing | 验收者：独立会话，Rubric+RED-first+断言锁 | 验收 |
-| harness-change | 需求变更：spec 降 draft、plan 标记、重新确认 | 需求变了 |
+| 技能            | 角色                                                      | 何时用           |
+| --------------- | --------------------------------------------------------- | ---------------- |
+| harness-dev     | 总控/路由 + workspace 管理                                | 跨仓库开发入口   |
+| harness-spec    | 澄清 → spec.md（confirmed gate，可路由 grill 类技能）     | 新需求、需求模糊 |
+| harness-plan    | spec → plan.md（每步验证命令+预期输出，superpowers 风格） | spec 确认后      |
+| harness-coding  | 实现者：TDD + validate + 逐 Step 勾 plan                  | 编码             |
+| harness-testing | 验收者：独立会话，Rubric+RED-first+断言锁                 | 验收             |
+| harness-change  | 需求变更：spec 降 draft、plan 标记、重新确认              | 需求变了         |
 
 流程：模糊需求 → spec（澄清+确认）→ plan（可验证分解）→ coding（TDD+门禁）→ testing
 （独立验收）；需求变更随时走 change 把 spec 打回 draft 重新确认。开工时各技能都会先跑
@@ -77,11 +77,11 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 
 ## 经验沉淀（工具集的核心价值）
 
-| 层 | 落点 | 放什么 |
-| --- | --- | --- |
-| 仓库专属 | `workspaces/<alias>/notes.md` | 该仓库的栈、命令实测、坑与约定（add 时生成） |
-| 跨仓库通用 | `playbooks/<主题>.md` | 换个仓库仍成立的方法论，一主题一文件，可回溯来源任务 |
-| 任务过程 | `workspaces/<alias>/tasks/<需求名>/history.md` | 只追加的过程记录 |
+| 层         | 落点                                           | 放什么                                               |
+| ---------- | ---------------------------------------------- | ---------------------------------------------------- |
+| 仓库专属   | `workspaces/<alias>/notes.md`                  | 该仓库的栈、命令实测、坑与约定（add 时生成）         |
+| 跨仓库通用 | `playbooks/<主题>.md`                          | 换个仓库仍成立的方法论，一主题一文件，可回溯来源任务 |
+| 任务过程   | `workspaces/<alias>/tasks/<需求名>/history.md` | 只追加的过程记录                                     |
 
 技能（harness-dev / harness-coding / harness-testing）收尾都会回写这三层。
 与 agent 内置 memory 的分工：memory 按会话项目隔离、开发其他仓库时读不到；

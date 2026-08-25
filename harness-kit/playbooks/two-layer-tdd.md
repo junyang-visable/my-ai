@@ -25,7 +25,7 @@
 
 ## 依据
 
-- 来源任务：workspaces/*/tasks/*（本 kit 建设过程，2026-08 讨论）
+- 来源任务：`workspaces/*/tasks/*`（本 kit 建设过程，2026-08 讨论）
 - 原理出处：kit 调研笔记《Coding 与 Testing Harness 自建方案》、
   `.harness/rubric/anti-false-reporting.md`（角色隔离 / RED-first）
 - 验证时间：2026-08-25
