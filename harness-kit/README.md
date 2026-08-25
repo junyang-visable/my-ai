@@ -7,7 +7,7 @@
 > 配套调研见 Obsidian 笔记《Coding 与 Testing Harness 自建方案》。本 kit 实现其中 P0–P2。
 >
 > 定位：**个人开发 harness 工具集**。kit 随本仓库（my-ai）走，任意目标仓库零安装即可被驱动；
-> 引擎、任务状态与经验都沉淀在本仓库，换机 clone 后重跑一次 `./harness link` 即恢复。
+> 引擎、任务状态与经验都沉淀在本仓库；技能经 `./harness link` 以相对软链接入，clone 后即用。
 
 ## 五层结构
 
@@ -15,14 +15,14 @@
 | --- | --- | --- |
 | 契约层 | 30 秒讲清边界，常驻且短 | `templates/AGENTS.md`（~100 行，只做索引与红线） |
 | 上下文层 | 按需加载的知识 | `templates/docs/`、`.harness/context/` |
-| 工具层 | 可复用技能/命令/钩子 | `adapters/{qoder,claude-code}/`、`.harness/hooks/` |
+| 工具层 | 可复用技能/命令/钩子 | `skills/`、`commands/`（agent 通用 markdown）、`.harness/hooks/` |
 | 验证层 | 机械化执法，不靠提示词 | `.harness/feedback/`（validate / lint-arch / lock-tests / collect-evidence） |
-| 循环层 | 状态与续跑 | `.harness/tasks/<需求>/{spec,current,result,history}.md + evidence/`（spec=实现者技术方案） |
+| 循环层 | 状态与续跑 | `.harness/tasks/<需求>/{spec,plan,current,result,history}.md + evidence/`（spec=边界契约，plan=可验证任务分解） |
 
 ## 快速开始（workspace 模式：在 kit 所在仓库直接驱动任意仓库，目标仓库零安装）
 
 ```bash
-# 0) 一次性：把 kit 的 Qoder 技能软链进本仓库的技能目录（换机后重跑一次）
+# 0) 一次性：把 kit 技能软链进本仓库的技能目录（相对软链，clone 后无需重跑）
 ./harness link
 
 # 1) 注册一个仓库，生成它的专属配置 + 经验笔记 + E2E 上下文
@@ -40,9 +40,24 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 
 > “用 harness-dev 给 my-app 加一个 XX 功能” / “harness-dev，切到 another-repo 继续 XX 任务”
 
-技能会自己定位 kit、确认活跃仓库、建任务、进编码循环、收尾沉淀经验；
+技能会自己定位 kit、确认活跃仓库、路由到专职技能、进编码循环、收尾沉淀经验；
 实现完成后另开会话说“用 harness-testing 验收 XX”（角色信息隔离）。
 注意：目标仓库需已加入 Qoder 工作区，否则写文件会被沙箱拦。
+
+### 技能家族（6 个，`./harness link` 一次接线）
+
+| 技能 | 角色 | 何时用 |
+| --- | --- | --- |
+| harness-dev | 总控/路由 + workspace 管理 | 跨仓库开发入口 |
+| harness-spec | 澄清 → spec.md（confirmed gate，可路由 grill 类技能） | 新需求、需求模糊 |
+| harness-plan | spec → plan.md（每步验证命令+预期输出，superpowers 风格） | spec 确认后 |
+| harness-coding | 实现者：TDD + validate + 逐 Step 勾 plan | 编码 |
+| harness-testing | 验收者：独立会话，Rubric+RED-first+断言锁 | 验收 |
+| harness-change | 需求变更：spec 降 draft、plan 标记、重新确认 | 需求变了 |
+
+流程：模糊需求 → spec（澄清+确认）→ plan（可验证分解）→ coding（TDD+门禁）→ testing
+（独立验收）；需求变更随时走 change 把 spec 打回 draft 重新确认。开工时各技能都会先跑
+`./harness brief` 把仓库经验带进上下文。
 
 命令行操作也都作用于当前活跃仓库：
 
@@ -55,6 +70,7 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 ./harness evidence 需求名 api       # 失败后收集证据，产出下一轮修复的 prompt
 ./harness task new 需求名           # 建循环层任务目录（current/result/history/evidence）
 ./harness context                   # 打印契约层文本，贴进 agent 会话开场
+./harness brief <关键词>            # 开工包：契约 + 仓库 notes + 命中 playbooks + 任务列表
 ```
 
 每仓库的配置、断言锁基线、任务与证据、经验笔记都在 `workspaces/<alias>/` 下，互不干扰。
@@ -74,7 +90,9 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 ### 可选：install 模式
 
 如果你希望某个仓库自带 harness（agent 进仓库即读到 AGENTS.md），也可 `./install.sh <repo>`。
-两种模式可共存；workspace 模式不在目标仓库写任何文件。
+两种模式可共存；workspace 模式不在目标仓库写任何文件。命令落到 `.qoder/commands/`
+（Claude Code 复制到 `.claude/commands/`，文件通用）；post-edit 钩子需在 CLI 的 hook
+配置里接 `bash .harness/hooks/post-edit.sh <file>`。
 
 ## 覆盖范围（P0–P2）
 
@@ -87,7 +105,8 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 ## 不限栈怎么做到的
 
 所有脚本只读 `.harness/config.sh` 里的命令变量；留空的阶段自动跳过。换栈只改 config，
-不动引擎。CLI 差异全部收敛在 `adapters/`，`.harness/` 本身是纯 shell + markdown。
+不动引擎。skill 与命令均为 agent 通用 markdown（Qoder / Claude Code 都读 SKILL.md），
+引擎本身是纯 shell + markdown。
 
 ## 目录
 
@@ -107,9 +126,8 @@ harness-kit/
 │   ├── context/testing/       E2E 用例上下文库模板
 │   ├── rubric/                四级 Rubric + 防谎报三件套 + 完成证据模板
 │   └── tasks/_template/       循环层状态模板
-└── adapters/
-    ├── qoder/                 skills(harness-dev/coding/testing) + commands
-    └── claude-code/           commands + settings.hooks.json
+├── skills/                    6 个技能（agent 通用 SKILL.md；link 相对软链到 .agents/skills/）
+└── commands/                  /harness-validate 等斜杠命令（agent 通用 markdown）
 ```
 
 ## 边界

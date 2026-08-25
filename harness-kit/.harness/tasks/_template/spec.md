@@ -5,6 +5,7 @@
 > 验收侧另有独立判定；两侧事后对照，不一致即澄清信号。
 
 - 需求名 / ID：
+- 状态：draft   # draft / confirmed——confirmed 必须来自用户明确同意；变更由 harness-change 降回
 
 ## 需求边界
 
@@ -19,7 +20,8 @@
 
 ## 计划
 
-1. <步骤，每步可独立验证>
+> 任务分解不在本文件——见同目录 `plan.md`（harness-plan 从本 spec 派生）。
+> spec 确认后冻结：执行偏差改 plan 即可；需求变了走 harness-change，不要直接改这里。
 
 ## 验收边界（实现者视角）
 

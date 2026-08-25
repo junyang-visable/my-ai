@@ -12,7 +12,7 @@ version: 1.1.0
 
 ## 第 0 步：定位（先做，再开工）
 
-1. **kit 根**：本 skill 物理目录向上 4 级（`adapters/qoder/skills/harness-coding`）。
+1. **kit 根**：本 skill 物理目录向上 2 级（`skills/harness-coding`）。
    软链部署时先 `readlink -f` 本 SKILL.md 解析真实路径再上溯。
    兜底：`/Users/yangjun/Desktop/my-ai/harness-kit`。
 2. **目标仓库与模式**：
@@ -36,10 +36,13 @@ version: 1.1.0
    `bash <kit>/harness context` 的输出作为契约。
 2. 判断走不走全套（11020656025）：跨 3 文件以上 / 异步并发状态机 / 外部系统集成 → 全套；
    单文件 bugfix / 加日志 / 改文案 → 直接改。
-3. 多步任务：在上表的任务目录里从 `_template` 复制的文件中，跨文件/跨模块任务**必填
-   `spec.md`**（需求边界 / 方案 / 影响文件 / 计划，开工前写好）；单文件小改可跳过。
-   已有任务续跑时先读 `spec.md` 与 `current.md`。
-4. 按需（不要一次全读）加载目标仓库的 `docs/ARCHITECTURE.md`、`docs/DEVELOPMENT.md`。
+3. 跨文件/跨模块任务**必须先有 confirmed 的 spec.md**（状态行 = `confirmed`）：
+   缺失 → 先走 harness-spec；是 draft → 请用户确认后才开工。单文件小改可跳过。
+4. 已有任务续跑时先读 `spec.md`（含状态与变更记录）与 `current.md`；开工前跑
+   `bash <kit>/harness brief <需求关键词>` 把该仓库 notes 与命中 playbooks 带进上下文。
+5. 有 `plan.md` 则逐 Task/Step 执行并勾选：每步跑其验证命令，输出与预期不符 = 没做完；
+   计划可调（直接改 plan 并在 Step 后注记原因），spec 不可擅改。
+6. 按需（不要一次全读）加载目标仓库的 `docs/ARCHITECTURE.md`、`docs/DEVELOPMENT.md`。
 
 ## 编码循环
 
@@ -54,8 +57,8 @@ version: 1.1.0
 
 ## 收尾
 
-- spec 与实现出现偏差时，在 `spec.md` 的「变更记录」里补一行（改了什么、为什么），
-  再更新 `current.md`；需求本身变了则先和用户确认再改 spec。
+- 实现与 plan 出现偏差：直接改 plan 并注记，无需重新确认。**需求本身变了不要改 spec**：
+  走 harness-change（它会降级状态、留痕、标记受影响 Task），再按其路由回来。
 - 按证据模板（见第 0 步表格）填完成证据，数字要可复核，未覆盖范围要诚实申报。
 - 更新任务 `current.md`（下一步）与 `history.md`（追加一行）。
 - **经验回写**（workspace 模式下经验沉淀在 kit，这是工具集的核心价值）：

@@ -11,11 +11,11 @@ version: 1.0.0
 
 ## 1. 定位 kit
 
-kit 根 = 本 skill 物理目录向上 4 级（`adapters/qoder/skills/harness-dev`）。
+kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-dev`）。
 软链部署时先解析真实路径再上溯：
 
 ```bash
-cd "$(dirname "$(readlink -f <本SKILL.md路径>)")/../../../.." && pwd
+cd "$(dirname "$(readlink -f <本SKILL.md路径>)")/../.." && pwd
 ```
 
 兜底（换机后改这一行）：`/Users/yangjun/Desktop/my-ai/harness-kit`。
@@ -43,14 +43,30 @@ cd "$(dirname "$(readlink -f <本SKILL.md路径>)")/../../../.." && pwd
   开工前提醒用户把目标仓库加入工作区（Add Folder to Workspace），不要反复试错。
 - `bash <kit>/harness task new <需求名>` 建任务；已有同名任务则先读其
   `current.md`（当前阶段 + 唯一下一步）续跑，不要另起炉灶。
-- 新任务且跨文件/跨模块：先填任务 `spec.md`（需求边界 / 方案 / 影响文件 / 计划），
-  用户确认后再进编码循环；单文件小改可跳过，口头澄清即可。
+- 新任务且跨文件/跨模块：路由 harness-spec 澄清并产出 spec.md（见下节路由表）。
+- **开工包**：`bash <kit>/harness brief <需求关键词>`——契约、该仓库 notes.md、
+  命中的 playbooks 一次带进上下文，开工必读。
+- **续跑校验（backfill）**：若 current.md 与实际不符（代码已写、plan 已勾、
+  git log 已有相关提交），从可观测状态（git log/diff、任务目录产物）反推真实阶段，
+  向用户确认后修正 current.md 再继续，不要盲信文档。
 
-## 5. 编码循环（实现者角色）
+## 5. 路由（总控只调度，重活交给专职技能）
+
+| 需求形态 | 路由 |
+| --- | --- |
+| 新需求 / 需求模糊 | harness-spec（澄清→spec.md→用户确认 confirmed）→ harness-plan |
+| spec 已 confirmed、有 plan.md | harness-coding（读 spec+plan 逐 Task 执行勾选） |
+| 单文件小改 / 加日志 / 改文案 | 直接走下方编码循环，跳过 spec/plan |
+| 需求变更 | harness-change（spec 降级 draft、标记受影响 Task） |
+| 验收 | 另开会话用 harness-testing（角色隔离） |
+
+## 6. 编码循环（实现者角色）
 
 与 harness-coding 技能同一套纪律，核心如下：
 
 - 先澄清需求与验收边界再动手；不清楚就停下来问。
+- 跨文件任务开工前检查 spec 状态行 = `confirmed`；是 draft 或缺失 → 回 harness-spec，
+  不要带病开工。有 plan.md 则逐 Task/Step 执行并勾选，每步跑验证命令对照预期输出。
 - 判断走不走全套（11020656025）：跨 3 文件以上 / 异步并发状态机 / 外部系统集成 → 全套；
   单文件 bugfix / 加日志 / 改文案 → 直接改。
 - 单测 TDD（可单测的逻辑改动适用，与走不走全套无关）：先写测试跑一次确认 RED
@@ -66,7 +82,7 @@ cd "$(dirname "$(readlink -f <本SKILL.md路径>)")/../../../.." && pwd
   认为测试本身有误就停下说明理由。build 不可跳过。
 - 失败就收证据变成下一轮输入：`bash <kit>/harness evidence <需求名> <layout|api|render|generic>`
 
-## 6. 收尾
+## 7. 收尾
 
 1. 更新任务 `current.md`（当前阶段 + 唯一下一步）与 `history.md`（只追加一行）。
 2. 按 `<kit>/.harness/rubric/evidence-template.md` 申报完成证据（数字可复核，未覆盖范围诚实申报）。

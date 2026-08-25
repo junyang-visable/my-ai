@@ -6,8 +6,7 @@
 # 拷贝进仓库，各仓库独立可改。已存在的文件默认不覆盖。
 #
 # 用法:
-#   ./install.sh <目标仓库路径> [--cli qoder|claude|both] [--copy] [--force]
-#     --cli   接哪家 CLI 的命令/钩子/技能，默认 both
+#   ./install.sh <目标仓库路径> [--copy] [--force]
 #     --copy  引擎也拷贝而非软链（离线分发用）
 #     --force 覆盖已存在的 config/AGENTS 等（危险，默认关）
 # =============================================================================
@@ -15,25 +14,23 @@ set -euo pipefail
 
 KIT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 TARGET=""
-CLI="both"
 MODE="symlink"
 FORCE=0
 
 while [ $# -gt 0 ]; do
   case "$1" in
-    --cli) CLI="${2:?}"; shift ;;
     --copy) MODE="copy" ;;
     --force) FORCE=1 ;;
-    -h|--help) sed -n '2,18p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
     -*) echo "unknown flag: $1" >&2; exit 64 ;;
     *) TARGET="$1" ;;
   esac
   shift
 done
 
-[ -z "$TARGET" ] && { echo "用法: ./install.sh <目标仓库路径> [--cli qoder|claude|both] [--copy] [--force]"; exit 64; }
+[ -z "$TARGET" ] && { echo "用法: ./install.sh <目标仓库路径> [--copy] [--force]"; exit 64; }
 TARGET="$(cd "$TARGET" && pwd)"   # 必须已存在
-echo "== 接入 harness-kit → $TARGET （cli=$CLI, mode=$MODE）=="
+echo "== 接入 harness-kit → $TARGET （mode=$MODE）=="
 
 link_or_copy() { # src dst
   local src="$1" dst="$2"
@@ -74,26 +71,17 @@ copy_keep "$KIT_DIR/templates/AGENTS.md" "$TARGET/AGENTS.md"
 copy_keep "$KIT_DIR/templates/docs/ARCHITECTURE.md" "$TARGET/docs/ARCHITECTURE.md"
 copy_keep "$KIT_DIR/templates/docs/DEVELOPMENT.md"  "$TARGET/docs/DEVELOPMENT.md"
 
-# --- 4) CLI 接线 --------------------------------------------------------------
-if [ "$CLI" = "qoder" ] || [ "$CLI" = "both" ]; then
-  echo "-- Qoder --"
-  skdir="${QODER_SKILLS_DIR:-$HOME/.qoderwork/skills}"
-  mkdir -p "$skdir" "$TARGET/.qoder/commands"
-  ln -sfn "$KIT_DIR/adapters/qoder/skills/harness-coding"  "$skdir/harness-coding"
-  ln -sfn "$KIT_DIR/adapters/qoder/skills/harness-testing" "$skdir/harness-testing"
-  echo "  link  技能 → $skdir/{harness-coding,harness-testing}"
-  cp -f "$KIT_DIR/adapters/qoder/commands/"*.md "$TARGET/.qoder/commands/"
-  echo "  put   命令 → $TARGET/.qoder/commands/（若你的 Qoder 命令目录不同，请自行移动）"
-fi
-
-if [ "$CLI" = "claude" ] || [ "$CLI" = "both" ]; then
-  echo "-- Claude Code --"
-  mkdir -p "$TARGET/.claude/commands"
-  cp -f "$KIT_DIR/adapters/claude-code/commands/"*.md "$TARGET/.claude/commands/"
-  echo "  put   命令 → $TARGET/.claude/commands/"
-  echo "  TODO  把 adapters/claude-code/settings.hooks.json 的 hooks 段合并进 $TARGET/.claude/settings.json"
-  echo "        （不自动改你的 settings.json，避免覆盖已有配置）"
-fi
+# --- 4) 技能与命令（agent 通用 markdown；目录按 Qoder 习惯，Claude Code 复制到 .claude/ 即可）---
+skdir="${QODER_SKILLS_DIR:-$HOME/.qoderwork/skills}"
+mkdir -p "$skdir" "$TARGET/.qoder/commands"
+for s in "$KIT_DIR"/skills/*/; do
+  [ -d "$s" ] || continue
+  name="$(basename "$s")"
+  ln -sfn "$KIT_DIR/skills/$name" "$skdir/$name"
+done
+echo "  link  技能 → $skdir/（全部）"
+cp -f "$KIT_DIR/commands/"*.md "$TARGET/.qoder/commands/"
+echo "  put   命令 → $TARGET/.qoder/commands/（Claude Code 复制到 .claude/commands/，文件通用）"
 
 # --- 5) 收尾提示 --------------------------------------------------------------
 cat <<EOF

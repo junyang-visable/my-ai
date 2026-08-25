@@ -11,7 +11,7 @@ version: 1.1.0
 
 ## 第 0 步：定位（先做，再判定）
 
-1. **kit 根**：本 skill 物理目录向上 4 级（`adapters/qoder/skills/harness-testing`）。
+1. **kit 根**：本 skill 物理目录向上 2 级（`skills/harness-testing`）。
    软链部署时先 `readlink -f` 本 SKILL.md 解析真实路径再上溯。
    兜底：`/Users/yangjun/Desktop/my-ai/harness-kit`。
 2. **目标仓库与模式**：目标仓库根存在 `.harness/config.sh` → **install 模式**（下表右列，
@@ -29,15 +29,17 @@ version: 1.1.0
 
 ## 顺序（务必按此）
 
-1. **先读用例上下文库**（见第 0 步表格）——拿真实页面入口、稳定选择器、测试账号。
+1. **开工包**（workspace 模式）：`bash <kit>/harness brief <需求关键词>`——契约 +
+   该仓库 notes.md（历史坑是 Pitfall 检查项的重要来源）+ 命中的 playbooks。
+2. **先读用例上下文库**（见第 0 步表格）——拿真实页面入口、稳定选择器、测试账号。
    没有它 AI 会编出不可执行的用例（11020757606 / 11020723202）。
    workspace 模式下该文件为空模板时，先引导用户按仓库实际填写再继续。
-2. **写 Rubric 先于代码**：从 Rubric 模板复制到任务目录（见第 0 步表格），
+3. **写 Rubric 先于代码**：从 Rubric 模板复制到任务目录（见第 0 步表格），
    填四级检查项（Essential/Pitfall/Important/Optional）。
-3. **RED 必须先跑红**（件二）：新增/关键用例先在当前实现下跑一次，确认它**确实会失败**，
+4. **RED 必须先跑红**（件二）：新增/关键用例先在当前实现下跑一次，确认它**确实会失败**，
    "验收器要先被证伪才配当裁判"。
-4. 生成 / 执行 E2E：先过 build 硬门禁（见第 0 步表格），再跑 HARNESS_E2E_CMD。
-5. 失败就收证据（见第 0 步表格），把它变成下一轮 prompt。
+5. 生成 / 执行 E2E：先过 build 硬门禁（见第 0 步表格），再跑 HARNESS_E2E_CMD。
+6. 失败就收证据（见第 0 步表格），把它变成下一轮 prompt。
 
 ## 判定口径（三者同时满足才 PASS）
 
