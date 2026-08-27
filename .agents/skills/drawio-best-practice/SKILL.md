@@ -21,7 +21,7 @@ description: 画易读易懂的 drawio 图的方法论。支持 MD 文档自动�
 | 条件判断 "如果...则..." | 决策树（菱形 + 矩形） |
 | 分类/分组 `### 类别A` | 分区卡片或表格分组行 |
 | 优先级标记 P0/P1/P2 | 颜色编码（红/黄/绿） |
-| 链接 `[text](url)` | UserObject 可点击链接 |
+| 链接 `[text](url)` | 表格外 UserObject；表格内 `<a href>`（见第六步） |
 | 指标/数据 | 数值直接填入表格单元格 |
 
 ### Step 2: 选择布局
@@ -182,11 +182,14 @@ drawio 中展示结构化数据，**必须用 HTML `<table>`**。以下是经过
 
 1. **style 不能有 `shape=table`** — 这是最常见的坑，加了就会裁切
 2. **`overflow=fill`** — 让内容撑满单元格
-3. **`width:100%`** — 表格宽度占满 mxCell
+3. **`width:100%`** — 表格宽度占满 mxCell，但**列宽总和必须小于 cell 宽**（见规则 8，否则最右列被裁剪）
 4. **交替行用 `background:#f5f5f5`** — 提升可读性
 5. **表头深色底白字** — 一眼区分表头和数据
-6. **height 要手动预估** — 每行约 20-25px，算好后设到 `<mxGeometry>`
+6. **height 用浏览器实测，不预估** — 「每行约 20-25px」的预估系统性偏差大（实测 9px 字号 + cellpadding=4 时单行约 19-21px，空隙/换行差异累积后偏差更大）；把表格 HTML 注入复刻 drawio 渲染参数的测量页（font-family:Helvetica,Arial + **无单位** line-height:1.2，写 1.2em 会按父级 16px 解析致高度虚高约 30%），读 `table.offsetHeight` 回写 height = 实测值 + 2px
 7. **HTML 实体转义** — value 中 `<` 写成 `&lt;`、`>` 写成 `&gt;`、`&` 写成 `&amp;`（drawio XML 要求）
+8. **列宽总和 + 开销 ≤ cell 宽（防最右列被裁）** — td 是 content-box，表格实际渲染宽 = 列宽总和 + cellpadding×2×列数 + 边框（约 9px/列）。列宽总和 == cell 宽时表格右溢出 37-55px，**最右列（如「查看链接」列）被 drawio 内部 overflow:hidden 中间层裁掉 40-60%**。正确做法：cell 宽 ≥ 列宽总和 + 9px×列数 + 4px（如 6 列总宽 1300 → cell 至少 1360）；列宽总和小于 cell 时 `width:100%` + `table-layout:fixed` 会自动分配余量，不会破坏布局
+9. **列宽用 `<td style='width:Npx;'>`，表格加 `table-layout:fixed`** — `<td width='N'>` 属性写法会被 drawio 引擎忽略，长文本列自动扩宽挤掉其他列；`table-layout:fixed` 固定列宽不被内容撑开
+10. **长文本列加 `word-break:break-all`** — 过滤表达式、URL 等长串防止把表格撑出 cell
 
 ### 颜色行表示状态
 
@@ -263,9 +266,9 @@ drawio 中展示结构化数据，**必须用 HTML `<table>`**。以下是经过
 
 ---
 
-## 第六步：可点击链接
+## 第六步：可点击链接（两种方式，按场景选）
 
-drawio 中要做可点击的链接（如跳转 Jira），必须用 `UserObject`：
+**方式一：独立元素（节点/按钮/Jira 卡片）→ `UserObject`**
 
 ```xml
 <UserObject label="DRG-1234 需求描述" link="https://visable.atlassian.net/browse/DRG-1234" id="xxx">
@@ -275,7 +278,15 @@ drawio 中要做可点击的链接（如跳转 Jira），必须用 `UserObject`�
 </UserObject>
 ```
 
-普通 `mxCell` 的 `value` 里写链接是**不可点击**的。
+**方式二：HTML 表格单元格内 → `<a href='URL'>文字</a>`**
+
+```xml
+<td style='text-align:center;'><a href='https://app.datadoghq.com/monitors/123'>查看</a></td>
+```
+
+- 表格内链接使用时需 **⌘/Ctrl + 点击**（drawio 防误触设计），编辑器与查看器均有效，可在图例中提示用户
+- 批量场景（每行一个「查看」链接列）这是唯一可行方案——UserObject 无法嵌入 HTML 表格
+- 注意：mxCell value 里的**纯文本 URL**（`value="https://..."`）不可点击，纯文本链接才必须用方式一
 
 ---
 
@@ -467,8 +478,9 @@ Part 三 (紫标题) → 4 个并排卡片 (告警路径)
 | 6 | HTML 表格有交替行？ | 确认偶数行有 `background:#f5f5f5` |
 | 7 | 所有 Part 标题有颜色条？ | 确认每个章节有深色标题 |
 | 8 | y 坐标没有重叠？ | 上一元素 y+height < 下一元素 y |
-| 9 | 可点击链接用 UserObject？ | 搜索 `link=`，确认在 `UserObject` 中 |
+| 9 | 可点击链接写法正确？ | 独立元素：`link=` 在 `UserObject` 中；表格内：`<a href='URL'>` |
 | 10 | 页面高度够？ | `pageHeight` > 最后元素的 y+height |
+| 11 | 表格列宽总和未超 cell？ | 每表：Σ(td 宽) + 9×列数 ≤ cell width，否则最右列被裁 |
 
 ---
 
@@ -482,8 +494,9 @@ Part 三 (紫标题) → 4 个并排卡片 (告警路径)
 | 监控全景 | 分层全景 + 归属颜色 + 通知标签 | 全域监控一页看完 | `nexus_connection_monitoring_overview.drawio` |
 | 需求跟踪 | 可点击 Jira 链接 + UserObject | 点击直达 Jira | `nexus_dragon_release_tracker.drawio` |
 | 报表导航 | 分区卡片 + 链接 | Redash+DD+Tableau 全导航 | `nexus_redash_qdr_reports.drawio` |
+| 告警能力清单 | HTML 表格 + 链接列 + 列宽 slack | 5 表 110 行、80 个 `<a href>` 可点击链接、列宽总和 + 开销 < cell 宽防裁剪 | `knowledge-base/V-Frontend-Monitor-告警能力清单.drawio` |
 
-所有文件路径: `/Users/lw/code/lw/lw_cron/` 下。
+nexus 系列文件路径: `/Users/lw/code/lw/lw_cron/` 下；告警能力清单在本仓库 `knowledge-base/` 下。
 
 ---
 
@@ -539,8 +552,13 @@ Part 三 (紫标题) → 4 个并排卡片 (告警路径)
 | 表格内容不显示 | 缺少 `html=1` | 加 `html=1;whiteSpace=wrap;` |
 | 颜色混乱看不懂 | 一个颜色同时表达归属和优先级 | 颜色只做一件事，优先级用 emoji |
 | 混合归属框里颜色矛盾 | 绿框里有蓝色团队的内容 | 框用 `#f5f5f5` 灰白，靠 🟢/🔵 前缀 |
-| 链接不可点击 | 链接写在 mxCell value 里 | 用 `<UserObject link="URL">` 包裹 |
+| 独立元素链接不可点击 | 链接以纯文本写在 mxCell value 里 | 用 `<UserObject link="URL">` 包裹（表格内则改用 `<a href>`，见第六步） |
 | 元素重叠 | 新增行后没更新下方元素的 y 坐标 | 每次加行，下方所有元素 y 都要 + 行高 |
 | 图太大打不开 | 内容全挤一页 | 拆成多个 diagram（drawio 支持多 tab） |
 | HTML 表格中 `>` `<` 显示异常 | 未做 XML 实体转义 | `>` → `&amp;gt;`、`<` → `&amp;lt;` |
 | mxCell 拼的表格有缝隙 | 相邻 cell 的 x+width ≠ 下一个 x | 严格计算：`x₂ = x₁ + width₁` |
+| 表格最右列看不见/被裁一半 | 列宽总和 + padding 开销 ≥ cell 宽，被内部 overflow:hidden 层裁剪 | cell 宽 ≥ 列宽总和 + 9px×列数 + 4px |
+| 设了列宽但不生效 | 用了 `<td width='N'>` 属性写法（引擎忽略） | `<td style='width:Npx;'>` + 表格 `table-layout:fixed` |
+| 长文本把表格撑出 cell | 长表达式/URL 撑宽列 | 该列 `<td style='word-break:break-all;'>` |
+| 本地验证通过但用户看不到列 | 量错了对比容器（foreignObject 是全画布尺寸，永远"装得下"） | 量表格右缘 vs cell 尺寸中间层：`fo.firstElementChild.firstElementChild` |
+| 表格底部大片空白/内容被裁 | height 按每行 20-25px 预估，系统性偏差 | 浏览器实测 offsetHeight 回写（见关键规则 6） |
