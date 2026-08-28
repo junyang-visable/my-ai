@@ -1,7 +1,7 @@
 ---
 name: harness-dev
 description: 个人 harness 工具集的跨仓库开发总控入口。当用户在工具集仓库（my-ai）会话里要开发其他代码仓库（如"用 harness 开发 X 仓库 / 给 X 仓库做 Y / 跨仓库开发"），或提到 harness-dev、注册新 workspace 时使用。负责定位 kit、注册或切换目标仓库、体检、建任务、以实现者角色进入编码循环，收尾沉淀经验到本仓库并提示独立验收。
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Harness Dev — 跨仓库开发总控
@@ -63,6 +63,21 @@ cd "$(dirname "$(readlink -f <本SKILL.md路径>)")/../.." && pwd
 ## 6. 编码循环（实现者角色）
 
 与 harness-coding 技能同一套纪律，核心如下：
+
+**动工前先建分支（硬性前置，勿在主分支工作区直接开发）：**
+
+```bash
+git fetch origin
+git symbolic-ref refs/remotes/origin/HEAD   # 确认默认分支；失败则按 master/main 实际存在者兜底
+git checkout --no-track -b <分支名> origin/<默认分支>
+```
+
+- 分支命名（统一斜杠分隔；`:` 是 git 非法字符不可用，已实测 `git check-ref-format`）：
+  有 ticket id → `<ticket-id>/<简要需求描述>`（如 `FE-1042/ssr-unsafe-api-detection`）；
+  无 ticket id → `feat/<简要需求描述>` / `chore/<简要需求描述>`（按改动性质选）。
+- 提交都发生在分支上；推送用 `git push -u origin <分支名>` 建立正确跟踪。
+- 任务续跑时已在正确分支上则跳过；若改动已误写在主分支工作区（未提交），
+  `git checkout --no-track -b <分支名> origin/<默认分支>` 会把未提交改动一并带到新分支。
 
 - 先澄清需求与验收边界再动手；不清楚就停下来问。
 - 跨文件任务开工前检查 spec 状态行 = `confirmed`；是 draft 或缺失 → 回 harness-spec，
