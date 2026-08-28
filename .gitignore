@@ -1,4 +1,3 @@
 .superpowers
-v-accio# personal task archives: state files in git; bulky evidence stays local
-harness-data/*/evidence/*
-!harness-data/*/evidence/.gitkeep
+v-accio
+harness-data/
