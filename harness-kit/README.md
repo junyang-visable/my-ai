@@ -59,6 +59,23 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 （独立验收）；需求变更随时走 change 把 spec 打回 draft 重新确认。开工时各技能都会先跑
 `./harness brief` 把仓库经验带进上下文。
 
+### 增强技能路由（可选，本地配置）
+
+harness 各技能在特定阶段（澄清、方案、诊断……）可以调用环境里已有的通用技能来增强自己
+（如 Qoder 里的 `grilling` 逼问、`design-an-interface` 并行发散）。映射关系写在 kit 根的
+`skill-routes.local.yaml`——本地个人配置，已 gitignore，不入库；格式与说明见
+`templates/skill-routes.yaml`：
+
+```yaml
+harness-spec:
+  澄清追问: grilling
+  方案发散: design-an-interface
+```
+
+规则：无配置、或配置的技能不在**当前会话可用技能清单**里 → 静默走默认逻辑，不报错、
+不打断。可用性以会话注入的清单为准（文件在 ≠ 会话里有）；换环境只改这份本地文件，
+不动技能本体。
+
 命令行操作也都作用于当前活跃仓库：
 
 ```bash
@@ -115,9 +132,11 @@ harness-kit/
 ├── harness                    workspace 模式控制台（add/use/link/validate/lock/evidence/task/...）
 ├── workspaces/                每仓库一份：conf.sh 配置 + notes.md 经验 + context/ + 任务/基线/证据
 ├── install.sh                 可选：把 harness 装进仓库（引擎软链 / 配置拷贝）
+├── skill-routes.local.yaml      本地增强技能路由（gitignore；格式模板见 templates/skill-routes.yaml）
 ├── playbooks/                 跨仓库通用经验库（一主题一文件，可回溯来源任务）
 ├── templates/                 契约层与 docs 模板
 │   ├── AGENTS.md
+│   ├── skill-routes.yaml
 │   └── docs/{ARCHITECTURE,DEVELOPMENT}.md
 ├── .harness/
 │   ├── config.sh              默认接线点（workspace 模式下被 workspaces/*.conf.sh 覆盖）

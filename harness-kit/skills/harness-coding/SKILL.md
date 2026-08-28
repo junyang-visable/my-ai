@@ -1,7 +1,7 @@
 ---
 name: harness-coding
 description: Coding Harness 的实现者(Implementer)角色。当用 harness-kit 做需求开发、写实现代码、修 bug 时使用——无论你身处已安装 harness 的目标仓库内（install 模式），还是在工具集仓库会话里跨仓库驱动开发（workspace 模式，通常由 harness-dev 调度）。负责澄清→方案→计划→编码→自测，产出代码与完成证据，最后必须跑 validate。刻意不接触验收 Rubric，以防为凑用例而硬编码。
-version: 1.1.0
+version: 1.2.0
 ---
 
 # Coding Harness — Implementer
@@ -54,6 +54,14 @@ version: 1.1.0
 4. 完成前跑唯一验证入口（见第 0 步表格，跨文件改动加 `--strict`）。
 5. 阻断级不过 = 没完成。**禁止**删断言 / 改测试预期 / 加 `@ts-ignore` / 新建测试文件来凑绿。
    如果你认为某条测试本身有误，**停下来说明理由**，交给人或 Evaluator，不要擅自改测试。
+
+## 增强技能路由（可选）
+
+本技能的阶段键：`诊断`（同一错误多轮无进展、拿不准根因时）。
+`<kit>/skill-routes.local.yaml`（本地配置，不入库；全阶段键与格式见 `<kit>/templates/skill-routes.yaml`）
+里本技能名下、当前阶段有映射的技能时：先确认它在**本会话可用技能清单**里
+（技能是环境注入的，文件在 ≠ 会话里有），可用则以 Skill 工具调用。
+无配置、技能不可用 → 静默走默认逻辑，不报错、不打断、不向用户抱怨。
 
 ## 收尾
 

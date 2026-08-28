@@ -3,6 +3,9 @@ workspaces/*/tasks/*/evidence/*
 !workspaces/*/tasks/*/evidence/.gitkeep
 workspaces/*/context/cypress-artifacts/
 
+# 本地增强技能路由（模板见 templates/skill-routes.yaml）
+skill-routes.local.yaml
+
 # 引擎目录内的运行时产物（install 模式基线落在目标仓库；kit 内仅防御性忽略）
 .harness/feedback/.lock-baseline.json
 .harness/feedback/__pycache__/

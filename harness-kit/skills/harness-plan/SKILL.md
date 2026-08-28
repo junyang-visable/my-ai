@@ -1,7 +1,7 @@
 ---
 name: harness-plan
 description: 个人 harness 工具集的可验证计划技能（superpowers writing-plans 的个人版）。当任务的 spec.md 已 confirmed、需要做任务分解时使用（通常由 harness-dev 或 harness-spec 路由过来）。从 spec 派生 plan.md：Task → Step，每步带验证命令与具体预期输出，checkbox 即进度，让执行会话能逐项勾选、每步自证做完。只写计划，不写实现代码。
-version: 1.0.0
+version: 1.1.0
 ---
 
 # Harness Plan — 可验证任务分解
@@ -28,6 +28,14 @@ kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-plan`，软链部
      没有现成的就写具体命令，注意 workspace 模式下命令的执行目录。
 4. 粒度控制：Task 数 ≤ 8；超过说明需求太大，建议拆任务或回 harness-spec 收窄边界。
 5. 交执行：告知用 harness-coding 执行此 plan（或由 harness-dev 路由）。
+
+## 增强技能路由（可选）
+
+本技能的阶段键：`方案存疑`。
+`<kit>/skill-routes.local.yaml`（本地配置，不入库；全阶段键与格式见 `<kit>/templates/skill-routes.yaml`）
+里本技能名下、当前阶段有映射的技能时：先确认它在**本会话可用技能清单**里
+（技能是环境注入的，文件在 ≠ 会话里有），可用则以 Skill 工具调用。
+无配置、技能不可用 → 静默走默认逻辑，不报错、不打断、不向用户抱怨。
 
 ## 硬约束
 
