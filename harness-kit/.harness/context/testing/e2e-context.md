@@ -1,45 +1,51 @@
-# E2E 用例上下文知识库
+# E2E case-context knowledge base
 
-> 这是 Testing Harness 里**最容易被跳过、却最关键**的一步（11020757606 专设一个阶段读它）。
-> 目的：让 AI 拿到真实页面入口、稳定选择器、测试账号，避免凭空编出不可执行的用例。
-> 组织方式按**业务能力**，不要按页面/技术分层——11020723202 实测按业务能力组织后
-> AI 定位精确率从 5.26% 升到 100%、召回从 14.28% 升到 85.7%。
+> The most-skipped yet most-critical step of the testing harness — its whole
+> purpose: hand the AI real page entries, stable selectors, and test accounts,
+> so it can't invent unexecutable cases. Organize by **business capability**,
+> never by page or technical layer — capability organization measurably lifts
+> AI code-location precision from ~5% to ~100% and recall from ~14% to ~86%.
 
-## 环境与登录态
+## Environment & login state
 
-- 目标环境 URL：`<staging base url>`
-- 测试账号：`<用户名>` / 口令获取方式：`<从哪拿，切勿明文入库>`
-- 登录态获取方式：`<UI 登录 / 注入 token / cypress session 复用>`
-- mock / 绕过方案：`<哪些外部依赖走 mock，怎么开>`
+- Target environment URL: `<staging base url>`
+- Test account: `<username>` / how to get the password: `<where from; never commit in plaintext>`
+- How login state is obtained: `<UI login / token injection / cypress session reuse>`
+- Mock / bypass plan: `<which external dependencies are mocked, how to enable>`
 
-## 业务能力清单
+## Business capability list
 
-### 能力：<例如 用户登录>
+### Capability: <e.g. user login>
 
-- 页面入口 URL：`<path>`
-- 关键区域稳定选择器（优先 data-testid）：
-  | 元素 | 选择器 |
-  | --- | --- |
-  | 用户名输入 | `[data-testid="login-username"]` |
-  | 密码输入 | `[data-testid="login-password"]` |
-  | 提交按钮 | `[data-testid="login-submit"]` |
-- 正常流：<步骤>
-- 边界 / 异常流：<空值、错误口令、锁定…>
-- 历史踩坑：<例如 登录后有异步重定向，需等待 url 包含 /home>
+- Page entry URL: `<path>`
+- Stable selectors for key regions (prefer data-testid):
+  | Element | Selector |
+  | ------- | -------- |
+  | username input | `[data-testid="login-username"]` |
+  | password input | `[data-testid="login-password"]` |
+  | submit button | `[data-testid="login-submit"]` |
+- Happy path: <steps>
+- Boundary / error paths: <empty input, wrong password, lockout…>
+- Historical pitfalls: <e.g. async redirect after login — wait for url to contain /home>
 
-### 能力：<下一个能力>
+### Capability: <next capability>
 
 ...
 
-## 定位鲁棒性约定（三层叠加，11020454848 / Playwright-MCP）
+## Selector-robustness conventions (three layers stacked)
 
-1. **底层**：关键交互元素补稳定 `data-testid`，把 AI 从"猜 class"变成"查契约"。
-2. **中层**：用 a11y 快照 + ref 定位（如 `textbox "请输入密码" [ref=e28]`），LLM 用 ref 而非 CSS。
-3. **上层**：DOM 优先、视觉兜底——有控件树时别用纯视觉；拿不到结构时才用截图标尺插值，
-   并用 `[clickable]` 标记防误点。
+1. **Base**: give key interactive elements stable `data-testid`s — turns the AI
+   from "guessing classes" into "looking up a contract".
+2. **Middle**: locate via a11y snapshot + ref (e.g. `textbox "password" [ref=e28]`);
+   LLMs should use refs, not CSS.
+3. **Top**: DOM first, visual fallback — with a control tree, never go
+   pure-visual; only when structure is unavailable, use screenshot-ruler
+   interpolation and mark `[clickable]` to prevent misclicks.
 
-## 保鲜机制（防用例库腐化，11020757606）
+## Freshness mechanism (preventing case-library rot)
 
-- 测新功能：用自然语言探索，不急着固化。
-- 固化：每轮把**验证通过**的 1–2 条用例硬化为脚本，进主干回归集（`HARNESS_SMOKE_GLOB`）。
-- 主干回归只跑已固化脚本；季度指定负责人 review 一次。
+- Testing a new feature: explore in natural language first; don't rush to freeze.
+- Freezing: each round, harden 1–2 **verified-passing** cases into scripts and
+  add them to the trunk regression set (`HARNESS_SMOKE_GLOB`).
+- The trunk regression runs only frozen scripts; assign an owner to review
+  quarterly.

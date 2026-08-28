@@ -1,23 +1,23 @@
-# DEVELOPMENT.md — 按需加载的本地开发知识
+# DEVELOPMENT.md — local development knowledge, loaded on demand
 
-> 只有需要跑/调项目时才读。
+> Read only when you need to run or debug the project.
 
-## 环境准备
+## Environment setup
 
-- 运行时版本：<node / python / go 版本，锁定方式>
-- 安装依赖：`<cmd>`
-- 环境变量：<从哪拿 .env，哪些必填>（**密钥不入库**）
+- Runtime versions: <node / python / go versions, how pinned>
+- Install dependencies: `<cmd>`
+- Environment variables: <where to get .env, which are required> (**secrets never committed**)
 
-## 常用命令
+## Common commands
 
-| 目的 | 命令 |
-| --- | --- |
-| 开发 | `<dev>` |
-| 构建 | `<build>` |
-| 单测 | `<test>` |
-| E2E 冒烟 | `<e2e smoke>` |
-| 一键验证 | `bash .harness/feedback/validate.sh` |
+| Purpose | Command |
+| ------- | ------- |
+| Dev | `<dev>` |
+| Build | `<build>` |
+| Unit tests | `<test>` |
+| E2E smoke | `<e2e smoke>` |
+| One-shot validation | `bash .harness/feedback/validate.sh` |
 
-## 调试技巧 / 常见坑
+## Debugging tips / known pitfalls
 
-- <历史踩坑，写清现象 + 根因 + 规避>
+<historical pitfalls: symptom + root cause + how to avoid>

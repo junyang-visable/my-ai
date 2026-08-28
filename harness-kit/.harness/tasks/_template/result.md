@@ -1,16 +1,17 @@
-# result — 有效结论与残留风险
+# result — valid conclusions & residual risks
 
-> 只沉淀「已验证有效」的结论，保持精简。冗长过程写进 history.md。
+> Distill only conclusions **verified as working**; keep it lean.
+> Lengthy process detail goes into history.md.
 
-## 已验证结论
-
--
-
-## 残留风险 / 未覆盖
+## Verified conclusions
 
 -
 
-## 验收证据
+## Residual risks / uncovered
 
-- Rubric：`rubric.md`
-- 证据目录：`evidence/`
+-
+
+## Acceptance evidence
+
+- Rubric: `rubric.md`
+- Evidence dir: `evidence/`

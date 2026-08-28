@@ -1,144 +1,184 @@
 ---
 name: harness-dev
-description: 个人 harness 工具集的跨仓库开发总控入口。当用户在工具集仓库（my-ai）会话里要开发其他代码仓库（如"用 harness 开发 X 仓库 / 给 X 仓库做 Y / 跨仓库开发"），或提到 harness-dev、注册新 workspace 时使用。负责定位 kit、判定开发模式（标准=默认全流程含多应用设计文档；极简=用户显式要求时跳过设计直接改码）、注册或切换目标仓库、体检、建任务、以实现者角色进入编码循环，收尾沉淀经验到本仓库并提示独立验收。
-version: 1.2.0
+description: Orchestrator entry point of the personal harness toolkit. Use when you want to develop another repo from the toolkit repo's session (e.g. "use harness-dev to work on repo X / do Y for repo X / cross-repo development") or mention harness-dev or registering a new workspace. Locates the kit, decides the execution mode (standard = default full flow with a multi-app design doc; minimal = skip design and patch directly, only on explicit request), registers or switches the target repo, runs health checks, creates tasks, enters the coding loop as the implementer, and distills lessons back into the kit at wrap-up.
+version: 1.3.0
 ---
 
-# Harness Dev — 跨仓库开发总控
+# Harness Dev — cross-repo development orchestrator
 
-你从**个人工具集仓库**驱动任意目标仓库的开发：引擎、任务、经验全部沉淀在 kit，
-目标仓库可以零安装（workspace 模式）。本技能只做**实现者**职责，不做验收。
-开发流程分**标准 / 极简**双模式，先判模式再走路由（§3）。
+You drive development of any target repo from your **personal toolkit repo**:
+engine, tasks, and lessons all live in the kit, while target repos need zero
+installation (workspace mode). This skill is the **implementer** only — never
+the acceptor. Development runs in two modes, **standard** and **minimal**;
+decide the mode before routing (§3).
 
-## 1. 定位 kit
+## 1. Locate the kit
 
-kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-dev`）。
-软链部署时先解析真实路径再上溯：
+kit root = two levels up from this skill's physical dir (`skills/harness-dev`).
+With symlinked deployment, resolve the real path first, then walk up:
 
 ```bash
-cd "$(dirname "$(readlink -f <本SKILL.md路径>)")/../.." && pwd
+cd "$(dirname "$(readlink -f <this SKILL.md path>)")/../.." && pwd
 ```
 
-兜底（换机后改这一行）：`/Users/yangjun/Desktop/my-ai/harness-kit`。
-下文用 `<kit>` 指代它。
+Fallback (edit this line when switching machines): `/Users/yangjun/Desktop/my-ai/harness-kit`.
+Below, `<kit>` refers to it.
 
-## 2. 确定目标仓库
+## 2. Pick the target repo
 
-- 用户给了**别名**：`bash <kit>/harness use <alias>`（不存在则展示 `harness list` 并问是否注册）
-- 用户给了**路径**：`bash <kit>/harness add <alias> <path>`（alias 取仓库名，重名加后缀）
-- **没给**：`bash <kit>/harness list` 展示全部让用户选；一个都没有就引导注册
-- 若目标仓库根存在 `.harness/config.sh`（install 模式），告知用户两种模式皆可，按其意愿选择
+- User gave an **alias**: `bash <kit>/harness use <alias>` (if unknown, show `harness list` and ask whether to register)
+- User gave a **path**: `bash <kit>/harness add <alias> <path>` (alias defaults to the repo name; add a suffix on collision)
+- **Neither**: `bash <kit>/harness list` and let the user pick; if none exist, guide registration
+- If the target repo root contains `.harness/config.sh` (install mode), tell the user both modes work and follow their preference
 
-## 3. 模式判定（先于一切流程）
+## 3. Decide the mode (before any flow)
 
-- **默认标准模式**。仅当用户**显式**说"极简模式 / 走极简 / 简单改一下 / 不用走全套 /
-  直接改就行"等才切极简模式——严格显式，不主动建议、不替用户判断任务大小。
-- 标准模式：全流程（澄清 → 设计文档 → 任务拆分 → 编码），支持多应用，见 §6。
-- 极简模式：跳过设计与计划，建轻任务后直接定位代码修改；**建分支与 validate 保底不豁免**。
-- 模式记入任务 `current.md` 的「模式」字段。开工后用户要求切换：按新模式的流程与
-  收尾要求继续，已产出的 spec/plan 不删。
+- **Standard is the default.** Switch to minimal only when the user explicitly
+  says so — "minimal mode / keep it minimal / just a small fix / skip the full
+  flow / just change it directly". Strictly explicit: never suggest switching,
+  never judge task size on the user's behalf.
+- Standard mode: full flow (clarify → design doc → task breakdown → coding),
+  multi-app capable, see §6.
+- Minimal mode: skip design and planning; create a light task, then locate and
+  patch directly. **Branch creation and validate are never waived.**
+- Record the mode in the task's `current.md` ("mode" field). If the user asks
+  to switch mid-flight: continue under the new mode's flow and wrap-up rules;
+  never delete spec/plan artifacts already produced.
 
-## 4. 新 workspace 引导（仅首次注册时）
+## 4. New-workspace onboarding (first registration only)
 
-1. 读目标仓库的 `package.json` / `Makefile` / `pyproject.toml` 等，**推断**
-   lint / typecheck / build / test 命令，写进 `workspaces/<alias>.conf.sh`，
-   并把推断依据告诉用户请其确认（不确定的留空，留空阶段自动跳过）。
-2. `bash <kit>/harness doctor` 体检；`bash <kit>/harness validate selfcheck` 确保护栏不是纸糊的。
-3. 仓库的栈与坑随手记进 `workspaces/<alias>/notes.md`；E2E 需求出现时再补
-   `workspaces/<alias>/context/e2e-context.md`。
+1. Read the target repo's `package.json` / `Makefile` / `pyproject.toml` etc.
+   and **infer** the lint / typecheck / build / test commands; write them into
+   the repo's `docs/harness-kit/config.sh` (created by `harness add`). Tell the
+   user the inference basis and ask for confirmation (leave uncertain ones
+   empty — empty stages are skipped automatically).
+2. Run `bash <kit>/harness doctor` for a health check, and
+   `bash <kit>/harness validate selfcheck` to prove the guardrails are real.
+3. Jot the repo's stack and pitfalls into `docs/harness-kit/notes.md`; add
+   `docs/harness-kit/context/e2e-context.md` when E2E needs arise.
 
-## 5. 任务与写权限
+## 5. Tasks and write permissions
 
-- **写权限前置检查**：目标仓库不在当前 Qoder 工作区时，写文件会被沙箱拦。
-  开工前提醒用户把目标仓库加入工作区（Add Folder to Workspace），不要反复试错。
-- 任务是 kit 一级维度：`bash <kit>/harness task new <需求名>` 建在 `<kit>/tasks/<需求名>/`，
-  不绑定活跃 workspace；已有同名任务则先读其 `current.md`（模式 + 当前阶段 + 唯一下一步）
-  续跑，不要另起炉灶。
-- **开工包**：`bash <kit>/harness brief <需求关键词>`——契约、活跃仓库 notes.md、
-  命中的 playbooks 一次带进上下文，开工必读。
-- **续跑校验（backfill）**：若 current.md 与实际不符（代码已写、plan 已勾、
-  git log 已有相关提交），从可观测状态（git log/diff、任务目录产物）反推真实阶段，
-  向用户确认后修正 current.md 再继续，不要盲信文档。
+- **Write-permission precheck**: when the target repo is not part of the
+  current Qoder workspace, file writes get blocked by the sandbox. Ask the
+  user to add the repo to the workspace (Add Folder to Workspace) before
+  starting — don't trial-and-error.
+- Harness-generated data lives **in the target repo** under
+  `docs/harness-kit/`. Create tasks with `bash <kit>/harness task new <name>`
+  (lands in the active repo's `docs/harness-kit/tasks/<name>/`). If a task
+  with the same name exists, read its `current.md` (mode + stage + single
+  next step) and resume — never start a parallel one.
+- **Kickoff pack**: `bash <kit>/harness brief <keywords>` — contract, the
+  active repo's notes, and matching playbooks in one shot. Required reading
+  before starting work.
+- **Resume validation (backfill)**: when current.md disagrees with reality
+  (code already written, plan already checked, relevant commits in git log),
+  reconstruct the true stage from observable state (git log/diff, task
+  artifacts), confirm with the user, fix current.md, then continue. Never
+  trust the file blindly.
 
-## 6. 路由（总控只调度，重活交给专职技能）
+## 6. Routing (the orchestrator dispatches; specialists do the heavy lifting)
 
-### 标准模式（默认）
+### Standard mode (default)
 
-1. **澄清与设计**：路由 harness-spec，产出 `tasks/<需求名>/spec.md`（即设计文档）。
-   - 单应用：spec 覆盖该应用即可。
-   - **多应用：spec 必须覆盖全部涉及应用**——涉及应用清单 + 每应用改动点/边界 +
-     跨应用契约（接口/顺序/依赖），缺一不可开工；涉及的每个仓库都须是已注册 workspace
-     （未注册先走 §4 引导）。
-2. **确认**：spec 状态到 `confirmed`（用户明确同意）。
-3. **拆分**：路由 harness-plan 产出 plan.md；多应用时 Task 按应用分组，标注跨应用依赖顺序。
-4. **编码**：逐应用进编码循环——`bash <kit>/harness use <app>` 切活跃仓库，
-   harness-coding 读 spec+plan 逐 Task 执行勾选。
-5. **收尾**：每应用各自 validate + 证据；经验回写各自 `notes.md`。
+1. **Clarify & design**: route to harness-spec, which produces
+   `docs/harness-kit/tasks/<name>/spec.md` (this *is* the design doc).
+   - Single app: the spec covers that app.
+   - **Multi-app: the spec must cover every involved app** — the app list,
+     per-app changes/boundaries, and cross-app contracts (interfaces /
+     ordering / dependencies). Missing any of these blocks kickoff. Every
+     involved repo must be a registered workspace (run §4 onboarding first).
+2. **Confirm**: the spec reaches `confirmed` (explicit user agreement).
+3. **Break down**: route to harness-plan to produce plan.md; for multi-app
+   tasks, group Tasks by app and annotate cross-app dependency order.
+4. **Code**: per app, enter the coding loop — `bash <kit>/harness use <app>`
+   to switch the active repo, then harness-coding executes spec+plan Task by
+   Task, checking items off.
+5. **Wrap up**: per-app validate + evidence; write lessons back to each
+   repo's `docs/harness-kit/notes.md`.
 
-### 极简模式（仅用户显式要求）
+### Minimal mode (explicit user request only)
 
-1. `bash <kit>/harness task new <需求名>` 建轻任务：current.md 记「模式：极简」+ 需求一句话；
-   澄清 Q&A 的结论以几行记入 spec.md（不走 confirmed 流程）。
-2. 建分支（硬性前置，同 §7）。
-3. 自动定位代码（搜索/读码），简要告知用户将改哪些文件，直接修改。
-4. `bash <kit>/harness validate` + 一行式完成证据（validate 输出摘要 + 改动文件数）。
+1. `bash <kit>/harness task new <name>` creates a light task: current.md
+   records "mode: minimal" plus a one-line requirement; clarification Q&A
+   conclusions go into spec.md as a few lines (no confirmed gate).
+2. Create a branch (hard prerequisite, same as §7).
+3. Locate the code (search/read), tell the user which files you intend to
+   change, then change them.
+4. `bash <kit>/harness validate` + a one-line completion claim (validate
+   summary + number of files changed).
 
-### 通用路由
+### Cross-cutting routes
 
-| 情形                             | 路由                                                         |
-| -------------------------------- | ------------------------------------------------------------ |
-| 需求变更（标准模式任务）         | harness-change（spec 降级 draft、标记受影响 Task）           |
-| 需求变更（极简模式任务）         | 更新 current.md 一句话与 spec.md 的 Q&A 结论后继续           |
-| 验收                             | 另开会话用 harness-testing（角色隔离）                       |
+| Situation                            | Route                                                              |
+| ------------------------------------ | ------------------------------------------------------------------ |
+| Requirement change (standard task)   | harness-change (demote spec to draft, mark affected Tasks)         |
+| Requirement change (minimal task)    | update current.md one-liner and spec.md Q&A conclusions, continue  |
+| Acceptance                           | separate session with harness-testing (role isolation)             |
 
-## 7. 编码循环（实现者角色）
+## 7. The coding loop (implementer role)
 
-与 harness-coding 技能同一套纪律，核心如下：
+Same discipline as the harness-coding skill; the core:
 
-**动工前先建分支（硬性前置，勿在主分支工作区直接开发）：**
+**Create a branch before any work (hard prerequisite; never develop on the main branch's working tree):**
 
 ```bash
 git fetch origin
-git symbolic-ref refs/remotes/origin/HEAD   # 确认默认分支；失败则按 master/main 实际存在者兜底
-git checkout --no-track -b <分支名> origin/<默认分支>
+git symbolic-ref refs/remotes/origin/HEAD   # confirm the default branch; on failure fall back to whichever of master/main exists
+git checkout --no-track -b <branch> origin/<default>
 ```
 
-- 分支命名（统一斜杠分隔；`:` 是 git 非法字符不可用，已实测 `git check-ref-format`）：
-  有 ticket id → `<ticket-id>/<简要需求描述>`（如 `FE-1042/ssr-unsafe-api-detection`）；
-  无 ticket id → `feat/<简要需求描述>` / `chore/<简要需求描述>`（按改动性质选）。
-- 提交都发生在分支上；推送用 `git push -u origin <分支名>` 建立正确跟踪。
-- 任务续跑时已在正确分支上则跳过；若改动已误写在主分支工作区（未提交），
-  `git checkout --no-track -b <分支名> origin/<默认分支>` 会把未提交改动一并带到新分支。
+- Branch naming (slash-separated; `:` is illegal in git refs — verified with
+  `git check-ref-format`): with a ticket id → `<ticket-id>/<short-desc>`
+  (e.g. `FE-1042/ssr-unsafe-api-detection`); without → `feat/<short-desc>` or
+  `chore/<short-desc>` (pick by change nature).
+- All commits happen on the branch; push with `git push -u origin <branch>`
+  to establish tracking.
+- Skip branch creation when resuming a task that is already on the right
+  branch; if changes were accidentally written in the main-branch working
+  tree (uncommitted), `git checkout --no-track -b <branch> origin/<default>`
+  carries them over to the new branch.
 
-- 先澄清需求与验收边界再动手；不清楚就停下来问。
-- 标准模式开工前检查 spec 状态行 = `confirmed`；是 draft 或缺失 → 回 harness-spec，
-  不要带病开工。有 plan.md 则逐 Task/Step 执行并勾选，每步跑验证命令对照预期输出。
-- 单测 TDD（可单测的逻辑改动适用，与模式无关）：先写测试跑一次确认 RED
-  （失败断言记入任务 `history.md`），再实现变绿；bugfix 先写能复现 bug 的失败测试。
-  纯文案/样式不强制。
-- 小步改；完成前跑唯一验证入口：
+- Clarify the requirement and acceptance boundaries before writing code; stop
+  and ask when unsure.
+- Standard mode: before starting, check the spec status line = `confirmed`;
+  draft or missing → back to harness-spec, never start on a shaky spec. With
+  plan.md, execute Task/Step by Task/Step, ticking items off and running each
+  step's verification command against its expected output.
+- Unit-test TDD (whenever the change is unit-testable, regardless of mode):
+  write the test first, run it once to confirm RED (record the failing
+  assertion in the task's `history.md`), then implement to green; for bugfix
+  start with a failing test that reproduces the bug. Pure copy/style changes
+  are exempt.
+- Small steps; before claiming completion, run the single validation entry:
 
   ```bash
-  bash <kit>/harness validate        # 跨文件改动加 --strict
+  bash <kit>/harness validate        # add --strict for cross-file changes
   ```
 
-- 阻断级不过 = 没完成。**禁止**删断言 / 改测试预期 / 加 `@ts-ignore` / 新建测试文件凑绿；
-  认为测试本身有误就停下说明理由。build 不可跳过。
-- 失败就收证据变成下一轮输入：`bash <kit>/harness evidence <需求名> <layout|api|render|generic>`
+- A blocking failure means not done. **Never** delete assertions / change test
+  expectations / add `@ts-ignore` / create new test files to force green; if
+  you believe a test itself is wrong, stop and explain. Build cannot be
+  skipped.
+- On failure, collect evidence as the next round's input:
+  `bash <kit>/harness evidence <task> <layout|api|render|generic>`
 
-## 8. 收尾
+## 8. Wrap-up
 
-1. 更新任务 `current.md`（模式 + 当前阶段 + 唯一下一步）与 `history.md`（只追加一行）。
-2. 按 `<kit>/.harness/rubric/evidence-template.md` 申报完成证据（数字可复核，未覆盖范围诚实申报；
-   极简模式可简化为一行 validate 摘要）。
-3. **经验回写**（这就是工具集的价值所在，别省略）：
-   - 该仓库的坑 / 命令实测 / 约定 → `workspaces/<alias>/notes.md`
-   - 换个仓库仍成立的做法 → `<kit>/playbooks/<主题>.md`（从 `_template.md` 起稿）
-   - 任务过程细节 → 任务 `history.md`
-4. 提醒用户：验收须**另开会话**用 harness-testing 技能（角色信息隔离，勿在本会话自验）。
+1. Update the task's `current.md` (mode + stage + single next step) and
+   `history.md` (append one line).
+2. File completion evidence per `<kit>/.harness/rubric/evidence-template.md`
+   (reproducible numbers; honestly declare uncovered scope; minimal mode may
+   compress to a one-line validate summary).
+3. **Write lessons back** (this is the toolkit's whole value — never skip):
+   - repo-specific pitfalls / verified commands / conventions → the repo's `docs/harness-kit/notes.md`
+   - practices that hold across repos → `<kit>/playbooks/<topic>.md` (start from `_template.md`)
+   - task-level detail → the task's `history.md`
+4. Remind the user: acceptance must happen in a **separate session** using the
+   harness-testing skill (role isolation; never self-accept in this session).
 
-## 三态退出
+## Three-way exit
 
-- `success`：validate 全绿 + 证据齐 → 交独立会话验收。
-- `failed`：同一错误连续 3 轮无进展 → 停止盲试。
-- `needs_human`：产出 ESCALATED 交接包（已试路径、失败证据、当前最可信假设、建议下一步）。
+- `success`: validate all green + evidence complete → hand off to an independent session.
+- `failed`: no progress on the same error for 3 consecutive rounds → stop blind retries.
+- `needs_human`: produce an ESCALATED handoff (paths tried, failure evidence, current best hypothesis, suggested next step).

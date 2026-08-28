@@ -1,28 +1,34 @@
 # =============================================================================
-# skill-routes.yaml — 增强技能路由配置模板（全集）
+# skill-routes.yaml — enhanced skill-routing config template (full set)
 # -----------------------------------------------------------------------------
-# 用法：复制本文件为 kit 根的 skill-routes.local.yaml（已 gitignore，纯本地
-# 个人配置，不入库），把想启用的阶段键从 null 改为技能名即可。
+# Usage: copy this file to skill-routes.local.yaml at the kit root (already
+# gitignored — purely local personal config, never committed) and change the
+# stage keys you want from null to a skill name.
 #
-# 规则：
-#   1. 键留 null 或整段缺失 → 走该技能的默认逻辑
-#   2. 配置了技能名，但该技能不在当前会话可用技能清单里（技能是环境注入的，
-#      文件在 ≠ 会话里有）→ 静默跳过走默认逻辑，不报错、不打断
-#   3. 值可以是单个技能名，或列表（多个时按序尝试，全部不可用才走默认）
-#   4. 换环境（Qoder / Claude Code / superpowers）技能名可能不同，
-#      写名字前先确认当前环境里它真的叫这个
-#   5. harness-dev（纯调度）与 harness-testing（角色隔离）不参与增强路由
+# Rules:
+#   1. key null or the whole block missing → the skill's default logic runs
+#   2. a skill name is configured, but that skill is not in the current
+#      session's available-skills list (skills are environment-injected —
+#      file exists ≠ available in session) → silently fall back to default
+#      logic: no errors, no interruptions
+#   3. the value may be a single skill name or a list (tried in order; fall
+#      back only when all are unavailable)
+#   4. skill names differ across environments (Qoder / Claude Code /
+#      superpowers) — confirm the name actually exists in the current
+#      environment before writing it
+#   5. harness-dev (pure dispatch) and harness-testing (role isolation) do
+#      not participate in enhanced routing
 # =============================================================================
 
 harness-spec:
-  澄清追问: null       # 触发：需求模糊需要逼问时（默认：苏格拉底式自问——目标用户/成功标准/明确不做/边界条件/失败态）例: grilling
-  方案发散: null       # 触发：方案思路打不开、想比较多种设计时（默认：自己列方案对比）例: design-an-interface
+  clarify: null            # trigger: vague requirement needs grilling (default: Socratic self-questioning — target users / success criteria / explicit non-goals / boundary conditions / failure states) e.g. grilling
+  explore-approaches: null # trigger: approach ideas won't open up, want to compare designs (default: list and compare approaches yourself) e.g. design-an-interface
 
 harness-plan:
-  方案存疑: null       # 触发：计划某步的设计/状态模型拿不准时（默认：写进 plan 风险栏）例: prototype
+  approach-uncertain: null # trigger: unsure about a step's design/state model (default: write it into the plan's risk column) e.g. prototype
 
 harness-coding:
-  诊断: null           # 触发：同一错误连续多轮无进展、拿不准根因时（默认：needs_human 三态退出）例: diagnosing-bugs
+  diagnosis: null          # trigger: same error stuck for multiple rounds, unsure of the root cause (default: needs_human three-way exit) e.g. diagnosing-bugs
 
 harness-change:
-  变更追问: null       # 触发：变更口径模糊、新旧 spec 差异说不清时（默认：对照差异自问）例: grilling
+  change-grill: null       # trigger: change intent vague, old-vs-new spec difference unclear (default: self-question against the diff) e.g. grilling

@@ -1,47 +1,52 @@
 ---
 name: harness-change
-description: 个人 harness 工具集的需求变更处理技能（jira-lifecycle-change 的轻量个人版）。当开发过程中需求发生变化（口径/范围变了、"这个不要了，改成…"、用户说需求变了）时使用。负责同步 spec.md、追加变更记录、把状态降回 draft、标记 plan 中受影响的 Task，并在用户重新确认后才恢复开发。只追加历史不删旧内容，不直接改实现代码。
-version: 1.1.0
+description: Requirement-change handling skill of the personal harness toolkit. Use when a requirement changes mid-development (scope/wording shifted, "drop this, make it…", the user says the requirement changed). Keeps spec.md in sync, appends to the change log, demotes the status back to draft, marks affected Tasks in the plan, and only resumes development after the user re-confirms. Appends history only, never deletes old content; never edits implementation code directly.
+version: 1.2.0
 ---
 
-# Harness Change — 需求变更处理
+# Harness Change — requirement change handling
 
-你是**变更管理员**。需求变了，你的职责是让 spec/plan 与新需求重新对齐，
-并把"哪些已做的工作要跟着变"摊开给用户决策。
+You are the **change administrator**. The requirement changed; your job is
+re-aligning spec/plan with the new requirement and laying out "which finished
+work must now change" for the user to decide.
 
-## 第 0 步：定位
+## Step 0: locate
 
-kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-change`，软链部署先 `readlink -f`）。
-兜底：`/Users/yangjun/Desktop/my-ai/harness-kit`。
-任务目录 = `tasks/<需求名>/`（kit 一级维度）。
+kit root = two levels up from this skill's physical dir (`skills/harness-change`;
+with symlinked deployment, `readlink -f` to resolve the real path first).
+Fallback: `/Users/yangjun/Desktop/my-ai/harness-kit`.
+Task dir = `<repo>/docs/harness-kit/tasks/<task>/` (kit holds no task data itself).
 
-## 流程
+## Flow
 
-1. 摸现状：读任务 spec.md（含变更记录）、plan.md（勾选状态）、current.md，
-   以及目标仓库 `git -C <repo> status / diff --stat / log --oneline -5`——
-   搞清"文档说了什么 / 计划走到哪 / 代码改了多少"。
-2. **澄清变更**：新需求与原 spec 逐点对照，列差异（新增 / 删除 / 修改的范围点），
-   模糊处追问（可按「增强技能路由」查 `变更追问` 阶段的 grill 类技能）。
-3. **同步 spec.md**：更新受影响段落；`变更记录`追加一行（日期 / 改了什么 / 为什么）；
-   状态行 `confirmed → draft`——旧确认对新需求无效，必须重新确认。
-4. **标记 plan.md**：受影响的 Task 删除线标记并注明原因，或补充新 Task；
-   已勾选但被变更波及的 Step 标注 `⚠ 需复核`，**不要悄悄改勾选记录**。
-5. **摊开决策**：已实现代码怎么办（保留适配 / 回滚 / 废弃），列选项交用户定，
-   具体执行交回 harness-coding。
-6. 用户重新确认 spec（状态 → confirmed）后路由：计划大变 → harness-plan 重排；
-   小变 → harness-coding 继续。
+1. Survey the current state: read the task's spec.md (with change log), plan.md (checkbox state), current.md,
+   plus the target repo's `git -C <repo> status / diff --stat / log --oneline -5` —
+   establish "what the docs say / where the plan stands / how much code changed".
+2. **Clarify the change**: compare the new requirement against the old spec point by point; list the deltas
+   (added / removed / modified scope points); grill the vague spots (see "enhanced skill routing" for grill-type
+   skills under the `change-grill` stage).
+3. **Sync spec.md**: update affected sections; append one line to `change log`
+   (date / what changed / why); status line `confirmed → draft` — the old
+   confirmation is void against the new requirement and must be renewed.
+4. **Mark plan.md**: strike through affected Tasks with a reason, or add new
+   Tasks; already-checked Steps hit by the change get a `⚠ needs re-verify`
+   note — **never silently alter the check history**.
+5. **Lay out the decision**: what to do with implemented code (keep & adapt /
+   revert / abandon) — list the options, let the user decide; execution goes
+   back to harness-coding.
+6. After the user re-confirms the spec (status → confirmed), route: big plan
+   changes → harness-plan re-sequences; small ones → harness-coding continues.
 
-## 增强技能路由（可选）
+## Enhanced skill routing (optional)
 
-本技能的阶段键：`变更追问`。
-`<kit>/skill-routes.local.yaml`（本地配置，不入库；全阶段键与格式见 `<kit>/templates/skill-routes.yaml`）
-里本技能名下、当前阶段有映射的技能时：先确认它在**本会话可用技能清单**里
-（技能是环境注入的，文件在 ≠ 会话里有），可用则以 Skill 工具调用。
-无配置、技能不可用 → 静默走默认逻辑，不报错、不打断、不向用户抱怨。
+Stage key for this skill: `change-grill`.
+When `<kit>/skill-routes.local.yaml` (local config, not committed; full key list and format in `<kit>/templates/skill-routes.yaml`)
+maps a skill for the current stage: first confirm it is in **this session's available-skills list**
+(skills are environment-injected — a file existing ≠ available in session); if available, invoke it with the Skill tool.
+No config or skill unavailable → silently use the default logic: no errors, no interruptions, no complaining to the user.
 
-## 硬约束
+## Hard constraints
 
-- 只追加历史（变更记录 / history.md），不删旧内容——回滚依据全靠它。
-- 状态降回 draft 是机械 gate：coding 侧见到 draft 会拒绝续跑跨文件任务，
-  不要试图绕过。
-- 你不写实现代码，不替用户决定已写代码的取舍。
+- Append-only history (change log / history.md) — never delete old content; it is the rollback evidence.
+- Demoting to draft is a mechanical gate: the coding side refuses to resume cross-file work on a draft — don't try to bypass it.
+- You don't write implementation code and don't decide the fate of written code on the user's behalf.

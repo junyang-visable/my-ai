@@ -1,18 +1,19 @@
 ---
-description: 跑 harness 统一验证入口（lint→typecheck→arch→build→test，三级门禁）
+description: Run the harness validation entry (lint→typecheck→arch→build→test, three gate levels)
 ---
 
-跑 harness 统一验证入口（lint→typecheck→arch→build→test，三级门禁），并把结果汇报给我。
+Run the harness validation entry (lint→typecheck→arch→build→test, three gate
+levels) and report the result to me.
 
-先定位模式：
-- 当前仓库根有 `.harness/config.sh`（install 模式）→ 执行 `bash .harness/feedback/validate.sh`
-- 否则在工具集仓库（my-ai）会话里（workspace 模式）→ 先 `bash harness-kit/harness current`
-  确认活跃仓库，再执行 `bash harness-kit/harness validate`
+First locate the mode:
+- Repo root has `.harness/config.sh` (install mode) → run `bash .harness/feedback/validate.sh`
+- Otherwise, in the toolkit repo's session (workspace mode) → first `bash harness-kit/harness current`
+  to confirm the active repo, then run `bash harness-kit/harness validate`
 
-步骤：
-1. 执行上述命令（若本次改动跨 3 个以上文件，加 `--strict`）。
-2. 如有阻断级失败，把失败 stage、file:line、原因、修复建议原样列出，并据此提出下一步修复。
-3. 不要通过删断言、改测试预期、加 @ts-ignore、新建测试文件来让它变绿。
-4. 全绿后，提醒我按 `.harness/rubric/evidence-template.md` 补完成证据。
+Steps:
+1. Run the command above (add `--strict` when this change spans more than 3 files).
+2. On blocking failures, list the failing stage, file:line, reason, and fix suggestion verbatim, and propose the next fix step based on them.
+3. Never force green by deleting assertions, changing test expectations, adding @ts-ignore, or creating new test files.
+4. When all green, remind me to file completion evidence per `.harness/rubric/evidence-template.md`.
 
 $ARGUMENTS

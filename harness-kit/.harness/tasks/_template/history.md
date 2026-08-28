@@ -1,5 +1,6 @@
-# history — 只追加日志
+# history — append-only log
 
-> 每次动作追加一行，永不回改。格式：时间 ｜ 动作 ｜ 结果/证据。
+> Append one line per action; never rewrite old lines.
+> Format: time | action | result/evidence.
 
-- 
+-

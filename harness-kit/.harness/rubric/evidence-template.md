@@ -1,48 +1,51 @@
-# 完成证据模板（Definition of Done）
+# Completion evidence template (Definition of Done)
 
-> 复制这份到 `.harness/tasks/<需求名>/result.md` 或直接贴进会话。
-> 依据 11020603220：证据模板是防谎报里**最不需要基础设施**的一条——不附证据不算完成。
-> 关键：数字要能被复核，不能只写"测试通过了"。
+> Copy this into `.harness/tasks/<task>/result.md` or paste it into the session.
+> The evidence template is the anti-false-reporting measure that needs the
+> **least infrastructure** — no evidence, no completion.
+> Key rule: numbers must be reproducible; "tests passed" alone doesn't count.
 
-## 需求
+## Requirement
 
-- 需求名 / ID：
-- 一句话目标：
+- Task name / ID:
+- One-line goal:
 
-## 代码基线
+## Code baseline
 
-- 分支：`<branch>`
-- 提交：`<commit sha>`
-- 改动文件数：`<n>`（跨 3 文件以上按全套 validate 走）
+- Branch: `<branch>`
+- Commit: `<commit sha>`
+- Files changed: `<n>` (more than 3 files → full validate)
 
-## 执行环境
+## Execution environment
 
-- 运行时 / 依赖版本：
-- 关键环境变量口径：`<staging / mock / 真实网关>`
+- Runtime / dependency versions:
+- Key env-var provenance: `<staging / mock / real gateway>`
 
-## 实际进入构建的模块
+## Modules that actually entered the build
 
-> 防"改了 A 但构建的是缓存的 B"。列出本次真实参与构建/测试的模块或包。
+> Guards against "changed A but built the cached B". List the modules/packages
+> that genuinely participated in this build/test run.
 
 -
 
-## 执行命令与原始报告
+## Commands run & raw reports
 
 ```text
 $ bash .harness/feedback/validate.sh
-<粘贴真实输出摘要：各 stage OK/FAIL 与 summary 行>
+<paste the real output summary: per-stage OK/FAIL and the summary line>
 ```
 
-- 单测：`<通过数 / 总数>`（原始报告链接或粘贴）
-- E2E 冒烟：`<通过数 / 总数>`，证据目录：`.harness/tasks/<需求名>/evidence/`
-- 断言锁：`<verify 通过 / 有 @lock-bypass 说明如下>`
+- Unit tests: `<passed / total>` (link or paste of the raw report)
+- E2E smoke: `<passed / total>`, evidence dir: `.harness/tasks/<task>/evidence/`
+- Assertion lock: `<verify passed / has @lock-bypass, explained below>`
 
-## 未覆盖范围（诚实申报）
+## Uncovered scope (declare honestly)
 
-> 这一栏为空几乎总是可疑的。写清楚哪些没测、为什么、风险多大。
+> An empty section here is almost always suspicious. State what wasn't tested,
+> why, and how much risk that carries.
 
 -
 
-## 残留风险
+## Residual risks
 
 -

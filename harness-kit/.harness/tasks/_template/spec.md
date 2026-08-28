@@ -1,38 +1,42 @@
-# spec — 实现者持有的技术方案
+# spec — the implementer's technical design
 
-> 标准模式必填；极简模式只留澄清 Q&A 结论（不走 confirmed）。多应用需求本文件
-> 即覆盖全部应用的设计文档。你（实现者）看不到验收 Rubric（角色隔离）——这份是
-> **你**对需求的理解与方案，验收侧另有独立判定；两侧事后对照，不一致即澄清信号。
+> Standard mode: required. Minimal mode: keep only the clarification Q&A
+> conclusions (no confirmed gate). For multi-app requirements this file *is*
+> the design doc covering every involved app. You (the implementer) never see
+> the acceptance Rubric (role isolation) — this file is **your** understanding
+> of the requirement and your approach; the acceptance side judges
+> independently, and the two get compared afterwards — mismatches are
+> clarification signals.
 
-- 需求名 / ID：
-- 状态：draft # draft / confirmed——confirmed 必须来自用户明确同意；变更由 harness-change 降回
+- Task name / ID:
+- status: draft # draft / confirmed — confirmed must come from explicit user agreement; changes are demoted back by harness-change
 
-## 涉及应用
+## Involved apps
 
-- 应用清单：<workspace 别名，单应用填一个；多应用列全>
-- 每应用改动点 / 边界：
-- 跨应用契约（多应用时必填：接口 / 顺序 / 依赖）：
+- App list: <workspace alias; one for single-app, list them all for multi-app>
+- Per-app changes / boundaries:
+- Cross-app contracts (required for multi-app: interfaces / ordering / dependencies):
 
-## 需求边界
+## Requirement boundary
 
-- 做什么：
-- 不做什么（明确排除）：
+- Do:
+- Don't (explicitly excluded):
 
-## 方案
+## Approach
 
-- 思路：<一句话说清选型与理由>
-- 影响文件 / 模块：
-- 风险与取舍：
+- Idea: <one line on the choice and why>
+- Affected files / modules:
+- Risks & trade-offs:
 
-## 计划
+## Plan
 
-> 任务分解不在本文件——见同目录 `plan.md`（harness-plan 从本 spec 派生）。
-> spec 确认后冻结：执行偏差改 plan 即可；需求变了走 harness-change，不要直接改这里。
+> Task breakdown lives elsewhere — see `plan.md` in this dir (harness-plan derives it from this spec).
+> Once confirmed, the spec is frozen: execution drift goes into the plan; requirement changes go through harness-change, never direct edits here.
 
-## 验收边界（实现者视角）
+## Acceptance boundary (implementer's view)
 
-- 可观测行为：<完成后应能看到什么。写你自己的理解，不要去问 Rubric>
+- Observable behavior: <what should be observable when done. Write your own understanding; never go ask the Rubric>
 
-## 变更记录
+## Change log
 
-- <日期：改了哪个字段，为什么>
+- <date: which field changed, why>

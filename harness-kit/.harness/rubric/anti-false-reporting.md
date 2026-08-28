@@ -1,49 +1,58 @@
-# 防谎报三件套（Anti-False-Reporting）
+# Anti-false-reporting trio
 
-> 成本接近零，收益最大，建议第一批就上（11020757606 / 11020729209 / 11020456085）。
-> 多篇文章独立踩到同一个坑：Agent 会通过**删断言、改测试预期、新建测试文件**来"通过"验证。
-> 这三件套就是堵这三条路。
+> Near-zero cost, maximum payoff — install this first.
+> Multiple independent reports hit the same trap: agents will "pass" validation
+> by **deleting assertions, changing test expectations, or creating new test
+> files**. These three measures close exactly those three paths.
 
-## 件一：角色信息隔离
+## Piece 1: role information isolation
 
-用两个独立 sub-agent，各自上下文 reset：
+Two independent sub-agents, each with a fresh context:
 
-- **Implementer（写实现）**：**不看 Rubric**。防止它为了通过特定用例而硬编码。
-  只拿到需求 / 技术方案 / 代码上下文。
-- **Evaluator（写验收）**：**不看技术方案**。防止被实现思路带偏。
-  只拿到需求 / Rubric / 运行结果 / 证据。
-- 可进一步用不同厂商的模型做 Maker–Checker，规避单模型的早停与自夸偏差（11020604944）。
+- **Implementer (writes the implementation)**: **never sees the Rubric** —
+  prevents hardcoding to specific cases. Gets only the requirement / technical
+  design / code context.
+- **Evaluator (writes acceptance)**: **never sees the technical design** —
+  prevents being anchored by the implementation's approach. Gets only the
+  requirement / Rubric / run results / evidence.
+- Optionally use models from different vendors as Maker–Checker to dodge a
+  single model's early-stop and self-flattery biases.
 
-对照本 kit：Implementer 用 `harness-coding` 技能，Evaluator 用 `harness-testing` 技能，
-两者不共享会话上下文。
+Mapped to this kit: the Implementer uses the `harness-coding` skill, the
+Evaluator uses `harness-testing`; the two never share session context.
 
-## 件二：RED 必须先跑红一次
+## Piece 2: RED must run red first
 
-在让 Agent 修复前，先证明这条测试**确实能失败**。
+Before letting the agent fix anything, prove the test **can actually fail**.
 
-- 11020729209 的硬约束：冒烟集写死，且首条用例（TC-001）必须先失败——
-  "验收器要先被证伪才配当裁判"。
-- 落地：新增用例先在无实现/旧实现下跑一次，确认 RED；再进入实现-绿灯循环。
-- 本 kit 用断言锁（lock-tests.py）冻结冒烟集函数体，防止"修测试凑绿"。
+- Hard constraint: the smoke set is frozen, and the first case (TC-001) must
+  fail first — "an acceptor must be falsified before it earns the right to judge".
+- In practice: run new cases once against no/old implementation, confirm RED,
+  then enter the implement-to-green loop.
+- This kit freezes smoke-test function bodies with the assertion lock
+  (lock-tests.py) to prevent "fix the test to force green".
 
-## 件三：提示词显式声明
+## Piece 3: explicit prompt declaration
 
-给实现会话的 prompt 里必须写这一句（缺了它，11020456085 记录到模型会直接改单测或
-新建测试文件绕过检查）：
+The prompt handed to the implementation session must contain this sentence
+(without it, models have been observed editing unit tests or creating new
+test files to bypass the check):
 
-> **"测试当前不应通过，禁止修改测试使其通过。你的任务是改实现代码让测试变绿；
-> 若你认为测试本身有误，停下来说明理由，不要擅自修改测试。"**
+> **"These tests are expected to fail right now. Do not modify the tests to
+> make them pass. Your job is to change the implementation so the tests go
+> green; if you believe a test itself is wrong, stop and explain — never edit
+> the test yourself."**
 
-## 配套：断言锁工作流
+## Companion: the assertion-lock workflow
 
 ```bash
-# 1) 冒烟集稳定后，记录基线（测试函数体的 SHA）
+# 1) once the smoke set is stable, record the baseline (SHA of test function bodies)
 python3 .harness/feedback/lock-tests.py update
 
-# 2) 每次 validate 会自动校验；也可手动：
-python3 .harness/feedback/lock-tests.py verify   # 不符 exit 2
+# 2) every validate verifies automatically; or manually:
+python3 .harness/feedback/lock-tests.py verify   # mismatch exits 2
 
-# 3) 确需改动冒烟测试时，二选一放行并留审计痕迹：
+# 3) when a smoke test genuinely must change, pick one and leave an audit trail:
 HARNESS_LOCK_BYPASS=1 python3 .harness/feedback/lock-tests.py verify
-# 或在该测试函数上方加注释： // @lock-bypass 原因……，然后重新 update
+# or add a comment above that test: // @lock-bypass <reason…>, then update again
 ```

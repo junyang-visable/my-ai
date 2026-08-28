@@ -1,11 +1,12 @@
-# current — 当前状态
+# current — current state
 
-> 换会话续跑时先读这份。只写「当前阶段 + 唯一的下一步」，不要堆历史。
-> 依据 12020742408（状态入文件；反模式是 result.md 膨胀到上千行）。
+> Read this first when resuming in a new session. Keep it to
+> "current stage + single next step" only; never pile up history here.
+> (State lives in files — the anti-pattern is result.md ballooning to thousands of lines.)
 
-- 需求名 / ID：
-- 模式：标准 # 标准 / 极简——极简必须来自用户显式要求（harness-dev §3）
-- 涉及应用：<workspace 别名，多应用列全>
-- 当前阶段：`澄清 / 方案 / 计划 / 编码 / 自测 / 验收 / 完成`
-- 唯一下一步：<一句话，具体到可执行>
-- 阻塞点（如有）：
+- Task name / ID:
+- mode: standard # standard / minimal — minimal must come from an explicit user request (harness-dev §3)
+- involved apps: <workspace alias(es); list them all for multi-app>
+- current stage: `clarify / design / plan / code / self-test / accept / done`
+- single next step: <one sentence, concrete enough to execute>
+- blockers (if any):

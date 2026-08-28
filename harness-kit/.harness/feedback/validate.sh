@@ -1,20 +1,19 @@
 #!/usr/bin/env bash
 # =============================================================================
-# .harness/feedback/validate.sh — 机械化执法的统一入口
+# .harness/feedback/validate.sh — the single entry point of mechanical enforcement
 # -----------------------------------------------------------------------------
-# 合成一条命令跑完 lint → typecheck → arch → build → test，并按三级门禁给结论：
-#   阻断级(blocking)  失败 => 退出码 1
-#   警告级(warning)   失败 => 默认放行；--strict 时按阻断处理
-#   提示级(info)      只打印，永不影响退出码
-# 反馈统一格式：LEVEL | stage | file:line（如有）| reason | fix
+# Composes lint → typecheck → arch → build → test into one command and reports
+# by gate level:
+#   blocking  — failure => exit code 1
+#   warning   — failure passes by default; treated as blocking under --strict
+#   info      — print only, never affects the exit code
+# Unified feedback format: LEVEL | stage | file:line (if any) | reason | fix
 #
-# 用法:
-#   validate.sh                 跑全套
-#   validate.sh --strict        警告也当阻断
-#   validate.sh --stage lint    只跑某一阶段
-#   validate.sh selfcheck       故意制造一次违规，确认护栏真的会报错（护栏的护栏）
-#
-# 对齐: 11020601776（统一入口 + 验证护栏本身）、11020729209（三级门禁 + 统一格式）
+# Usage:
+#   validate.sh                 full pipeline
+#   validate.sh --strict        warnings become blocking
+#   validate.sh --stage lint    single stage only
+#   validate.sh selfcheck       deliberately plant a violation to prove the guardrail fires
 # =============================================================================
 set -uo pipefail
 
@@ -23,10 +22,11 @@ HARNESS_DIR="$(cd "$HERE/.." && pwd)"
 # shellcheck source=/dev/null
 source "$HARNESS_DIR/config.sh"
 
-# workspace 模式：引擎在 kit，执行切到目标仓库（HARNESS_REPO 由 harness CLI 注入）
+# workspace mode: engine lives in the kit, execution switches to the target repo
+# (HARNESS_REPO injected by the harness CLI)
 if [ -n "${HARNESS_REPO:-}" ]; then
   if [ ! -d "$HARNESS_REPO" ]; then
-    echo "HARNESS_REPO 不存在: $HARNESS_REPO" >&2; exit 66
+    echo "HARNESS_REPO not found: $HARNESS_REPO" >&2; exit 66
   fi
   cd "$HARNESS_REPO"
 fi
@@ -39,13 +39,13 @@ while [ $# -gt 0 ]; do
     --strict) STRICT=1 ;;
     --stage) ONLY_STAGE="${2:-}"; shift ;;
     selfcheck) MODE="selfcheck" ;;
-    -h|--help) sed -n '2,20p' "$0"; exit 0 ;;
+    -h|--help) sed -n '2,15p' "$0"; exit 0 ;;
     *) echo "unknown arg: $1" >&2; exit 64 ;;
   esac
   shift
 done
 
-# --- 输出助手 -----------------------------------------------------------------
+# --- output helpers -------------------------------------------------------------
 c_red=$'\033[31m'; c_yel=$'\033[33m'; c_dim=$'\033[2m'; c_grn=$'\033[32m'; c_rst=$'\033[0m'
 BLOCKING_FAILS=0
 WARNING_FAILS=0
@@ -67,53 +67,54 @@ run_stage() { # level stage cmd fix
   local level="$1" stage="$2" cmd="$3" fix="${4:-}"
   [ -n "$ONLY_STAGE" ] && [ "$ONLY_STAGE" != "$stage" ] && return 0
   if [ -z "$cmd" ]; then
-    report INFO "$stage" "未配置命令，跳过（在 .harness/config.sh 里填 HARNESS_*_CMD）"
+    report INFO "$stage" "no command configured, skipping (fill HARNESS_*_CMD in the repo's harness config)"
     return 0
   fi
   local out rc
   out="$(bash -c "$cmd" 2>&1)"; rc=$?
   if [ $rc -eq 0 ]; then
-    report OK "$stage" "通过"
+    report OK "$stage" "passed"
     return 0
   fi
-  # 失败：按级别归类，末尾附最后 15 行原始输出便于当作下一轮 prompt
+  # failure: classify by level; append the last 15 lines of raw output as next-round prompt
   local last; last="$(printf '%s\n' "$out" | tail -n 15)"
   case "$level" in
     BLOCK)
       BLOCKING_FAILS=$((BLOCKING_FAILS+1))
-      report BLOCK "$stage" "命令失败（exit $rc）：$cmd" "$fix"
+      report BLOCK "$stage" "command failed (exit $rc): $cmd" "$fix"
       ;;
     WARN)
       if [ "$STRICT" -eq 1 ]; then
         BLOCKING_FAILS=$((BLOCKING_FAILS+1))
-        report BLOCK "$stage" "命令失败（--strict，exit $rc）：$cmd" "$fix"
+        report BLOCK "$stage" "command failed (--strict, exit $rc): $cmd" "$fix"
       else
         WARNING_FAILS=$((WARNING_FAILS+1))
-        report WARN "$stage" "命令失败（exit $rc）：$cmd" "$fix"
+        report WARN "$stage" "command failed (exit $rc): $cmd" "$fix"
       fi
       ;;
   esac
-  printf "%s---- %s 输出（末 15 行）----%s\n%s\n" "$c_dim" "$stage" "$c_rst" "$last"
+  printf "%s---- %s output (last 15 lines) ----%s\n%s\n" "$c_dim" "$stage" "$c_rst" "$last"
 }
 
-# --- selfcheck：护栏的护栏 ------------------------------------------------------
-# 11020601776：护栏建好后要故意制造一次违规，确认它真会报错——「lint 没报错说明护栏是纸糊的」。
+# --- selfcheck: the guardrail of the guardrail ----------------------------------
+# Once a guardrail exists, deliberately plant a violation and confirm it fires —
+# "a linter that never complains proves the guardrail is paper".
 selfcheck() {
-  echo "== selfcheck：故意制造一次架构违规，确认 lint-arch 会拦 =="
+  echo "== selfcheck: planting a known architecture violation, expecting lint-arch to block =="
   local tmp; tmp="$(mktemp -d)"
-  # 造一个明显违规：源码里出现被禁的跨层 import 标记
+  # fabricate an obvious violation: a forbidden cross-layer import in source
   mkdir -p "$tmp/src/domain"
   echo "import { db } from '../../infra/db' // FORBIDDEN_CROSS_LAYER" > "$tmp/src/domain/leak.ts"
   local out rc
   out="$(HARNESS_ARCH_SCAN_ROOT="$tmp" bash "$HARNESS_DIR/feedback/lint-arch.sh" 2>&1)"; rc=$?
   rm -rf "$tmp"
   if [ $rc -ne 0 ]; then
-    report OK "selfcheck" "护栏按预期拦截了违规（exit $rc）——护栏是真的"
+    report OK "selfcheck" "guardrail blocked the violation as expected (exit $rc) — the guardrail is real"
     echo "$out" | sed 's/^/    /'
     return 0
   else
-    report BLOCK "selfcheck" "护栏没有拦住已知违规——护栏是纸糊的，请检查 lint-arch.sh 规则" \
-      "确认规则表能匹配 FORBIDDEN_CROSS_LAYER"
+    report BLOCK "selfcheck" "guardrail failed to block a known violation — it's paper; check lint-arch.sh rules" \
+      "confirm the rule table matches FORBIDDEN_CROSS_LAYER"
     return 1
   fi
 }
@@ -124,18 +125,18 @@ fi
 
 echo "== harness validate $( [ "$STRICT" -eq 1 ] && echo '(strict)')${HARNESS_REPO:+ @ $HARNESS_REPO} =="
 
-# 阻断级（顺序执行）
-run_stage BLOCK lint      "$HARNESS_LINT_CMD"      "修掉 lint 报错；风格类可先跑 $HARNESS_STYLE_CMD"
-run_stage BLOCK typecheck "$HARNESS_TYPECHECK_CMD" "修类型错误，禁止用 @ts-ignore 绕过（11020656025）"
-run_stage BLOCK arch      "$HARNESS_ARCH_LINT_CMD" "检查跨层依赖，规则见 .harness/feedback/lint-arch.sh"
-run_stage BLOCK build     "$HARNESS_BUILD_CMD"     "build 是不可跳过的硬门禁（11020656025）"
-run_stage BLOCK test      "$HARNESS_TEST_CMD"      "先看失败断言，别改测试预期去凑绿"
+# blocking stages (in order)
+run_stage BLOCK lint      "$HARNESS_LINT_CMD"      "fix lint errors; style-only issues can go through $HARNESS_STYLE_CMD first"
+run_stage BLOCK typecheck "$HARNESS_TYPECHECK_CMD" "fix type errors; @ts-ignore is not a workaround"
+run_stage BLOCK arch      "$HARNESS_ARCH_LINT_CMD" "cross-layer dependency check; rules in .harness/feedback/lint-arch.sh"
+run_stage BLOCK build     "$HARNESS_BUILD_CMD"     "build is a hard gate that cannot be skipped"
+run_stage BLOCK test      "$HARNESS_TEST_CMD"      "read the failing assertions first; never bend expectations to green"
 
-# 警告级
-run_stage WARN  style     "$HARNESS_STYLE_CMD"       "跑格式化即可"
-run_stage WARN  lock      "$HARNESS_LOCK_TESTS_CMD"  "冒烟测试被改动，见断言锁提示；确需改动加 // @lock-bypass + 说明"
+# warning stages
+run_stage WARN  style     "$HARNESS_STYLE_CMD"       "run the formatter"
+run_stage WARN  lock      "$HARNESS_LOCK_TESTS_CMD"  "smoke tests were modified (see the assertion-lock output); for a deliberate change add // @lock-bypass + a reason"
 
-# 提示级
+# informational stages
 if [ -z "$ONLY_STAGE" ] || [ "$ONLY_STAGE" = "info" ]; then
   for c in "${HARNESS_INFO_CMDS[@]:-}"; do
     [ -z "$c" ] && continue
@@ -145,12 +146,12 @@ fi
 
 echo "------------------------------------------------------------"
 if [ "$BLOCKING_FAILS" -gt 0 ]; then
-  report BLOCK summary "$BLOCKING_FAILS 个阻断级失败，$WARNING_FAILS 个警告"
-  echo "退出码 1：未达门禁，上面的失败输出即下一轮修复的 prompt。"
+  report BLOCK summary "$BLOCKING_FAILS blocking failure(s), $WARNING_FAILS warning(s)"
+  echo "exit 1: gates not met; the failure output above is the next round's prompt."
   exit 1
 fi
 if [ "$WARNING_FAILS" -gt 0 ]; then
-  report WARN summary "$WARNING_FAILS 个警告（非阻断）。加 --strict 可将其升级为阻断。"
+  report WARN summary "$WARNING_FAILS warning(s) (non-blocking). Add --strict to promote them to blocking."
 fi
-report OK summary "全部阻断级门禁通过。"
+report OK summary "all blocking gates passed."
 exit 0

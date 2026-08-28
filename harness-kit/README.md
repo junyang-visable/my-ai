@@ -1,163 +1,199 @@
 # harness-kit
 
-一套**可复用、不限栈**的编排层脚手架，把「Coding Harness + Testing Harness（E2E 优先）」
-接入任意仓库。它不是自研引擎，而是在现有 agent CLI（Qoder / Claude Code）之上，用
-**契约 + 命令 + 钩子 + 上下文约定 + 机械化验证**把「模型能力 × 环境能力」里的环境这一半补齐。
+A reusable, stack-agnostic orchestration scaffold that plugs **Coding Harness +
+Testing Harness (E2E-first)** into any repo. It is not a homegrown engine: it sits
+on top of your agent CLI (Qoder / Claude Code) and uses **contract + commands +
+hooks + context conventions + mechanical validation** to close the "environment"
+half of the "model capability × environment capability" equation.
 
-> 配套调研见 Obsidian 笔记《Coding 与 Testing Harness 自建方案》。本 kit 实现其中 P0–P2。
+> Positioning: a **personal development toolkit**. Three pillars:
 >
-> 定位：**个人开发 harness 工具集**。kit 随本仓库（my-ai）走，任意目标仓库零安装即可被驱动；
-> 引擎、任务状态与经验都沉淀在本仓库；技能经 `./harness link` 以相对软链接入，clone 后即用。
+> 1. **Knowledge that compounds** — every task leaves notes, playbooks, and history behind.
+>    Repo-specific knowledge lives in the repo (`docs/harness-kit/`); cross-repo methodology
+>    lives in the kit (`playbooks/`). Your work writes your own best practices.
+> 2. **Skill orchestration** — bring your favorite skills. Stage-keyed local routing
+>    (`skill-routes.local.yaml`) plugs grill/diagnosis/design skills into the workflow.
+> 3. **A harness loop with teeth** — clarify → design doc → verifiable plan → TDD coding →
+>    independent acceptance, with mechanical gates instead of prompt-nagging.
 
-## 五层结构
+## Data model
 
-| 层       | 作用                    | 本 kit 对应                                                                                                     |
-| -------- | ----------------------- | --------------------------------------------------------------------------------------------------------------- |
-| 契约层   | 30 秒讲清边界，常驻且短 | `templates/AGENTS.md`（~100 行，只做索引与红线）                                                                |
-| 上下文层 | 按需加载的知识          | `templates/docs/`、`.harness/context/`                                                                          |
-| 工具层   | 可复用技能/命令/钩子    | `skills/`、`commands/`（agent 通用 markdown）、`.harness/hooks/`                                                |
-| 验证层   | 机械化执法，不靠提示词  | `.harness/feedback/`（validate / lint-arch / lock-tests / collect-evidence）                                    |
-| 循环层   | 状态与续跑              | `tasks/<需求>/{spec,plan,current,result,history}.md + evidence/`（kit 一级维度；spec=边界契约，plan=可验证任务分解） |
+```
+<your repo>/docs/harness-kit/     ← harness-generated data for THAT repo (committable)
+├── config.sh                     # the only file to adapt per stack (commands)
+├── notes.md                      # repo stack, verified commands, pitfalls
+├── context/e2e-context.md        # E2E case context (entries/selectors/accounts)
+├── tasks/<task>/                 # spec / plan / current / result / history + evidence/
+└── .lock-baseline.json           # assertion-lock baseline
 
-## 快速开始（workspace 模式：在 kit 所在仓库直接驱动任意仓库，目标仓库零安装）
+harness-kit/                      ← pure tool (this repo)
+├── workspaces/<alias>.conf.sh    # thin registry: repo path (+ optional env defaults)
+├── playbooks/                    # cross-repo methodology (your distilled practices)
+└── skill-routes.local.yaml       # local skill-routing config (gitignored)
+```
+
+Project knowledge follows the project; methodology follows the toolkit. Target repos
+need zero installation — the kit drives them from outside (workspace mode).
+
+## Five layers
+
+| Layer          | Purpose                        | In this kit                                                                                                      |
+| -------------- | ------------------------------ | ---------------------------------------------------------------------------------------------------------------- |
+| Contract       | 30-second boundaries, short    | `templates/AGENTS.md` (~100 lines, index + red lines only)                                                        |
+| Context        | knowledge loaded on demand     | `templates/docs/`, `.harness/context/`                                                                            |
+| Tooling        | reusable skills/commands/hooks | `skills/`, `commands/`, `.harness/hooks/`                                                                         |
+| Validation     | mechanical enforcement         | `.harness/feedback/` (validate / lint-arch / lock-tests / collect-evidence)                                       |
+| Loop           | state & resume                 | `<repo>/docs/harness-kit/tasks/<task>/{spec,plan,current,result,history}.md + evidence/` (spec = boundary contract, plan = verifiable breakdown) |
+
+## Quick start (workspace mode: drive any repo from the kit's repo; targets need zero install)
 
 ```bash
-# 0) 一次性：把 kit 技能软链进本仓库的技能目录（相对软链，clone 后无需重跑）
+# 0) once: symlink kit skills into this repo's skills dir (relative links survive clones)
 ./harness link
 
-# 1) 注册一个仓库，生成它的专属配置 + 经验笔记 + E2E 上下文
+# 1) register a repo — creates its docs/harness-kit/ (config + notes + e2e context)
 ./harness add my-app /path/to/your-repo
 
-# 2) 填这个仓库的命令（按栈）
-$EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD / E2E_CMD ...
+# 2) fill in that repo's commands (per stack)
+$EDITOR /path/to/your-repo/docs/harness-kit/config.sh   # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD / E2E_CMD ...
 
-# 3) 先验证护栏本身，再跑全套
+# 3) prove the guardrails are real, then run the full pipeline
 ./harness validate selfcheck
 ./harness validate
 ```
 
-日常开发**优先在本仓库会话里直接调技能**，说人话即可：
+Day-to-day, **talk to the skills directly** from the kit repo's session:
 
-> “用 harness-dev 给 my-app 加一个 XX 功能” / “harness-dev，切到 another-repo 继续 XX 任务”
+> "Use harness-dev to add an XX feature to my-app" / "harness-dev, switch to another-repo and continue the XX task"
 
-技能会自己定位 kit、判定开发模式（**标准=默认全流程**：澄清→设计文档→拆分→编码，
-支持多应用一份设计文档；**极简=显式切换**：跳过设计直接定位改码）、确认活跃仓库、
-路由到专职技能、进编码循环、收尾沉淀经验；
-实现完成后另开会话说“用 harness-testing 验收 XX”（角色信息隔离）。
-注意：目标仓库需已加入 Qoder 工作区，否则写文件会被沙箱拦。
+The skill locates the kit, decides the execution mode (**standard = default full flow**:
+clarify → design doc covering all involved apps → breakdown → coding;
+**minimal = explicit switch**: skip design, locate and patch directly, branch + validate
+guardrails kept), confirms the active repo, routes to specialist skills, runs the coding
+loop, and distills lessons at wrap-up. After implementation, open a separate session and
+say "use harness-testing to accept XX" (role isolation).
+Note: the target repo must be part of your Qoder workspace, or writes get sandbox-blocked.
 
-### 技能家族（6 个，`./harness link` 一次接线）
+### The skill family (6, wired up by `./harness link`)
 
-| 技能            | 角色                                                      | 何时用           |
-| --------------- | --------------------------------------------------------- | ---------------- |
-| harness-dev     | 总控/路由 + workspace 管理 + 双模式判定（标准默认 / 极简显式） | 跨仓库开发入口   |
-| harness-spec    | 澄清 → spec.md（confirmed gate，可路由 grill 类技能）     | 新需求、需求模糊 |
-| harness-plan    | spec → plan.md（每步验证命令+预期输出，superpowers 风格） | spec 确认后      |
-| harness-coding  | 实现者：TDD + validate + 逐 Step 勾 plan                  | 编码             |
-| harness-testing | 验收者：独立会话，Rubric+RED-first+断言锁                 | 验收             |
-| harness-change  | 需求变更：spec 降 draft、plan 标记、重新确认              | 需求变了         |
+| Skill           | Role                                                            | When                 |
+| --------------- | --------------------------------------------------------------- | -------------------- |
+| harness-dev     | orchestrator/routing + workspace mgmt + dual-mode decision     | cross-repo entry     |
+| harness-spec    | clarify → spec.md (confirmed gate; can route grill-type skills) | new/vague requirement |
+| harness-plan    | spec → plan.md (per-step verify command + expected output)      | after spec confirmed |
+| harness-coding  | implementer: TDD + validate + tick plan Steps                  | coding               |
+| harness-testing | acceptor: separate session, Rubric + RED-first + assertion lock | acceptance           |
+| harness-change  | requirement change: demote spec to draft, mark plan            | requirement changed  |
 
-流程（标准模式，默认）：模糊需求 → spec（澄清+确认；多应用覆盖全部应用）→ plan
-（可验证分解，多应用按应用分组）→ coding（TDD+门禁，逐应用执行）→ testing
-（独立验收）；需求变更随时走 change 把 spec 打回 draft 重新确认。
-极简模式（对 harness-dev 显式说"极简/直接改"）：建轻任务 → 定位改码 → validate，
-跳过设计与计划。开工时各技能都会先跑 `./harness brief` 把仓库经验带进上下文。
+Standard-mode flow (default): vague requirement → spec (clarify + confirm; multi-app
+specs cover every involved app) → plan (verifiable breakdown, grouped by app) → coding
+(TDD + gates, per app) → testing (independent acceptance); requirement changes route
+through harness-change at any time, demoting the spec back to draft for re-confirmation.
+Minimal mode (explicitly tell harness-dev "minimal / just change it"): light task →
+locate & patch → validate, skipping design and planning. Every skill runs
+`./harness brief` first to pull repo knowledge into context.
 
-### 增强技能路由（可选，本地配置）
+### Enhanced skill routing (optional, local config)
 
-harness 各技能在特定阶段（澄清、方案、诊断……）可以调用环境里已有的通用技能来增强自己
-（如 Qoder 里的 `grilling` 逼问、`design-an-interface` 并行发散）。映射关系写在 kit 根的
-`skill-routes.local.yaml`——本地个人配置，已 gitignore，不入库；格式与说明见
-`templates/skill-routes.yaml`：
+At specific stages (clarify, approach, diagnosis…) harness skills can call general-purpose
+skills already present in your environment (e.g. Qoder's `grilling` interrogation or
+`design-an-interface` parallel exploration). Mappings live in `skill-routes.local.yaml`
+at the kit root — personal local config, gitignored, not committed; format and docs in
+`templates/skill-routes.yaml`:
 
 ```yaml
 harness-spec:
-  澄清追问: grilling
-  方案发散: design-an-interface
+  clarify: grilling
+  explore-approaches: design-an-interface
 ```
 
-规则：无配置、或配置的技能不在**当前会话可用技能清单**里 → 静默走默认逻辑，不报错、
-不打断。可用性以会话注入的清单为准（文件在 ≠ 会话里有）；换环境只改这份本地文件，
-不动技能本体。
+Rules: no mapping, or the mapped skill is not in **this session's available-skills list** →
+silently use the default logic; no errors, no interruptions. Availability follows the
+session-injected list (file exists ≠ available in session). Switching environments means
+editing that one local file — the skills themselves never change.
 
-命令行操作也都作用于当前活跃仓库：
+CLI commands all act on the active repo:
 
 ```bash
-./harness list                      # 看注册了哪些仓库，* 是当前活跃
-./harness use another-repo          # 切换活跃仓库
-./harness doctor                    # 体检：命令是否配置、冒烟集、断言锁基线
-./harness validate --strict         # 三级门禁全套（阻断/警告/提示）
-./harness lock update               # 冒烟集稳定后记基线；verify 校验是否被篡改
-./harness evidence 需求名 api       # 失败后收集证据，产出下一轮修复的 prompt
-./harness task new 需求名           # 建循环层任务目录（current/result/history/evidence）
-./harness context                   # 打印契约层文本，贴进 agent 会话开场
-./harness brief <关键词>            # 开工包：契约 + 仓库 notes + 命中 playbooks + 任务列表
+./harness list                      # registered repos; * marks the active one
+./harness use another-repo          # switch the active repo
+./harness doctor                    # health: configured commands, smoke set, lock baseline
+./harness validate --strict         # full pipeline, three gate levels (blocking/warning/info)
+./harness lock update               # record baseline once the smoke set is stable; verify detects tampering
+./harness evidence task api         # collect evidence after failure; produces the next fix prompt
+./harness task new my-task          # create a task dir in the active repo's docs/harness-kit/tasks/
+./harness context                   # print the contract text; paste it into agent sessions
+./harness brief <keywords>          # kickoff pack: contract + repo notes + matching playbooks + tasks
 ```
 
-每仓库的配置、断言锁基线、经验笔记在 `workspaces/<alias>/` 下互不干扰；
-任务与证据是 kit 一级维度，统一在 `tasks/<需求名>/`（不分单应用/跨应用）。
+## Knowledge compounding (the toolkit's core value)
 
-## 经验沉淀（工具集的核心价值）
+| Layer        | Location                                       | What goes there                                                         |
+| ------------ | ---------------------------------------------- | ------------------------------------------------------------------------ |
+| Repo-specific | `<repo>/docs/harness-kit/notes.md`            | that repo's stack, verified commands, pitfalls, conventions              |
+| Cross-repo   | `playbooks/<topic>.md`                        | methodology that holds in any repo; one topic per file, traceable to tasks |
+| Task-level   | `<repo>/docs/harness-kit/tasks/<task>/history.md` | append-only process record                                           |
 
-| 层         | 落点                                           | 放什么                                               |
-| ---------- | ---------------------------------------------- | ---------------------------------------------------- |
-| 仓库专属   | `workspaces/<alias>/notes.md`                  | 该仓库的栈、命令实测、坑与约定（add 时生成）         |
-| 跨仓库通用 | `playbooks/<主题>.md`                          | 换个仓库仍成立的方法论，一主题一文件，可回溯来源任务 |
-| 任务过程   | `tasks/<需求名>/history.md`                    | 只追加的过程记录                                     |
+The skills (harness-dev / harness-coding / harness-testing) write back to all three
+layers at wrap-up. Division of labor with agent built-in memory: memory is isolated per
+session-project and unreadable when developing other repos; this kit is plain files, in
+git, following the repo — which is exactly why the knowledge lives here.
 
-技能（harness-dev / harness-coding / harness-testing）收尾都会回写这三层。
-与 agent 内置 memory 的分工：memory 按会话项目隔离、开发其他仓库时读不到；
-本库是纯文件、进 git、跟着仓库走——这正是把经验放在这里的原因。
+### Optional: install mode
 
-### 可选：install 模式
+If you want a repo to carry its own harness (agents read AGENTS.md on entering), run
+`./install.sh <repo>`. Both modes coexist; workspace mode writes nothing into the target
+repo except `docs/harness-kit/`. Commands land in `.qoder/commands/` (Claude Code copies
+to `.claude/commands/`; the files are universal); the post-edit hook needs wiring in your
+CLI's hook config: `bash .harness/hooks/post-edit.sh <file>`.
 
-如果你希望某个仓库自带 harness（agent 进仓库即读到 AGENTS.md），也可 `./install.sh <repo>`。
-两种模式可共存；workspace 模式不在目标仓库写任何文件。命令落到 `.qoder/commands/`
-（Claude Code 复制到 `.claude/commands/`，文件通用）；post-edit 钩子需在 CLI 的 hook
-配置里接 `bash .harness/hooks/post-edit.sh <file>`。
+## Coverage (P0–P2)
 
-## 覆盖范围（P0–P2）
+- **P0**: contract layer `AGENTS.md`; `validate.sh` composes lint→typecheck→arch→build→test
+  with three gate levels; `selfcheck` deliberately plants a violation to prove the
+  guardrails actually fire.
+- **P1**: `post-edit.sh` incremental post-edit quick-check + output truncation;
+  `evidence-template.md` completion-evidence template.
+- **P2**: E2E case context library, four-level Rubric, the anti-false-reporting trio,
+  assertion lock `lock-tests.py`, automatic failure-evidence collection `collect-evidence.sh`.
 
-- **P0**：契约层 `AGENTS.md`；`validate.sh` 合成 lint→typecheck→arch→build→test 并分三级门禁；
-  `selfcheck` 故意造违规确认护栏不是纸糊的。
-- **P1**：`post-edit.sh` 编辑后增量快检 + 输出截断；`evidence-template.md` 完成证据模板。
-- **P2**：E2E 用例上下文库、四级 Rubric、防谎报三件套、断言锁 `lock-tests.py`、
-  失败证据自动收集 `collect-evidence.sh`。
+## How "stack-agnostic" works
 
-## 不限栈怎么做到的
+Every script reads only the command variables in the repo's `docs/harness-kit/config.sh`
+(install mode: `.harness/config.sh`); empty stages are skipped automatically. Switching
+stacks means editing config, never the engine. Skills and commands are agent-universal
+markdown (Qoder / Claude Code both read SKILL.md); the engine itself is pure shell +
+markdown.
 
-所有脚本只读 `.harness/config.sh` 里的命令变量；留空的阶段自动跳过。换栈只改 config，
-不动引擎。skill 与命令均为 agent 通用 markdown（Qoder / Claude Code 都读 SKILL.md），
-引擎本身是纯 shell + markdown。
-
-## 目录
+## Directory
 
 ```
 harness-kit/
-├── harness                    workspace 模式控制台（add/use/link/validate/lock/evidence/task/...）
-├── tasks/                     任务一级维度：<需求名>/{spec,plan,current,result,history}.md + evidence/（gitignore）
-├── workspaces/                每仓库一份：conf.sh 配置 + notes.md 经验 + context/ + 断言锁基线
-├── install.sh                 可选：把 harness 装进仓库（引擎软链 / 配置拷贝）
-├── skill-routes.local.yaml      本地增强技能路由（gitignore；格式模板见 templates/skill-routes.yaml）
-├── playbooks/                 跨仓库通用经验库（一主题一文件，可回溯来源任务）
-├── templates/                 契约层与 docs 模板
+├── harness                    workspace-mode console (add/use/link/validate/lock/evidence/task/...)
+├── workspaces/                thin repo registry: <alias>.conf.sh = repo path (+ optional env defaults)
+├── install.sh                 optional: install harness into a repo (engine symlinks / config copies)
+├── skill-routes.local.yaml    local enhanced-skill routing (gitignored; template: templates/skill-routes.yaml)
+├── playbooks/                 cross-repo methodology library (one topic per file, traceable to tasks)
+├── templates/                 contract layer & docs templates
 │   ├── AGENTS.md
 │   ├── skill-routes.yaml
 │   └── docs/{ARCHITECTURE,DEVELOPMENT}.md
 ├── .harness/
-│   ├── config.sh              默认接线点（workspace 模式下被 workspaces/*.conf.sh 覆盖）
+│   ├── config.sh              default wiring point (workspace mode: overridden by the repo's docs/harness-kit/config.sh)
 │   ├── feedback/              validate / lint-arch / lock-tests / collect-evidence
-│   ├── hooks/post-edit.sh     编辑后增量快检
-│   ├── context/testing/       E2E 用例上下文库模板
-│   ├── rubric/                四级 Rubric + 防谎报三件套 + 完成证据模板
-│   └── tasks/_template/       循环层状态模板
-├── skills/                    6 个技能（agent 通用 SKILL.md；link 相对软链到 .agents/skills/）
-└── commands/                  /harness-validate 等斜杠命令（agent 通用 markdown）
+│   ├── hooks/post-edit.sh     incremental post-edit quick-check
+│   ├── context/testing/       E2E case-context template
+│   ├── rubric/                four-level Rubric + anti-false-reporting trio + evidence template
+│   └── tasks/_template/       loop-state templates
+├── skills/                    6 skills (agent-universal SKILL.md; link symlinks them into .agents/skills/)
+└── commands/                  /harness-validate etc. slash commands (agent-universal markdown)
 ```
 
-## 边界
+## Boundaries
 
-双模式就是负担出口：标准模式（默认）全流程不因任务小而打折；琐碎改动
-（单文件 bugfix / 加日志 / 改文案）对 harness-dev **显式说"极简模式"**跳过设计直接改，
-但建分支与 validate 保底不豁免。门禁分级（阻断/警告/提示）就是为了避免
-「所有检查都阻断」引发的绕过冲动。
+The dual modes are the pressure valve: standard mode (default) never short-changes the
+flow because a task looks small; for trivial changes (single-file bugfix / log line /
+copy tweak) tell harness-dev **explicitly "minimal mode"** to skip design and patch
+directly — branch + validate guardrails are never waived. Gate levels exist
+(blocking/warning/info) precisely to avoid the "everything blocks" dynamic that breeds
+workarounds.

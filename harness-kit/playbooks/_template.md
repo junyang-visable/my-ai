@@ -1,18 +1,20 @@
-# <主题：一句话说清这条经验是什么>
+# <topic: one line stating what this lesson is>
 
-## 适用场景
+## When to apply
 
-<什么情况下该想起这条经验；越具体越好，最好能举出触发信号。>
+<under what circumstances this lesson should come to mind; the more concrete
+the better — ideally with trigger signals.>
 
-## 做法
+## The practice
 
-1. <可执行的步骤/判断顺序，写给未来的 agent 会话直接照做。>
+1. <executable steps / decision order, written so a future agent session can
+   follow them directly.>
 
-## 反例（不要这样做）
+## Anti-pattern (don't do this)
 
-- <常见错误做法及其后果。>
+- <common wrong approach and its consequences.>
 
-## 依据
+## Basis
 
-- 来源任务：<tasks/<需求名>/（或外部链接/调研编号）>
-- 验证时间：<YYYY-MM-DD，便于季度 review 判断是否过期>
+- Source task: <tasks/<task>/ (or an external link / research number)>
+- Verified: <YYYY-MM-DD, to judge expiry at quarterly review>

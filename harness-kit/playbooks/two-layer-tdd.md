@@ -1,31 +1,46 @@
-# two-layer-tdd — 两层 TDD 分工（实现侧单测 + 验收侧 E2E）
+# two-layer-tdd — the two-layer TDD split (implementer unit tests + acceptor E2E)
 
-## 适用场景
+## When to apply
 
-用 harness-kit 做需求开发、纠结"既然有 Evaluator 的 RED-first，实现者还要不要写测试"时；
-以及实现/验收两个角色如何各管一层测试而不破坏角色信息隔离。
+When working with harness-kit and wondering "given the Evaluator's RED-first,
+does the implementer still write tests?"; also for how the implement/accept
+roles each own one test layer without breaking role information isolation.
 
-## 做法
+## The practice
 
-1. **验收侧（Evaluator，已有）**：E2E 用例 RED-first + 四级 Rubric + 断言锁冻结冒烟集。
-   这层解决"整条链路对不对"，防谎报靠机械执法。
-2. **实现侧（Implementer，dev agent 自律）**：可单测的逻辑改动（工具函数、状态机、
-   数据转换）先写单测跑一次确认 RED（失败断言记入任务 history.md 作跑红证据），
-   再实现变绿；bugfix 先写能复现 bug 的失败测试。纯文案/样式不强制。
-3. 实现者写的是**自己的单测**，依然看不到 Rubric——不违反角色隔离；他不能改的是
-   冒烟集（断言锁管着），自己新写的单测随实现一起演进。
-4. 配套 spec 分工：实现者持 `tasks/<需求名>/spec.md`（方案与边界），
-   Evaluator 持 `rubric.md`（验收标准），两侧独立写、事后对照——不一致即澄清信号。
+1. **Acceptor layer (Evaluator, already present)**: E2E cases RED-first +
+   four-level Rubric + assertion lock freezing the smoke set. This layer
+   answers "is the whole chain right"; anti-false-reporting via mechanical
+   enforcement.
+2. **Implementer layer (Implementer, self-discipline)**: for unit-testable
+   logic changes (utility functions, state machines, data transforms), write
+   the unit test first, run it once to confirm RED (record the failing
+   assertion in the task's history.md as red-run evidence), then implement to
+   green; for bugfixes start with a failing test reproducing the bug. Pure
+   copy/style changes are exempt.
+3. The implementer writes **their own unit tests** and still never sees the
+   Rubric — no role-isolation violation; what they cannot touch is the smoke
+   set (the assertion lock guards it), while their own new unit tests evolve
+   with the implementation.
+4. Companion spec split: the implementer holds `tasks/<task>/spec.md`
+   (approach & boundaries), the Evaluator holds `rubric.md` (acceptance
+   criteria) — the two write independently and compare afterwards; mismatch is
+   a clarification signal.
 
-## 反例（不要这样做）
+## Anti-pattern (don't do this)
 
-- 因为"有 E2E 验收了"就不写单测：纯逻辑模块用 E2E 验收太重，反馈环慢，质量护栏空转。
-- 实现者为通过验收去改 E2E 冒烟用例：断言锁会拦（exit 2），该判 ESCALATED。
-- spec 只写一份、实现和验收共用：违反信息隔离，Evaluator 会被实现思路带偏。
+- Skipping unit tests because "E2E acceptance exists": accepting pure-logic
+  modules via E2E is too heavy, the feedback loop is slow, and the quality
+  guardrail idles.
+- The implementer editing E2E smoke cases to pass acceptance: the assertion
+  lock blocks it (exit 2) — that's an ESCALATED verdict.
+- One shared spec for implement and accept: breaks information isolation; the
+  Evaluator gets anchored by the implementation's approach.
 
-## 依据
+## Basis
 
-- 来源任务：`tasks/*`（本 kit 建设过程，2026-08 讨论；迁移前位于 workspaces/*/tasks/）
-- 原理出处：kit 调研笔记《Coding 与 Testing Harness 自建方案》、
-  `.harness/rubric/anti-false-reporting.md`（角色隔离 / RED-first）
-- 验证时间：2026-08-25
+- Source task: `tasks/*` (kit construction, discussed 2026-08; lived under
+  workspaces/*/tasks/ before the data-model migration)
+- Origin: the kit's research notes "Coding & Testing Harness self-build plan",
+  `.harness/rubric/anti-false-reporting.md` (role isolation / RED-first)
+- Verified: 2026-08-25

@@ -1,23 +1,25 @@
-# ARCHITECTURE.md — 按需加载的架构知识
+# ARCHITECTURE.md — architecture knowledge, loaded on demand
 
-> 不进 AGENTS.md 常驻上下文，只有涉及架构改动时才让 agent 读这里。
-> 按**业务能力**组织，不要按技术分层堆——11020723202 实测：按技术分层组织时
-> AI 定位精确率 5.26% / 召回 14.28%，改成按业务能力后升到 100% / 85.7%。
+> Not part of the always-present AGENTS.md context; agents read this only for
+> architecture-touching changes. Organize by **business capability**, never by
+> technical layering — organize by tech layer and AI code-location precision
+> collapses (measured: single-digit %), organize by capability and it soars.
 
-## 系统边界
+## System boundaries
 
-<一张图或一段话：外部系统、上下游、数据流向>
+<one diagram or paragraph: external systems, upstream/downstream, data flow>
 
-## 业务能力地图
+## Business capability map
 
-- 能力 A：<做什么> —— 入口代码 `<path>`，关键概念 `<...>`
-- 能力 B：<做什么> —— 入口代码 `<path>`
+- Capability A: <what it does> — entry code `<path>`, key concepts `<...>`
+- Capability B: <what it does> — entry code `<path>`
 - …
 
-## 分层与依赖方向
+## Layers & dependency direction
 
-<允许的依赖方向；哪层不能依赖哪层——这条会被 .harness/feedback/lint-arch.sh 机械执法>
+<allowed dependency directions; which layer must not depend on which —
+this part is mechanically enforced by .harness/feedback/lint-arch.sh>
 
-## 关键约定 / 契约
+## Key conventions / contracts
 
-- <数据契约 / 接口契约 / 事件契约，指向 SSOT 定义处>
+<data contracts / API contracts / event contracts, pointing at the SSOT definitions>

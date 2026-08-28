@@ -1,58 +1,59 @@
-# 验收 Rubric 模板（四级 + E2E 四层加权）
+# Acceptance Rubric template (four levels + E2E four-layer weighting)
 
-> 验收标准必须**先于代码存在**，且写实现的会话不看这份（角色信息隔离，见
-> anti-false-reporting.md）。依据 11020604944 / 11020757606。
-> 复制到 `.harness/tasks/<需求名>/rubric.md`，由 Evaluator 角色填写与判定。
+> Acceptance criteria must exist **before the code**, and the session writing
+> the implementation never reads this (role isolation — see
+> anti-false-reporting.md). Copy to `.harness/tasks/<task>/rubric.md`; the
+> Evaluator role fills it in and rules on it.
 
-## 四级分类与权重（11020604944）
+## Four levels & weights
 
-| 级别 | 权重 | 含义 | FAIL 后果 |
-| --- | --- | --- | --- |
-| Essential | 1.0 | 核心功能，不达即失败 | 任一 FAIL → 回喂修复，直到全 PASS |
-| Pitfall | 0.9 | 已知高频坑，必须规避 | 任一 FAIL → 回喂修复 |
-| Important | 0.7 | 重要但非致命 | 计入扣分 |
-| Optional | 0.3 | 加分项 | 计入扣分 |
+| Level | Weight | Meaning | On FAIL |
+| ----- | ------ | ------- | ------- |
+| Essential | 1.0 | core functionality; missing = failure | any FAIL → feed back for a fix, until all PASS |
+| Pitfall | 0.9 | known high-frequency pitfalls that must be avoided | any FAIL → feed back for a fix |
+| Important | 0.7 | important but not fatal | counts against the score |
+| Optional | 0.3 | nice-to-have | counts against the score |
 
-**达标口径（三者同时满足才算通过）**：
-1. 加权总分 ≥ 阈值（建议 0.85，按需调整）；
-2. 所有 Essential 项 PASS；
-3. 触发准确率 100%（该触发的触发、不该触发的不触发）。
+**Pass criteria (all three at once)**:
+1. weighted total ≥ threshold (0.85 suggested; tune as needed);
+2. every Essential item PASS;
+3. trigger accuracy 100% (what should trigger, triggers; what shouldn't, doesn't).
 
-## E2E 四层总分（可直接抄，11020604944）
+## E2E four-layer score (copy as-is)
 
-| 维度 | 权重 |
-| --- | --- |
-| 功能正确性 | 0.40 |
-| 健壮性（异常/边界/并发） | 0.25 |
-| UI 呈现 | 0.20 |
-| 交互体验 | 0.15 |
+| Dimension | Weight |
+| --------- | ------ |
+| Functional correctness | 0.40 |
+| Robustness (errors / boundaries / concurrency) | 0.25 |
+| UI presentation | 0.20 |
+| Interaction quality | 0.15 |
 
-## 检查项清单（按需求填写）
+## Checklist (fill per requirement)
 
-### Essential（权重 1.0）
+### Essential (weight 1.0)
 
-- [ ] E-1：<核心行为，可观测的断言>
-- [ ] E-2：<...>
+- [ ] E-1: <core behavior, an observable assertion>
+- [ ] E-2: <...>
 
-### Pitfall（权重 0.9）
+### Pitfall (weight 0.9)
 
-- [ ] P-1：<历史踩坑对应的防护，如"登录失败不得吞异常"）>
+- [ ] P-1: <guard against a historical pitfall, e.g. "login failure must not swallow the exception">
 
-### Important（权重 0.7）
+### Important (weight 0.7)
 
-- [ ] I-1：<...>
+- [ ] I-1: <...>
 
-### Optional（权重 0.3）
+### Optional (weight 0.3)
 
-- [ ] O-1：<...>
+- [ ] O-1: <...>
 
-## 判定记录（Evaluator 填）
+## Verdict record (filled by the Evaluator)
 
-| 项 | 结果 | 证据（截图/断言/日志路径） |
-| --- | --- | --- |
-| E-1 | PASS/FAIL | `.harness/tasks/<需求名>/evidence/...` |
+| Item | Result | Evidence (screenshot/assertion/log path) |
+| ---- | ------ | ----------------------------------------- |
+| E-1 | PASS/FAIL | `.harness/tasks/<task>/evidence/...` |
 
-- 加权总分：`<x.xx>` / 阈值 `<0.85>`
-- Essential 全过：`<是/否>`
-- 触发准确率：`<100%/...>`
-- **结论**：`PASS / 回喂修复 / ESCALATED`
+- weighted total: `<x.xx>` / threshold `<0.85>`
+- all Essential passed: `<yes/no>`
+- trigger accuracy: `<100%/...>`
+- **verdict**: `PASS / feed back for a fix / ESCALATED`

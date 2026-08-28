@@ -1,21 +1,25 @@
-# playbooks/ — 跨仓库通用经验库
+# playbooks/ — cross-repo methodology library
 
-> 与 `workspaces/<alias>/notes.md`（仓库专属）的分工：**只有换个仓库仍然成立的结论才放这里**。
-> 某个仓库的命令、选择器、环境坑 → notes.md；可迁移的方法论（套路、反模式、决策依据）→ 本目录。
+> Division of labor with `<repo>/docs/harness-kit/notes.md` (repo-specific):
+> **only conclusions that hold in a different repo belong here**. A repo's
+> commands, selectors, environment quirks → notes.md; transferable methodology
+> (patterns, anti-patterns, decision heuristics) → this directory.
 
-## 组织方式
+## Organization
 
-- **一主题一文件**，文件名即主题：`<主题>.md`（如 `red-first.md`、`cypress-selector-strategy.md`）。
-- 从 `_template.md` 复制起稿；写完在文末「依据」里链接来源任务（`tasks/<需求名>/`），
-  让每条经验都能回溯到真实案例。
-- 经验来自 skill 收尾回写（harness-coding / harness-dev 收尾步骤）或人工复盘；
-  防谎报类基础经验另见 `.harness/rubric/anti-false-reporting.md`，不在此重复。
+- **One topic per file**, the filename is the topic: `<topic>.md` (e.g. `red-first.md`, `cypress-selector-strategy.md`).
+- Start from `_template.md`; when done, link the source task (`tasks/<task>/`) at the
+  bottom under "Basis" so every lesson traces back to a real case.
+- Lessons come from skill wrap-up write-backs (harness-coding / harness-dev
+  wrap-up steps) or manual retrospectives; base anti-false-reporting material
+  lives in `.harness/rubric/anti-false-reporting.md` and is not repeated here.
 
-## 命名建议
+## Naming suggestions
 
-- 动作类：`<怎么做某事>.md`（如 `collect-evidence-priority.md`）
-- 反模式类：`avoid-<什么>.md`（如 `avoid-editing-tests-to-green.md`）
+- Action-oriented: `<how-to-do-x>.md` (e.g. `collect-evidence-priority.md`)
+- Anti-pattern-oriented: `avoid-<what>.md` (e.g. `avoid-editing-tests-to-green.md`)
 
-## 保鲜
+## Freshness
 
-- 季度 review 一次：失效的删掉，互相重复的合并。宁可少而准，不要多而水。
+- Review quarterly: delete what expired, merge what overlaps. Better few and
+  precise than many and watery.

@@ -1,14 +1,15 @@
 #!/usr/bin/env bash
 # =============================================================================
-# install.sh — 把 harness-kit 接入一个目标仓库
+# install.sh — wire harness-kit into a target repo
 # -----------------------------------------------------------------------------
-# 设计：引擎(脚本)软链回 kit，便于统一升级；配置与内容(config/context/rubric/tasks)
-# 拷贝进仓库，各仓库独立可改。已存在的文件默认不覆盖。
+# Design: engine (scripts) symlinks back to the kit for unified upgrades;
+# config & content (config/context/rubric/tasks) are copied into the repo so
+# each repo can evolve independently. Existing files are kept by default.
 #
-# 用法:
-#   ./install.sh <目标仓库路径> [--copy] [--force]
-#     --copy  引擎也拷贝而非软链（离线分发用）
-#     --force 覆盖已存在的 config/AGENTS 等（危险，默认关）
+# Usage:
+#   ./install.sh <target-repo-path> [--copy] [--force]
+#     --copy  copy the engine too instead of symlinking (for offline distribution)
+#     --force overwrite existing config/AGENTS etc. (dangerous; off by default)
 # =============================================================================
 set -euo pipefail
 
@@ -28,9 +29,9 @@ while [ $# -gt 0 ]; do
   shift
 done
 
-[ -z "$TARGET" ] && { echo "用法: ./install.sh <目标仓库路径> [--copy] [--force]"; exit 64; }
-TARGET="$(cd "$TARGET" && pwd)"   # 必须已存在
-echo "== 接入 harness-kit → $TARGET （mode=$MODE）=="
+[ -z "$TARGET" ] && { echo "usage: ./install.sh <target-repo-path> [--copy] [--force]"; exit 64; }
+TARGET="$(cd "$TARGET" && pwd)"   # must already exist
+echo "== wiring harness-kit → $TARGET (mode=$MODE) =="
 
 link_or_copy() { # src dst
   local src="$1" dst="$2"
@@ -42,17 +43,17 @@ link_or_copy() { # src dst
   fi
 }
 
-copy_keep() { # src dst  —— 已存在则保留（除非 --force）
+copy_keep() { # src dst — keep existing unless --force
   local src="$1" dst="$2"
   mkdir -p "$(dirname "$dst")"
   if [ -e "$dst" ] && [ "$FORCE" -ne 1 ]; then
-    echo "  keep  $dst（已存在，--force 可覆盖）"
+    echo "  keep  $dst (exists; --force overwrites)"
   else
     cp -Rf "$src" "$dst"; echo "  put   $dst"
   fi
 }
 
-# --- 1) 引擎脚本：软链回 kit --------------------------------------------------
+# --- 1) engine scripts: symlink back to the kit --------------------------------
 for f in feedback/validate.sh feedback/lint-arch.sh feedback/lock-tests.py \
          feedback/collect-evidence.sh hooks/post-edit.sh; do
   link_or_copy "$KIT_DIR/.harness/$f" "$TARGET/.harness/$f"
@@ -60,18 +61,18 @@ for f in feedback/validate.sh feedback/lint-arch.sh feedback/lock-tests.py \
 done
 chmod +x "$KIT_DIR/.harness/feedback/"*.sh "$KIT_DIR/.harness/hooks/"*.sh 2>/dev/null || true
 
-# --- 2) 配置与内容：拷贝，仓库独立可改 -------------------------------------------
+# --- 2) config & content: copied, per-repo editable -----------------------------
 copy_keep "$KIT_DIR/.harness/config.sh"        "$TARGET/.harness/config.sh"
 copy_keep "$KIT_DIR/.harness/context"          "$TARGET/.harness/context"
 copy_keep "$KIT_DIR/.harness/rubric"           "$TARGET/.harness/rubric"
 copy_keep "$KIT_DIR/.harness/tasks/_template"  "$TARGET/.harness/tasks/_template"
 
-# --- 3) 契约层与 docs ---------------------------------------------------------
+# --- 3) contract layer & docs ---------------------------------------------------
 copy_keep "$KIT_DIR/templates/AGENTS.md" "$TARGET/AGENTS.md"
 copy_keep "$KIT_DIR/templates/docs/ARCHITECTURE.md" "$TARGET/docs/ARCHITECTURE.md"
 copy_keep "$KIT_DIR/templates/docs/DEVELOPMENT.md"  "$TARGET/docs/DEVELOPMENT.md"
 
-# --- 4) 技能与命令（agent 通用 markdown；目录按 Qoder 习惯，Claude Code 复制到 .claude/ 即可）---
+# --- 4) skills & commands (agent-universal markdown; Qoder-style dirs, Claude Code copies to .claude/) ---
 skdir="${QODER_SKILLS_DIR:-$HOME/.qoderwork/skills}"
 mkdir -p "$skdir" "$TARGET/.qoder/commands"
 for s in "$KIT_DIR"/skills/*/; do
@@ -79,17 +80,17 @@ for s in "$KIT_DIR"/skills/*/; do
   name="$(basename "$s")"
   ln -sfn "$KIT_DIR/skills/$name" "$skdir/$name"
 done
-echo "  link  技能 → $skdir/（全部）"
+echo "  link  skills → $skdir/ (all)"
 cp -f "$KIT_DIR/commands/"*.md "$TARGET/.qoder/commands/"
-echo "  put   命令 → $TARGET/.qoder/commands/（Claude Code 复制到 .claude/commands/，文件通用）"
+echo "  put   commands → $TARGET/.qoder/commands/ (Claude Code: copy to .claude/commands/; files are universal)"
 
-# --- 5) 收尾提示 --------------------------------------------------------------
+# --- 5) wrap-up hints -----------------------------------------------------------
 cat <<EOF
 
-接入完成。接下来 3 步：
-  1) 编辑 $TARGET/.harness/config.sh —— 填 HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD / E2E_CMD 等
-  2) 填 $TARGET/AGENTS.md 的 <占位> 与红线；按需补 docs/
-  3) 验证护栏本身： bash $TARGET/.harness/feedback/validate.sh selfcheck
-     再跑一次全套： bash $TARGET/.harness/feedback/validate.sh
-  冒烟集稳定后： python3 $TARGET/.harness/feedback/lock-tests.py update
+Wiring complete. Next 3 steps:
+  1) edit $TARGET/.harness/config.sh — fill HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD / E2E_CMD etc.
+  2) fill $TARGET/AGENTS.md placeholders and red lines; extend docs/ as needed
+  3) prove the guardrails: bash $TARGET/.harness/feedback/validate.sh selfcheck
+     then the full run:  bash $TARGET/.harness/feedback/validate.sh
+  once the smoke set is stable: python3 $TARGET/.harness/feedback/lock-tests.py update
 EOF

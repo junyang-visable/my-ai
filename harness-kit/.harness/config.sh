@@ -1,43 +1,45 @@
 # shellcheck shell=bash
 # =============================================================================
-# .harness/config.sh — 每个仓库自己的接线点（唯一需要按栈修改的文件）
+# .harness/config.sh — per-repo wiring point (the only file to adapt per stack)
 # -----------------------------------------------------------------------------
-# 骨架不限栈：validate.sh / hooks 全部读这里的变量。
-# 留空的命令会被自动跳过并打一条 info，不会让流水线失败。
-# 命令用字符串写，validate 会用 `bash -c` 执行，可自由拼管道。
+# The skeleton is stack-agnostic: validate.sh / hooks read only these variables.
+# Empty commands are skipped automatically with an info line; the pipeline
+# never fails because of them. Commands are strings executed via `bash -c`,
+# so pipes are free to use.
 # =============================================================================
 
-# --- harness 引擎目录（.harness 自身，一般不用改）--------------------------------
-# 指向本 config.sh 所在目录，即 <repo>/.harness；feedback/ 脚本都挂在它下面。
+# --- harness engine dir (.harness itself; rarely changed) ------------------------
+# Points at the dir containing this config.sh, i.e. <repo>/.harness;
+# the feedback/ scripts hang off it.
 HARNESS_ROOT="${HARNESS_ROOT:-$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)}"
 export HARNESS_ROOT
 
-# --- 阻断级（blocking）：失败必然让 validate 退出码非 0 ----------------------------
-# 顺序即执行顺序，对齐 11020601776 的「build → lint-arch → test → verify 合成一条命令」。
-HARNESS_LINT_CMD="${HARNESS_LINT_CMD:-}"            # 例: "pnpm -s lint"
-HARNESS_TYPECHECK_CMD="${HARNESS_TYPECHECK_CMD:-}" # 例: "pnpm -s tsc --noEmit"
+# --- blocking stages: any failure makes validate exit non-zero --------------------
+# Order below is execution order: one composed command, lint → arch → build → test.
+HARNESS_LINT_CMD="${HARNESS_LINT_CMD:-}"            # e.g. "pnpm -s lint"
+HARNESS_TYPECHECK_CMD="${HARNESS_TYPECHECK_CMD:-}" # e.g. "pnpm -s tsc --noEmit"
 HARNESS_ARCH_LINT_CMD="${HARNESS_ARCH_LINT_CMD:-bash \"$HARNESS_ROOT/feedback/lint-arch.sh\"}"
-HARNESS_BUILD_CMD="${HARNESS_BUILD_CMD:-}"          # 例: "pnpm -s build" —— 前端硬门禁：不可跳过
-HARNESS_TEST_CMD="${HARNESS_TEST_CMD:-}"            # 例: "pnpm -s test -- --run"
+HARNESS_BUILD_CMD="${HARNESS_BUILD_CMD:-}"          # e.g. "pnpm -s build" — hard gate for frontends: cannot be skipped
+HARNESS_TEST_CMD="${HARNESS_TEST_CMD:-}"            # e.g. "pnpm -s test -- --run"
 
-# --- 警告级（warning）：默认不阻断，--strict 时才阻断 --------------------------------
-HARNESS_STYLE_CMD="${HARNESS_STYLE_CMD:-}"          # 例: "pnpm -s prettier --check ."
+# --- warning stages: non-blocking by default; blocking under --strict -------------
+HARNESS_STYLE_CMD="${HARNESS_STYLE_CMD:-}"          # e.g. "pnpm -s prettier --check ."
 HARNESS_LOCK_TESTS_CMD="${HARNESS_LOCK_TESTS_CMD:-python3 \"$HARNESS_ROOT/feedback/lock-tests.py\" verify}"
 
-# --- 提示级（informational）：只打印，永不影响退出码 --------------------------------
+# --- informational stages: print only, never affect the exit code -----------------
 HARNESS_INFO_CMDS=(
   # "echo \"bundle: $(du -sh dist 2>/dev/null | cut -f1)\""
 )
 
-# --- Testing Harness / E2E ---------------------------------------------------
-HARNESS_E2E_CMD="${HARNESS_E2E_CMD:-}"              # 例: "pnpm -s cypress run --spec 'cypress/e2e/smoke/**'"
-# 冒烟集：断言锁与 RED 校验作用的范围。用 glob，可多条空格分隔。
+# --- Testing Harness / E2E -------------------------------------------------------
+HARNESS_E2E_CMD="${HARNESS_E2E_CMD:-}"              # e.g. "pnpm -s cypress run --spec 'cypress/e2e/smoke/**'"
+# smoke set: the scope protected by the assertion lock and RED checks. Globs; space-separate multiple.
 HARNESS_SMOKE_GLOB="${HARNESS_SMOKE_GLOB:-cypress/e2e/smoke/**/*.cy.*}"
-# 失败证据落盘目录（相对项目根）。
+# where failure evidence lands (relative to the repo root).
 HARNESS_EVIDENCE_DIR="${HARNESS_EVIDENCE_DIR:-.harness/tasks/_last/evidence}"
 
-# --- 增量检查（post-edit 钩子用）：给一个文件路径，返回该文件应跑的快检命令 --------------
-# 参数 $1 = 被编辑文件的绝对路径。空输出表示无需检查。
+# --- incremental checks (post-edit hook): given a file path, emit its quick-check command ----
+# $1 = absolute path of the edited file. Empty output means "nothing to check".
 harness_incremental_cmd() {
   local f="$1"
   case "$f" in
@@ -51,13 +53,15 @@ harness_incremental_cmd() {
   esac
 }
 
-# --- workspace 模式：最后加载仓库专属配置 ----------------------------------------
-# harness CLI 通过 HARNESS_CONF 指向 workspaces/<alias>.conf.sh，放在文件末尾加载，
-# 保证其中的赋值覆盖上面的默认值。install 模式下该变量为空，此段无效果。
+# --- workspace mode: load the repo-specific config last ---------------------------
+# The harness CLI points HARNESS_CONF at the target repo's
+# docs/harness-kit/config.sh; loading it at the end of this file lets its
+# assignments override the defaults above. In install mode that variable is
+# empty and this block is a no-op.
 if [ -n "${HARNESS_CONF:-}" ] && [ -f "${HARNESS_CONF:-}" ]; then
   # shellcheck source=/dev/null
   source "$HARNESS_CONF"
 fi
 
-# 子进程（lock-tests.py / collect-evidence.sh 等）需要读到这些值，显式导出
+# child processes (lock-tests.py / collect-evidence.sh …) need these values
 export HARNESS_SMOKE_GLOB HARNESS_EVIDENCE_DIR HARNESS_E2E_CMD
