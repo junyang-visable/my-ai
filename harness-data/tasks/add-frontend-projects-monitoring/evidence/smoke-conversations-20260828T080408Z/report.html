@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitoring Report — 2026-08-27 08:04–2026-08-28 08:04 UTC (last_24h)</title>
+<style>* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  background: #0f172a; color: #e2e8f0; padding: 32px; line-height: 1.6;
+  max-width: 880px; margin: 0 auto;
+}
+h1 { font-size: 20px; font-weight: 700; margin-bottom: 4px; color: #f1f5f9; }
+h2 { font-size: 16px; font-weight: 600; margin: 24px 0 12px; color: #f1f5f9;
+     border-bottom: 1px solid #1e293b; padding-bottom: 6px; }
+h3 { font-size: 13px; font-weight: 600; margin: 16px 0 8px; color: #cbd5e1; }
+a { color: #7dd3fc; text-decoration: none;
+    border-bottom: 1px dotted rgba(125, 211, 252, 0.5); }
+a:hover { color: #bae6fd; border-bottom: 1px solid #bae6fd; }
+.meta { font-size: 12px; color: #64748b; margin-bottom: 20px; }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+         gap: 12px; margin: 12px 0; }
+.stat { background: #1e293b; border-radius: 8px; padding: 12px 16px; }
+.stat-value { font-size: 20px; font-weight: 700; color: #f1f5f9; }
+.stat-value.good { color: #34d399; }
+.stat-value.bad { color: #f87171; }
+.stat-label { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+table { width: 100%; border-collapse: collapse; font-size: 12px; margin: 8px 0; }
+th { text-align: left; padding: 6px 10px; background: #1e293b; color: #94a3b8;
+     font-weight: 600; border-bottom: 1px solid #334155; }
+td { padding: 6px 10px; border-bottom: 1px solid #1e293b; }
+tr:hover td { background: #1e293b; }
+.num { text-align: right; font-variant-numeric: tabular-nums; }
+.new-badge { background: #dc2626; color: #fff; font-size: 10px; padding: 1px 5px;
+             border-radius: 3px; font-weight: 600; margin-left: 4px; }
+.spike-badge { background: #d97706; color: #fff; font-size: 10px; padding: 1px 5px;
+               border-radius: 3px; font-weight: 600; margin-left: 4px; }
+.p0-badge { background: #7c3aed; color: #fff; font-size: 10px; padding: 1px 5px;
+            border-radius: 3px; font-weight: 600; margin-left: 4px; }
+.url { word-break: break-all; }
+.wrap { overflow-wrap: anywhere; }
+.note { color: #94a3b8; font-size: 12px; margin: 6px 0 0; }
+.divider { border-top: 1px solid #1e293b; margin: 24px 0; }
+.footer { font-size: 11px; color: #475569; margin-top: 24px; }
+.section-signal { display: inline-block; background: #1e293b; padding: 2px 8px;
+                  border-radius: 4px; font-size: 11px; color: #94a3b8; margin-right: 6px; }
+.signal-h { font-size: 14px; font-weight: 700; color: #f1f5f9; margin: 28px 0 10px;
+            padding-left: 10px; border-left: 3px solid #60a5fa; }
+.signal-h.dd { border-left-color: #a78bfa; }
+.signal-h.sentry { border-left-color: #f472b6; }
+.signal-h.aws { border-left-color: #f59e0b; }
+.trigger-block { background: #1e293b; border-radius: 8px; padding: 12px 16px;
+                 margin: 12px 0; font-size: 13px; border-left: 3px solid #60a5fa; }
+.trigger-block.release { border-left-color: #a78bfa; }
+.trigger-mode { display: inline-block; font-size: 11px; font-weight: 700; padding: 1px 8px;
+                border-radius: 10px; background: #334155; color: #e2e8f0; margin-right: 8px;
+                text-transform: uppercase; letter-spacing: 0.5px; }
+.trigger-block.release .trigger-mode { background: #5b21b6; }
+.trigger-detail { color: #94a3b8; margin-top: 4px; }
+.trigger-detail a { color: #60a5fa; text-decoration: none; }
+.trigger-warning { color: #fbbf24; margin-top: 4px; }
+.tab-bar { display: flex; gap: 4px; margin-top: 20px; border-bottom: 1px solid #1e293b; }
+.tab-btn { background: none; border: none; color: #94a3b8; font-family: inherit;
+           font-size: 13px; font-weight: 600; padding: 8px 16px; cursor: pointer;
+           border-bottom: 2px solid transparent; margin-bottom: -1px; }
+.tab-btn:hover { color: #e2e8f0; }
+.tab-btn.active { color: #60a5fa; border-bottom-color: #60a5fa; }
+.tab-panel { display: none; padding-top: 8px; }
+.tab-panel.active { display: block; }
+.available { color: #34d399; }
+.alert { color: #f87171; }
+</style></head><body>
+<h1>Monitoring Report — 2026-08-27 08:04–2026-08-28 08:04 UTC (last_24h)</h1>
+<div class="meta">Time range: 2026-08-27T08:04:08.712436Z → 2026-08-28T08:04:08.712436Z | Run: 20260828T080408Z | Observed: 2026-08-28T08:06:09.740927+00:00</div>
+<div class="trigger-block">
+<span class="trigger-mode">routine</span><strong>Trigger projects:</strong> conversations-frontend
+</div>
+<div class="stats">
+<div class="stat"><div class="stat-value">0</div><div class="stat-label">conversations-frontend errors</div></div>
+</div>
+<div class="tab-bar">
+<button class="tab-btn active" data-target="panel-0">conversations-frontend</button>
+</div>
+<div class="tab-panel active" id="panel-0">
+<div>
+<span class="section-signal">datadog: <span class="available">AVAILABLE</span></span>
+<span class="section-signal">stability_sdk: <span class="available">AVAILABLE</span></span>
+<span class="section-signal">sentry: <span class="">DISABLED</span></span>
+<span class="section-signal">aws: <span class="alert">UNAVAILABLE</span></span>
+<span class="section-signal">tracking_patrol: <span class="">DISABLED</span></span>
+</div>
+<div class="stats">
+<div class="stat"><div class="stat-value">0</div><div class="stat-label">Stability errors</div></div>
+<div class="stat"><div class="stat-value">230</div><div class="stat-label">Datadog error logs</div></div>
+</div>
+<h3 class="signal-h">Stability SDK</h3>
+<h3 class="signal-h dd">Datadog</h3>
+<h3>Top Errors (Logs)</h3>
+<table><thead><tr><th>#</th><th>Error</th><th class="num">Count</th></tr></thead><tbody><tr><td>1</td><td class="wrap">Proxy error details</td><td class="num">115</td></tr><tr><td>2</td><td class="wrap">Proxy error: Unknown error</td><td class="num">105</td></tr><tr><td>3</td><td class="wrap">Proxy error: Connection refused to backend service</td><td class="num">10</td></tr></tbody></table>
+</div>
+<div class="footer">Run ID: 20260828T080408Z | Generated by monitoring-orchestrator report_html.py | Stability data may be provisional</div>
+<script>
+document.querySelectorAll('.tab-btn').forEach(function (btn) {
+  btn.addEventListener('click', function () {
+    document.querySelectorAll('.tab-btn').forEach(function (b) { b.classList.remove('active'); });
+    document.querySelectorAll('.tab-panel').forEach(function (p) { p.classList.remove('active'); });
+    btn.classList.add('active');
+    document.getElementById(btn.getAttribute('data-target')).classList.add('active');
+  });
+});
+</script>
+</body></html>

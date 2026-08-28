@@ -1,0 +1,44 @@
+{
+  "duration_ms": 15807,
+  "errors": [],
+  "evidence": "",
+  "metrics": {
+    "baseline_mode": "pop",
+    "baseline_window": {
+      "end": "2026-08-27T08:04:08.713064+00:00",
+      "start": "2026-08-26T08:04:08.713064+00:00"
+    },
+    "dominant_error": "Proxy error details",
+    "dominant_error_count": 115,
+    "error_log_count": 230,
+    "metric_queries": {},
+    "monitors": [],
+    "time_range": {
+      "end": "2026-08-28T08:04:08.713064+00:00",
+      "label": "last_24h",
+      "start": "2026-08-27T08:04:08.713064+00:00"
+    },
+    "top_errors": [
+      {
+        "count": 115,
+        "error": "Proxy error details",
+        "rank": 1
+      },
+      {
+        "count": 105,
+        "error": "Proxy error: Unknown error",
+        "rank": 2
+      },
+      {
+        "count": 10,
+        "error": "Proxy error: Connection refused to backend service",
+        "rank": 3
+      }
+    ]
+  },
+  "observed_at": "2026-08-28T08:04:24.519772+00:00",
+  "project": "conversations-frontend",
+  "signal": "datadog",
+  "status": "available",
+  "summary": "230 error logs; top error: Proxy error details (115); 0 monitors found in last_24h"
+}

@@ -1,0 +1,39 @@
+{
+  "duration_ms": 22132,
+  "errors": [],
+  "evidence": "",
+  "metrics": {
+    "baseline_mode": "pop",
+    "baseline_window": {
+      "end": "2026-08-27T07:59:55.490427+00:00",
+      "start": "2026-08-26T07:59:55.490427+00:00"
+    },
+    "dominant_error": null,
+    "dominant_error_count": 0,
+    "error_log_count": 0,
+    "metric_queries": {},
+    "monitors": [],
+    "time_range": {
+      "end": "2026-08-28T07:59:55.490427+00:00",
+      "label": "last_24h",
+      "start": "2026-08-27T07:59:55.490427+00:00"
+    },
+    "top_error_endpoints": [
+      {
+        "baseline_count": 58,
+        "count": 53,
+        "delta": -5,
+        "delta_percent": -8.62,
+        "error": "401 /api/user-hub/me",
+        "link": "https://app.datadoghq.com/apm/traces?query=service%3A%22visable-dev%2Fvisitors-frontend%22+status%3Aerror+%40http.status_code%3A401+%40http.url_details.path%3A%22%2Fapi%2Fuser-hub%2Fme%22&from_ts=1787817595490&to_ts=1787903995490",
+        "rank": 1
+      }
+    ],
+    "top_errors": []
+  },
+  "observed_at": "2026-08-28T08:00:17.621945+00:00",
+  "project": "visitors-frontend",
+  "signal": "datadog",
+  "status": "available",
+  "summary": "0 error logs; 0 monitors found in last_24h"
+}
