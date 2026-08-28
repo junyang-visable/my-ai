@@ -13,7 +13,8 @@ version: 1.1.0
 
 kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-spec`，
 软链部署先 `readlink -f` 解析真实路径再上溯）。兜底：`/Users/yangjun/Desktop/my-ai/harness-kit`。
-目标仓库用 `bash <kit>/harness current` 确认；任务目录 = `workspaces/<alias>/tasks/<需求名>/`。
+目标仓库用 `bash <kit>/harness current` 确认；任务目录 = `tasks/<需求名>/`（kit 一级维度；
+install 模式为 `<repo>/.harness/tasks/...`）。
 
 ## 流程
 
@@ -27,11 +28,12 @@ kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-spec`，
    - 追问有度：每轮 3–5 个问题，答完再下一轮；连续两轮无新信息即停，
      转为陈述你的理解请用户纠错。
 4. **写 spec.md**（模板已由 task new 生成）：填状态以外的全部字段——
-   需求边界（做什么 / 不做什么）、方案（思路 / 影响文件 / 风险）、
+   涉及应用（单应用填一个；多应用列全，**每应用改动点/边界 + 跨应用契约（接口/顺序/依赖），
+   缺一不可开工**）、需求边界（做什么 / 不做什么）、方案（思路 / 影响文件 / 风险）、
    验收边界（实现者视角的可观测行为）。**计划一节是指针，不要展开**。
 5. **请用户确认**：展示 spec 要点（边界 / 方案 / 风险），用户明确同意后把状态行改为
    `- 状态：confirmed`。confirmed 必须来自用户表态，不能自封。
-6. **路由下一步**：跨文件任务 → harness-plan 做可验证计划；小任务 → 直接 harness-coding。
+6. **路由下一步**：harness-plan 做可验证计划（标准模式全流程，不因任务小而跳过）。
 
 ## 增强技能路由（可选）
 

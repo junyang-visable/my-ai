@@ -13,7 +13,7 @@ spec = 做什么与边界（冻结），plan = 怎么做（执行中可调，调
 
 kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-plan`，软链部署先 `readlink -f`）。
 兜底：`/Users/yangjun/Desktop/my-ai/harness-kit`。
-任务目录 = `workspaces/<alias>/tasks/<需求名>/`（install 模式为 `<repo>/.harness/tasks/...`）。
+任务目录 = `tasks/<需求名>/`（kit 一级维度；install 模式为 `<repo>/.harness/tasks/...`）。
 
 ## 流程
 
@@ -23,6 +23,7 @@ kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-plan`，软链部
    不要猜路径。
 3. 写 plan.md（模板已由 task new 生成；旧任务从 `<kit>/.harness/tasks/_template/` 复制）：
    - Task = 一次提交粒度的独立可验证单元；Step = 一个具体动作。
+   - 多应用任务：Task 按应用分组，标注跨应用依赖顺序（谁先谁后、谁依赖谁的接口）。
    - **每个 Step 必须带验证命令与具体预期输出**：跑不出预期 = 没做完。
      优先用引擎已有命令（`bash <kit>/harness validate --stage lint` / 单测命令），
      没有现成的就写具体命令，注意 workspace 模式下命令的执行目录。

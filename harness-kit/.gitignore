@@ -1,6 +1,6 @@
 # harness-kit 自身：配置、任务状态、经验笔记入库；大二进制证据不入库
-workspaces/*/tasks/*/evidence/*
-!workspaces/*/tasks/*/evidence/.gitkeep
+tasks/*/evidence/*
+!tasks/*/evidence/.gitkeep
 workspaces/*/context/cypress-artifacts/
 
 # 本地增强技能路由（模板见 templates/skill-routes.yaml）

@@ -3,7 +3,8 @@
 # harness — workspace 模式控制台
 # -----------------------------------------------------------------------------
 # 在 harness-kit 目录里直接注册、切换、驱动任意仓库，仓库本身零安装。
-# 每个仓库一份配置：workspaces/<alias>.conf.sh；每仓库独立的任务目录、断言锁基线。
+# 每个仓库一份配置：workspaces/<alias>.conf.sh（命令/经验/上下文）；
+# 任务是 kit 一级维度：tasks/<需求名>/（spec 不分单应用/跨应用都在这里）。
 #
 # 用法:
 #   ./harness add <alias> <repo-path>   注册仓库（生成配置/notes/e2e-context 并设为活跃）
@@ -24,6 +25,7 @@ set -euo pipefail
 
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 WS="$KIT/workspaces"
+TASKS="$KIT/tasks"
 ACTIVE_F="$WS/.active"
 ENGINE="$KIT/.harness/feedback"
 TPL="$KIT/.harness/tasks/_template"
@@ -51,7 +53,7 @@ load_env() {
   [ -n "$repo" ] && [ -d "$repo" ] || die "workspace '$a' 的仓库不存在: ${repo:-<未配置 HARNESS_REPO>}"
   export HARNESS_REPO="$repo"
   export HARNESS_CONF="$conf"
-  export HARNESS_TASKS_DIR="$WS/$a/tasks"
+  export HARNESS_TASKS_DIR="$TASKS"
   export HARNESS_LOCK_BASELINE="$WS/$a/.lock-baseline.json"
   # lock/evidence 直接调 python/脚本时也要能看到这些值
   export HARNESS_SMOKE_GLOB="${HARNESS_SMOKE_GLOB:-cypress/e2e/smoke/**/*.cy.*}"
@@ -60,7 +62,7 @@ load_env() {
   mkdir -p "$HARNESS_TASKS_DIR"
 }
 
-usage() { sed -n '2,25p' "$0" | sed 's/^# \{0,1\}//'; }
+usage() { sed -n '2,23p' "$0" | sed 's/^# \{0,1\}//'; }
 
 cmd="${1:-}"; shift || true
 case "$cmd" in
@@ -194,19 +196,19 @@ NOTES_EOF
 
   task)
     sub="${1:?用法: ./harness task new|list <name>}"; shift || true
-    a="$(require_active)"; load_env "$a"
     case "$sub" in
       new)
         name="${1:?用法: ./harness task new <name>}"
-        dst="$HARNESS_TASKS_DIR/$name"
+        dst="$TASKS/$name"
         [ -e "$dst" ] && die "任务已存在: $dst"
         mkdir -p "$dst/evidence"
         cp "$TPL/spec.md" "$TPL/plan.md" "$TPL/current.md" "$TPL/result.md" "$TPL/history.md" "$dst/"
         echo "已创建任务: $dst"
-        echo "跨文件任务：harness-spec 填 spec.md（确认到 confirmed）→ harness-plan 出 plan.md → 再动手；current.md 写当前阶段与唯一下一步；history.md 只追加。"
+        echo "标准模式（默认）：harness-spec 填 spec.md（confirmed）→ harness-plan 出 plan.md → 编码循环；多应用 spec 须覆盖全部涉及应用。"
+        echo "极简模式（仅用户显式要求）：跳过 spec/plan，current.md 记模式+需求一句话，直接定位改码；分支与 validate 保底不豁免。"
         ;;
       list)
-        ls -1 "$HARNESS_TASKS_DIR" 2>/dev/null | grep -v '^_template$' || echo "(无任务)"
+        ls -1 "$TASKS" 2>/dev/null | grep -v '^_template$' || echo "(无任务)"
         ;;
       *) die "未知子命令: task $sub" ;;
     esac

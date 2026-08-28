@@ -9,7 +9,7 @@ description: 以 Evaluator 角色对 <需求名> 做 E2E 验收（RED-first + �
 先定位模式：当前仓库根有 `.harness/config.sh`（install 模式）→ 下述路径相对仓库根；
 否则在工具集仓库（my-ai）会话（workspace 模式）→ 先 `bash harness-kit/harness current`
 确认活跃仓库，路径换成：E2E 上下文 `harness-kit/workspaces/<alias>/context/e2e-context.md`，
-Rubric 落点 `harness-kit/workspaces/<alias>/tasks/$ARGUMENTS/rubric.md`，
+Rubric 落点 `harness-kit/tasks/$ARGUMENTS/rubric.md`，
 断言锁/证据收集用 `bash harness-kit/harness lock|evidence ...`。
 
 1. 读 E2E 用例上下文拿真实入口/选择器/账号。

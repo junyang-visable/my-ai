@@ -6,7 +6,7 @@
 ## 组织方式
 
 - **一主题一文件**，文件名即主题：`<主题>.md`（如 `red-first.md`、`cypress-selector-strategy.md`）。
-- 从 `_template.md` 复制起稿；写完在文末「依据」里链接来源任务（`workspaces/<alias>/tasks/<需求名>/`），
+- 从 `_template.md` 复制起稿；写完在文末「依据」里链接来源任务（`tasks/<需求名>/`），
   让每条经验都能回溯到真实案例。
 - 经验来自 skill 收尾回写（harness-coding / harness-dev 收尾步骤）或人工复盘；
   防谎报类基础经验另见 `.harness/rubric/anti-false-reporting.md`，不在此重复。

@@ -13,7 +13,7 @@ version: 1.1.0
 
 kit 根 = 本 skill 物理目录向上 2 级（`skills/harness-change`，软链部署先 `readlink -f`）。
 兜底：`/Users/yangjun/Desktop/my-ai/harness-kit`。
-任务目录 = `workspaces/<alias>/tasks/<需求名>/`。
+任务目录 = `tasks/<需求名>/`（kit 一级维度）。
 
 ## 流程
 

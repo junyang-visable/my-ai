@@ -21,7 +21,7 @@ version: 1.1.0
 | ----------------------- | ------------------------------------------------------- | ------------------------------------------------------------ |
 | E2E 用例上下文          | `<kit>/workspaces/<alias>/context/e2e-context.md`       | `.harness/context/testing/e2e-context.md`                    |
 | Rubric 模板             | `<kit>/.harness/rubric/rubric-template.md`              | `.harness/rubric/rubric-template.md`                         |
-| 任务目录（Rubric 落点） | `<kit>/workspaces/<alias>/tasks/<需求名>/rubric.md`     | `.harness/tasks/<需求名>/rubric.md`                          |
+| 任务目录（Rubric 落点） | `<kit>/tasks/<需求名>/rubric.md`                         | `.harness/tasks/<需求名>/rubric.md`                          |
 | build 硬门禁            | `bash <kit>/harness validate --stage build`             | `bash .harness/feedback/validate.sh --stage build`           |
 | E2E 执行                | 由 `workspaces/<alias>.conf.sh` 的 HARNESS_E2E_CMD 驱动 | 由 `.harness/config.sh` 的 HARNESS_E2E_CMD 驱动              |
 | 断言锁                  | `bash <kit>/harness lock verify`                        | `python3 .harness/feedback/lock-tests.py verify`             |

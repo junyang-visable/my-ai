@@ -17,7 +17,7 @@
 | 上下文层 | 按需加载的知识          | `templates/docs/`、`.harness/context/`                                                                          |
 | 工具层   | 可复用技能/命令/钩子    | `skills/`、`commands/`（agent 通用 markdown）、`.harness/hooks/`                                                |
 | 验证层   | 机械化执法，不靠提示词  | `.harness/feedback/`（validate / lint-arch / lock-tests / collect-evidence）                                    |
-| 循环层   | 状态与续跑              | `.harness/tasks/<需求>/{spec,plan,current,result,history}.md + evidence/`（spec=边界契约，plan=可验证任务分解） |
+| 循环层   | 状态与续跑              | `tasks/<需求>/{spec,plan,current,result,history}.md + evidence/`（kit 一级维度；spec=边界契约，plan=可验证任务分解） |
 
 ## 快速开始（workspace 模式：在 kit 所在仓库直接驱动任意仓库，目标仓库零安装）
 
@@ -40,7 +40,9 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 
 > “用 harness-dev 给 my-app 加一个 XX 功能” / “harness-dev，切到 another-repo 继续 XX 任务”
 
-技能会自己定位 kit、确认活跃仓库、路由到专职技能、进编码循环、收尾沉淀经验；
+技能会自己定位 kit、判定开发模式（**标准=默认全流程**：澄清→设计文档→拆分→编码，
+支持多应用一份设计文档；**极简=显式切换**：跳过设计直接定位改码）、确认活跃仓库、
+路由到专职技能、进编码循环、收尾沉淀经验；
 实现完成后另开会话说“用 harness-testing 验收 XX”（角色信息隔离）。
 注意：目标仓库需已加入 Qoder 工作区，否则写文件会被沙箱拦。
 
@@ -48,16 +50,18 @@ $EDITOR workspaces/my-app.conf.sh    # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD /
 
 | 技能            | 角色                                                      | 何时用           |
 | --------------- | --------------------------------------------------------- | ---------------- |
-| harness-dev     | 总控/路由 + workspace 管理                                | 跨仓库开发入口   |
+| harness-dev     | 总控/路由 + workspace 管理 + 双模式判定（标准默认 / 极简显式） | 跨仓库开发入口   |
 | harness-spec    | 澄清 → spec.md（confirmed gate，可路由 grill 类技能）     | 新需求、需求模糊 |
 | harness-plan    | spec → plan.md（每步验证命令+预期输出，superpowers 风格） | spec 确认后      |
 | harness-coding  | 实现者：TDD + validate + 逐 Step 勾 plan                  | 编码             |
 | harness-testing | 验收者：独立会话，Rubric+RED-first+断言锁                 | 验收             |
 | harness-change  | 需求变更：spec 降 draft、plan 标记、重新确认              | 需求变了         |
 
-流程：模糊需求 → spec（澄清+确认）→ plan（可验证分解）→ coding（TDD+门禁）→ testing
-（独立验收）；需求变更随时走 change 把 spec 打回 draft 重新确认。开工时各技能都会先跑
-`./harness brief` 把仓库经验带进上下文。
+流程（标准模式，默认）：模糊需求 → spec（澄清+确认；多应用覆盖全部应用）→ plan
+（可验证分解，多应用按应用分组）→ coding（TDD+门禁，逐应用执行）→ testing
+（独立验收）；需求变更随时走 change 把 spec 打回 draft 重新确认。
+极简模式（对 harness-dev 显式说"极简/直接改"）：建轻任务 → 定位改码 → validate，
+跳过设计与计划。开工时各技能都会先跑 `./harness brief` 把仓库经验带进上下文。
 
 ### 增强技能路由（可选，本地配置）
 
@@ -90,7 +94,8 @@ harness-spec:
 ./harness brief <关键词>            # 开工包：契约 + 仓库 notes + 命中 playbooks + 任务列表
 ```
 
-每仓库的配置、断言锁基线、任务与证据、经验笔记都在 `workspaces/<alias>/` 下，互不干扰。
+每仓库的配置、断言锁基线、经验笔记在 `workspaces/<alias>/` 下互不干扰；
+任务与证据是 kit 一级维度，统一在 `tasks/<需求名>/`（不分单应用/跨应用）。
 
 ## 经验沉淀（工具集的核心价值）
 
@@ -98,7 +103,7 @@ harness-spec:
 | ---------- | ---------------------------------------------- | ---------------------------------------------------- |
 | 仓库专属   | `workspaces/<alias>/notes.md`                  | 该仓库的栈、命令实测、坑与约定（add 时生成）         |
 | 跨仓库通用 | `playbooks/<主题>.md`                          | 换个仓库仍成立的方法论，一主题一文件，可回溯来源任务 |
-| 任务过程   | `workspaces/<alias>/tasks/<需求名>/history.md` | 只追加的过程记录                                     |
+| 任务过程   | `tasks/<需求名>/history.md`                    | 只追加的过程记录                                     |
 
 技能（harness-dev / harness-coding / harness-testing）收尾都会回写这三层。
 与 agent 内置 memory 的分工：memory 按会话项目隔离、开发其他仓库时读不到；
@@ -130,7 +135,8 @@ harness-spec:
 ```
 harness-kit/
 ├── harness                    workspace 模式控制台（add/use/link/validate/lock/evidence/task/...）
-├── workspaces/                每仓库一份：conf.sh 配置 + notes.md 经验 + context/ + 任务/基线/证据
+├── tasks/                     任务一级维度：<需求名>/{spec,plan,current,result,history}.md + evidence/（gitignore）
+├── workspaces/                每仓库一份：conf.sh 配置 + notes.md 经验 + context/ + 断言锁基线
 ├── install.sh                 可选：把 harness 装进仓库（引擎软链 / 配置拷贝）
 ├── skill-routes.local.yaml      本地增强技能路由（gitignore；格式模板见 templates/skill-routes.yaml）
 ├── playbooks/                 跨仓库通用经验库（一主题一文件，可回溯来源任务）
@@ -151,5 +157,7 @@ harness-kit/
 
 ## 边界
 
-不建议把 harness 变成负担：单文件 bugfix / 加日志 / 改文案直接对话改，别走全套。
-门禁分级（阻断/警告/提示）就是为了避免「所有检查都阻断」引发的绕过冲动。
+双模式就是负担出口：标准模式（默认）全流程不因任务小而打折；琐碎改动
+（单文件 bugfix / 加日志 / 改文案）对 harness-dev **显式说"极简模式"**跳过设计直接改，
+但建分支与 validate 保底不豁免。门禁分级（阻断/警告/提示）就是为了避免
+「所有检查都阻断」引发的绕过冲动。

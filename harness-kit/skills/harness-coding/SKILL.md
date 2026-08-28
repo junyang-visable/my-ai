@@ -25,7 +25,7 @@ version: 1.2.0
 | 动作       | workspace 模式（kit 会话）                    | install 模式（目标仓库内）                                   |
 | ---------- | --------------------------------------------- | ------------------------------------------------------------ |
 | 全套验证   | `bash <kit>/harness validate [--strict]`      | `bash .harness/feedback/validate.sh [--strict]`              |
-| 任务目录   | `<kit>/workspaces/<alias>/tasks/<需求名>/`    | `.harness/tasks/<需求名>/`                                   |
+| 任务目录   | `<kit>/tasks/<需求名>/`                        | `.harness/tasks/<需求名>/`                                   |
 | 断言锁     | `bash <kit>/harness lock verify`              | `python3 .harness/feedback/lock-tests.py verify`             |
 | 收失败证据 | `bash <kit>/harness evidence <需求名> <类别>` | `bash .harness/feedback/collect-evidence.sh <需求名> <类别>` |
 | 证据模板   | `<kit>/.harness/rubric/evidence-template.md`  | `.harness/rubric/evidence-template.md`                       |
@@ -34,10 +34,11 @@ version: 1.2.0
 
 1. install 模式读目标仓库的 `AGENTS.md`（契约层）；workspace 模式贴
    `bash <kit>/harness context` 的输出作为契约。
-2. 判断走不走全套（11020656025）：跨 3 文件以上 / 异步并发状态机 / 外部系统集成 → 全套；
-   单文件 bugfix / 加日志 / 改文案 → 直接改。
-3. 跨文件/跨模块任务**必须先有 confirmed 的 spec.md**（状态行 = `confirmed`）：
-   缺失 → 先走 harness-spec；是 draft → 请用户确认后才开工。单文件小改可跳过。
+2. 模式：读任务 current.md 的「模式」字段——「极简」（用户显式指定）跳过 spec/plan 直接改；
+   「标准」或未标注按全套纪律。无任务上下文被直接调用时默认标准模式，
+   用户显式说"极简 / 直接改"才跳过（判模式见 harness-dev §3）。
+3. 标准模式跨文件/跨模块任务**必须先有 confirmed 的 spec.md**（状态行 = `confirmed`）：
+   缺失 → 先走 harness-spec；是 draft → 请用户确认后才开工。极简模式无此要求。
 4. 已有任务续跑时先读 `spec.md`（含状态与变更记录）与 `current.md`；开工前跑
    `bash <kit>/harness brief <需求关键词>` 把该仓库 notes 与命中 playbooks 带进上下文。
 5. 有 `plan.md` 则逐 Task/Step 执行并勾选：每步跑其验证命令，输出与预期不符 = 没做完；
