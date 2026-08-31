@@ -68,8 +68,10 @@ load_env() {
   export HARNESS_CONF="$pdata/config.sh"
   export HARNESS_TASKS_DIR="$pdata/tasks"
   export HARNESS_LOCK_BASELINE="$pdata/.lock-baseline.json"
-  # lock/evidence scripts also need these when invoked directly
-  export HARNESS_SMOKE_GLOB="${HARNESS_SMOKE_GLOB:-cypress/e2e/smoke/**/*.cy.*}"
+  # lock/evidence scripts also need these when invoked directly.
+  # ':'-less default: an explicitly emptied SMOKE_GLOB in config.sh means
+  # "no smoke set" (doctor warns); only an unset var gets the cypress default.
+  export HARNESS_SMOKE_GLOB="${HARNESS_SMOKE_GLOB-cypress/e2e/smoke/**/*.cy.*}"
   export HARNESS_E2E_CMD="${HARNESS_E2E_CMD:-}"
   export HARNESS_EVIDENCE_DIR="${HARNESS_EVIDENCE_DIR:-}"
   mkdir -p "$HARNESS_TASKS_DIR"
@@ -308,7 +310,7 @@ NOTES_EOF
       dir="${g%/*}"; [ "$dir" = "$g" ] && dir="."
       dir="${dir%%\*\**}"                  # strip ** and beyond, keep the leading dir
       dir="${dir%/}"; [ -z "$dir" ] && dir="."
-      cnt="$(find "$HARNESS_REPO/$dir" -type f -name "$base" 2>/dev/null | wc -l | tr -d ' ')"
+      cnt="$(find "$HARNESS_REPO/$dir" -type f -name "$base" 2>/dev/null | wc -l | tr -d ' ' || true)"
       echo "smoke:    $g → $cnt file(s)"; n=$((n+cnt))
     done
     [ "$n" -eq 0 ] && echo "${c_red}!${c_rst} smoke set is empty: the assertion lock has nothing to protect yet; add cases under cypress/e2e/smoke/"
