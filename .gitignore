@@ -1,3 +1,5 @@
 .superpowers
 v-accio
-harness-data/
+# knowledge-base: KB docs are tracked; local-only harness artifacts stay out
+knowledge-base/*/.lock-baseline.json
+knowledge-base/*/tasks/*/evidence/

@@ -17,7 +17,8 @@ kit root = two levels up from this skill's physical dir (`skills/harness-spec`;
 with symlinked deployment, `readlink -f` to resolve the real path first).
 Fallback: `/Users/yangjun/Desktop/my-ai/harness-kit`.
 Confirm the target repo with `bash <kit>/harness current`; the task dir is
-`<repo>/docs/harness-kit/tasks/<task>/` (install mode: `<repo>/.harness/tasks/...`).
+`<kb>/<alias>/tasks/<task>/` (`<kb>` = knowledge-base root, see harness-dev §4;
+install mode: `<repo>/.harness/tasks/...`).
 
 ## Flow
 

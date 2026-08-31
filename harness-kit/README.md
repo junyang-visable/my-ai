@@ -9,8 +9,9 @@ half of the "model capability × environment capability" equation.
 > Positioning: a **personal development toolkit**. Three pillars:
 >
 > 1. **Knowledge that compounds** — every task leaves notes, playbooks, and history behind.
->    Repo-specific knowledge lives in the repo (`docs/harness-kit/`); cross-repo methodology
->    lives in the kit (`playbooks/`). Your work writes your own best practices.
+>    Per-project knowledge lives in your central knowledge base (`knowledge-base/<project>/`);
+>    cross-repo methodology lives in the kit (`playbooks/`). Your work writes your own
+>    best practices.
 > 2. **Skill orchestration** — bring your favorite skills. Stage-keyed local routing
 >    (`skill-routes.local.yaml`) plugs grill/diagnosis/design skills into the workflow.
 > 3. **A harness loop with teeth** — clarify → design doc → verifiable plan → TDD coding →
@@ -19,21 +20,25 @@ half of the "model capability × environment capability" equation.
 ## Data model
 
 ```
-<your repo>/docs/harness-kit/     ← harness-generated data for THAT repo (committable)
-├── config.sh                     # the only file to adapt per stack (commands)
-├── notes.md                      # repo stack, verified commands, pitfalls
-├── context/e2e-context.md        # E2E case context (entries/selectors/accounts)
-├── tasks/<task>/                 # spec / plan / current / result / history + evidence/
-└── .lock-baseline.json           # assertion-lock baseline
+<kb>/                              ← your central knowledge base (one tree per project)
+├── <alias>/                       ← per-project data (committable, follows YOU not the repo)
+│   ├── config.sh                  # that repo's commands (the only file to adapt per stack)
+│   ├── notes.md                   # repo stack, verified commands, pitfalls
+│   ├── context/e2e-context.md     # E2E case context (entries/selectors/accounts)
+│   ├── tasks/<task>/              # spec / plan / current / result / history + evidence/
+│   └── .lock-baseline.json        # assertion-lock baseline
+└── (your own topic docs…)         # the KB is yours — top-level notes coexist freely
 
-harness-kit/                      ← pure tool (this repo)
-├── workspaces/<alias>.conf.sh    # thin registry: repo path (+ optional env defaults)
-├── playbooks/                    # cross-repo methodology (your distilled practices)
-└── skill-routes.local.yaml       # local skill-routing config (gitignored)
+harness-kit/                       ← pure tool (this repo)
+├── workspaces/<alias>.conf.sh     # thin registry: repo path (+ optional env defaults)
+├── playbooks/                     # cross-repo methodology (your distilled practices)
+└── skill-routes.local.yaml        # local skill-routing config (gitignored)
 ```
 
-Project knowledge follows the project; methodology follows the toolkit. Target repos
-need zero installation — the kit drives them from outside (workspace mode).
+`<kb>` defaults to the kit's sibling `knowledge-base/` dir; relocate it via
+`HARNESS_KB_HOME`. Target repos need zero installation and receive zero
+writes — the kit drives them from outside (workspace mode), while all
+knowledge accumulates centrally in your KB.
 
 ## Five layers
 
@@ -43,7 +48,7 @@ need zero installation — the kit drives them from outside (workspace mode).
 | Context        | knowledge loaded on demand     | `templates/docs/`, `.harness/context/`                                                                            |
 | Tooling        | reusable skills/commands/hooks | `skills/`, `commands/`, `.harness/hooks/`                                                                         |
 | Validation     | mechanical enforcement         | `.harness/feedback/` (validate / lint-arch / lock-tests / collect-evidence)                                       |
-| Loop           | state & resume                 | `<repo>/docs/harness-kit/tasks/<task>/{spec,plan,current,result,history}.md + evidence/` (spec = boundary contract, plan = verifiable breakdown) |
+| Loop           | state & resume                 | `<kb>/<alias>/tasks/<task>/{spec,plan,current,result,history}.md + evidence/` (spec = boundary contract, plan = verifiable breakdown) |
 
 ## Quick start (workspace mode: drive any repo from the kit's repo; targets need zero install)
 
@@ -51,11 +56,11 @@ need zero installation — the kit drives them from outside (workspace mode).
 # 0) once: symlink kit skills into this repo's skills dir (relative links survive clones)
 ./harness link
 
-# 1) register a repo — creates its docs/harness-kit/ (config + notes + e2e context)
+# 1) register a repo — creates its KB tree <kb>/my-app/ (config + notes + e2e context)
 ./harness add my-app /path/to/your-repo
 
 # 2) fill in that repo's commands (per stack)
-$EDITOR /path/to/your-repo/docs/harness-kit/config.sh   # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD / E2E_CMD ...
+$EDITOR knowledge-base/my-app/config.sh   # HARNESS_LINT_CMD / TEST_CMD / BUILD_CMD / E2E_CMD ...
 
 # 3) prove the guardrails are real, then run the full pipeline
 ./harness validate selfcheck
@@ -121,7 +126,7 @@ CLI commands all act on the active repo:
 ./harness validate --strict         # full pipeline, three gate levels (blocking/warning/info)
 ./harness lock update               # record baseline once the smoke set is stable; verify detects tampering
 ./harness evidence task api         # collect evidence after failure; produces the next fix prompt
-./harness task new my-task          # create a task dir in the active repo's docs/harness-kit/tasks/
+./harness task new my-task          # create a task dir under <kb>/<active-repo>/tasks/
 ./harness context                   # print the contract text; paste it into agent sessions
 ./harness brief <keywords>          # kickoff pack: contract + repo notes + matching playbooks + tasks
 ```
@@ -130,20 +135,21 @@ CLI commands all act on the active repo:
 
 | Layer        | Location                                       | What goes there                                                         |
 | ------------ | ---------------------------------------------- | ------------------------------------------------------------------------ |
-| Repo-specific | `<repo>/docs/harness-kit/notes.md`            | that repo's stack, verified commands, pitfalls, conventions              |
+| Project-specific | `<kb>/<alias>/notes.md`                    | that repo's stack, verified commands, pitfalls, conventions              |
 | Cross-repo   | `playbooks/<topic>.md`                        | methodology that holds in any repo; one topic per file, traceable to tasks |
-| Task-level   | `<repo>/docs/harness-kit/tasks/<task>/history.md` | append-only process record                                           |
+| Task-level   | `<kb>/<alias>/tasks/<task>/history.md`        | append-only process record                                               |
 
 The skills (harness-dev / harness-coding / harness-testing) write back to all three
 layers at wrap-up. Division of labor with agent built-in memory: memory is isolated per
 session-project and unreadable when developing other repos; this kit is plain files, in
-git, following the repo — which is exactly why the knowledge lives here.
+git, following you across all your projects — which is exactly why the knowledge lives
+in your central KB.
 
 ### Optional: install mode
 
 If you want a repo to carry its own harness (agents read AGENTS.md on entering), run
-`./install.sh <repo>`. Both modes coexist; workspace mode writes nothing into the target
-repo except `docs/harness-kit/`. Commands land in `.qoder/commands/` (Claude Code copies
+`./install.sh <repo>`. Both modes coexist; workspace mode writes nothing into the
+target repo at all. Commands land in `.qoder/commands/` (Claude Code copies
 to `.claude/commands/`; the files are universal); the post-edit hook needs wiring in your
 CLI's hook config: `bash .harness/hooks/post-edit.sh <file>`.
 
@@ -159,7 +165,7 @@ CLI's hook config: `bash .harness/hooks/post-edit.sh <file>`.
 
 ## How "stack-agnostic" works
 
-Every script reads only the command variables in the repo's `docs/harness-kit/config.sh`
+Every script reads only the command variables in the project's `<kb>/<alias>/config.sh`
 (install mode: `.harness/config.sh`); empty stages are skipped automatically. Switching
 stacks means editing config, never the engine. Skills and commands are agent-universal
 markdown (Qoder / Claude Code both read SKILL.md); the engine itself is pure shell +
@@ -179,7 +185,7 @@ harness-kit/
 │   ├── skill-routes.yaml
 │   └── docs/{ARCHITECTURE,DEVELOPMENT}.md
 ├── .harness/
-│   ├── config.sh              default wiring point (workspace mode: overridden by the repo's docs/harness-kit/config.sh)
+│   ├── config.sh              default wiring point (workspace mode: overridden by <kb>/<alias>/config.sh)
 │   ├── feedback/              validate / lint-arch / lock-tests / collect-evidence
 │   ├── hooks/post-edit.sh     incremental post-edit quick-check
 │   ├── context/testing/       E2E case-context template

@@ -25,7 +25,7 @@ to specific test cases.
 | Action      | workspace mode (kit session)                   | install mode (inside target repo)                          |
 | ----------- | ---------------------------------------------- | ----------------------------------------------------------- |
 | Full validation | `bash <kit>/harness validate [--strict]`   | `bash .harness/feedback/validate.sh [--strict]`              |
-| Task dir    | `<repo>/docs/harness-kit/tasks/<task>/`         | `.harness/tasks/<task>/`                                     |
+| Task dir    | `<kb>/<alias>/tasks/<task>/` (see harness-dev §4 for `<kb>`) | `.harness/tasks/<task>/`                                     |
 | Assertion lock | `bash <kit>/harness lock verify`            | `python3 .harness/feedback/lock-tests.py verify`             |
 | Failure evidence | `bash <kit>/harness evidence <task> <kind>` | `bash .harness/feedback/collect-evidence.sh <task> <kind>`   |
 | Evidence template | `<kit>/.harness/rubric/evidence-template.md` | `.harness/rubric/evidence-template.md`                      |
@@ -61,7 +61,7 @@ No config or skill unavailable → silently use the default logic: no errors, no
 - File completion evidence per the template (see the Step 0 table): numbers must be reproducible; honestly declare uncovered scope.
 - Update the task's `current.md` (next step) and `history.md` (append one line).
 - **Write lessons back** (in workspace mode lessons live in the kit/its repos — this is the toolkit's core value):
-  - repo-specific pitfalls / verified commands / conventions → the repo's `docs/harness-kit/notes.md`
+  - repo-specific pitfalls / verified commands / conventions → `<kb>/<alias>/notes.md`
   - practices that hold across repos → `<kit>/playbooks/<topic>.md` (start from `_template.md`)
 
 ## Three-way exit

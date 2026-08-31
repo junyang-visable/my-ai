@@ -11,8 +11,8 @@ First locate the mode: repo root has `.harness/config.sh` (install mode) → the
 paths below are relative to the repo root; otherwise, in the toolkit repo's
 session (workspace mode) → first `bash harness-kit/harness current` to confirm
 the active repo, and the paths become: E2E context
-`harness-kit/../../<repo>/docs/harness-kit/context/e2e-context.md`,
-Rubric location `<repo>/docs/harness-kit/tasks/$ARGUMENTS/rubric.md`,
+`knowledge-base/<active-repo>/context/e2e-context.md`,
+Rubric location `knowledge-base/<active-repo>/tasks/$ARGUMENTS/rubric.md`,
 assertion lock / evidence collection via `bash harness-kit/harness lock|evidence ...`.
 
 1. Read the E2E case context for real entries/selectors/accounts.

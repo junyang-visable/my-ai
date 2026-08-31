@@ -49,13 +49,17 @@ Below, `<kit>` refers to it.
 
 1. Read the target repo's `package.json` / `Makefile` / `pyproject.toml` etc.
    and **infer** the lint / typecheck / build / test commands; write them into
-   the repo's `docs/harness-kit/config.sh` (created by `harness add`). Tell the
-   user the inference basis and ask for confirmation (leave uncertain ones
-   empty — empty stages are skipped automatically).
+   the project's knowledge-base config `<kb>/<alias>/config.sh` (created by
+   `harness add`). Tell the user the inference basis and ask for confirmation
+   (leave uncertain ones empty — empty stages are skipped automatically).
 2. Run `bash <kit>/harness doctor` for a health check, and
    `bash <kit>/harness validate selfcheck` to prove the guardrails are real.
-3. Jot the repo's stack and pitfalls into `docs/harness-kit/notes.md`; add
-   `docs/harness-kit/context/e2e-context.md` when E2E needs arise.
+3. Jot the repo's stack and pitfalls into `<kb>/<alias>/notes.md`; add
+   `<kb>/<alias>/context/e2e-context.md` when E2E needs arise.
+
+`<kb>` = the knowledge-base root: the kit's sibling `knowledge-base/` dir by
+default, overridable via `HARNESS_KB_HOME`. One tree per project alias; the
+target repo itself is never written.
 
 ## 5. Tasks and write permissions
 
@@ -63,11 +67,11 @@ Below, `<kit>` refers to it.
   current Qoder workspace, file writes get blocked by the sandbox. Ask the
   user to add the repo to the workspace (Add Folder to Workspace) before
   starting — don't trial-and-error.
-- Harness-generated data lives **in the target repo** under
-  `docs/harness-kit/`. Create tasks with `bash <kit>/harness task new <name>`
-  (lands in the active repo's `docs/harness-kit/tasks/<name>/`). If a task
-  with the same name exists, read its `current.md` (mode + stage + single
-  next step) and resume — never start a parallel one.
+- Harness-generated data lives **in the knowledge base** under
+  `<kb>/<alias>/` — never inside the target repo. Create tasks with
+  `bash <kit>/harness task new <name>` (lands in `<kb>/<alias>/tasks/<name>/`).
+  If a task with the same name exists, read its `current.md` (mode + stage +
+  single next step) and resume — never start a parallel one.
 - **Kickoff pack**: `bash <kit>/harness brief <keywords>` — contract, the
   active repo's notes, and matching playbooks in one shot. Required reading
   before starting work.
@@ -82,7 +86,7 @@ Below, `<kit>` refers to it.
 ### Standard mode (default)
 
 1. **Clarify & design**: route to harness-spec, which produces
-   `docs/harness-kit/tasks/<name>/spec.md` (this *is* the design doc).
+   `<kb>/<alias>/tasks/<name>/spec.md` (this *is* the design doc).
    - Single app: the spec covers that app.
    - **Multi-app: the spec must cover every involved app** — the app list,
      per-app changes/boundaries, and cross-app contracts (interfaces /
@@ -95,7 +99,7 @@ Below, `<kit>` refers to it.
    to switch the active repo, then harness-coding executes spec+plan Task by
    Task, checking items off.
 5. **Wrap up**: per-app validate + evidence; write lessons back to each
-   repo's `docs/harness-kit/notes.md`.
+   app's `<kb>/<app>/notes.md`.
 
 ### Minimal mode (explicit user request only)
 
@@ -171,7 +175,7 @@ git checkout --no-track -b <branch> origin/<default>
    (reproducible numbers; honestly declare uncovered scope; minimal mode may
    compress to a one-line validate summary).
 3. **Write lessons back** (this is the toolkit's whole value — never skip):
-   - repo-specific pitfalls / verified commands / conventions → the repo's `docs/harness-kit/notes.md`
+   - repo-specific pitfalls / verified commands / conventions → `<kb>/<alias>/notes.md`
    - practices that hold across repos → `<kit>/playbooks/<topic>.md` (start from `_template.md`)
    - task-level detail → the task's `history.md`
 4. Remind the user: acceptance must happen in a **separate session** using the

@@ -1,6 +1,6 @@
 # playbooks/ — cross-repo methodology library
 
-> Division of labor with `<repo>/docs/harness-kit/notes.md` (repo-specific):
+> Division of labor with `<kb>/<alias>/notes.md` (project-specific):
 > **only conclusions that hold in a different repo belong here**. A repo's
 > commands, selectors, environment quirks → notes.md; transferable methodology
 > (patterns, anti-patterns, decision heuristics) → this directory.

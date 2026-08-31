@@ -53,11 +53,11 @@ harness_incremental_cmd() {
   esac
 }
 
-# --- workspace mode: load the repo-specific config last ---------------------------
-# The harness CLI points HARNESS_CONF at the target repo's
-# docs/harness-kit/config.sh; loading it at the end of this file lets its
-# assignments override the defaults above. In install mode that variable is
-# empty and this block is a no-op.
+# --- workspace mode: load the project's knowledge-base config last ----------------
+# The harness CLI points HARNESS_CONF at the project's <kb>/<alias>/config.sh;
+# loading it at the end of this file lets its assignments override the
+# defaults above. In install mode that variable is empty and this block is a
+# no-op.
 if [ -n "${HARNESS_CONF:-}" ] && [ -f "${HARNESS_CONF:-}" ]; then
   # shellcheck source=/dev/null
   source "$HARNESS_CONF"

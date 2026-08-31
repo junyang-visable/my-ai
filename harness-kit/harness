@@ -3,13 +3,16 @@
 # harness — workspace-mode console for harness-kit
 # -----------------------------------------------------------------------------
 # Register, switch, and drive any repo from the kit directory; target repos
-# need zero installation. Data model: harness-generated data (commands, notes,
-# tasks, evidence) lives in EACH repo under docs/harness-kit/; the kit keeps
-# only a thin repo registry (workspaces/<alias>.conf.sh = repo path), the
-# engine/skills, and cross-project playbooks.
+# need zero installation and receive zero writes. Data model: per-project
+# harness data (commands, notes, tasks, evidence) lives in a central
+# knowledge base, one tree per project: <kb>/<alias>/{config.sh, notes.md,
+# context/, tasks/}. <kb> defaults to the kit's sibling "knowledge-base" dir
+# and can be relocated via HARNESS_KB_HOME (useful when distributing the kit).
+# The kit itself keeps only a thin repo registry (workspaces/<alias>.conf.sh =
+# repo path), the engine/skills, and cross-project playbooks.
 #
 # Usage:
-#   ./harness add <alias> <repo-path>   Register a repo (init docs/harness-kit/) and activate it
+#   ./harness add <alias> <repo-path>   Register a repo (init <kb>/<alias>/) and activate it
 #   ./harness link [skills-dir]         Symlink kit skills into a skills dir (default ../.agents/skills)
 #   ./harness use <alias>               Switch the active repo
 #   ./harness list                      List registered workspaces
@@ -17,7 +20,7 @@
 #   ./harness validate [selfcheck|--strict|--stage X]   Run the unified validation pipeline
 #   ./harness lock <update|verify|list> Assertion lock (scope = active repo's smoke set)
 #   ./harness evidence <task> [layout|api|render|generic]   Collect failure evidence
-#   ./harness task new <name>           Create a task dir (spec/plan/current/result/history/evidence) in the active repo
+#   ./harness task new <name>           Create a task dir (spec/plan/current/result/history/evidence) under <kb>/<alias>/tasks/
 #   ./harness task list                 List tasks of the active repo
 #   ./harness context                   Print the contract text (paste into agent sessions or save as AGENTS.md)
 #   ./harness brief [keywords...]       Kickoff pack: contract + repo notes + matching playbooks + task list
@@ -26,6 +29,7 @@
 set -euo pipefail
 
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+KB="${HARNESS_KB_HOME:-$(cd "$KIT/.." && pwd)/knowledge-base}"
 WS="$KIT/workspaces"
 ACTIVE_F="$WS/.active"
 ENGINE="$KIT/.harness/feedback"
@@ -52,9 +56,10 @@ load_env() {
   source "$conf"
   repo="${HARNESS_REPO:-}"
   [ -n "$repo" ] && [ -d "$repo" ] || die "workspace '$a' repo not found: ${repo:-<HARNESS_REPO unset>}"
-  pdata="$repo/docs/harness-kit"
-  # Project-side config carries the commands; source it so doctor/brief see it,
-  # and export HARNESS_CONF so engine scripts re-source it over kit defaults.
+  pdata="$KB/$a"
+  # The project's knowledge-base config carries the commands; source it so
+  # doctor/brief see it, and export HARNESS_CONF so engine scripts re-source
+  # it over kit defaults.
   if [ -f "$pdata/config.sh" ]; then
     # shellcheck source=/dev/null
     source "$pdata/config.sh"
@@ -85,16 +90,17 @@ case "$cmd" in
     if [ -e "$conf" ]; then die "workspace already exists: $alias ($conf)"; fi
     cat > "$conf" <<EOF
 # workspace: $alias — thin registry (repo path + optional env defaults).
-# Commands, notes, and tasks live in the repo itself at docs/harness-kit/.
+# Commands, notes, and tasks live in the knowledge base at $KB/$alias/.
 HARNESS_REPO="$repo"
 EOF
 
-    # Project-side data home: commands + notes + E2E context (skip if already initialized)
-    pdata="$repo/docs/harness-kit"
+    # Knowledge-base data home for this project: commands + notes + E2E context
+    # (skip if already initialized; the target repo itself is never written)
+    pdata="$KB/$alias"
     if [ -e "$pdata" ]; then
-      echo "  docs/harness-kit/ already exists in the repo — keeping it as is"
+      echo "  $pdata already exists — keeping it as is"
     else
-      mkdir -p "$pdata/context"
+      mkdir -p "$pdata/context" "$pdata/tasks"
       cat > "$pdata/config.sh" <<'EOF'
 # harness-kit project config — the ONLY file to adapt per stack.
 # Commands run via `bash -c`; empty commands are skipped with an info line.
@@ -115,7 +121,7 @@ EOF
 # $alias — repo notes
 
 > Stack, verified commands, pitfalls, and conventions for this repo.
-> Task-level history lives in docs/harness-kit/tasks/<task>/history.md;
+> Task-level history lives in tasks/<task>/history.md under this dir;
 > cross-repo lessons graduate to the kit's playbooks/.
 
 ## Stack & verified commands
@@ -242,7 +248,7 @@ NOTES_EOF
     echo "- on completion, file evidence per harness-kit/.harness/rubric/evidence-template.md"
     echo "- red lines: never delete assertions / change test expectations / @ts-ignore your way to green; build cannot be skipped."
     echo "- smoke tests are protected by the assertion lock: ./harness lock verify"
-    echo "- repo-specific notes and E2E context: docs/harness-kit/notes.md and docs/harness-kit/context/e2e-context.md"
+    echo "- repo-specific notes and E2E context: $KB/$a/notes.md and $KB/$a/context/e2e-context.md"
     echo
     echo "${c_dim}Full contract layer: templates/AGENTS.md. To have agents read it every session, copy it to the repo root as AGENTS.md.${c_rst}"
     ;;
@@ -255,10 +261,10 @@ NOTES_EOF
     echo "red lines: never delete assertions / change test expectations / @ts-ignore to green; build cannot be skipped."
     echo "evidence template: $KIT/.harness/rubric/evidence-template.md"
     echo
-    echo "== repo notes (docs/harness-kit/notes.md, full text) =="
-    cat "$HARNESS_REPO/docs/harness-kit/notes.md" 2>/dev/null || echo "(missing)"
+    echo "== repo notes ($KB/$a/notes.md, full text) =="
+    cat "$KB/$a/notes.md" 2>/dev/null || echo "(missing)"
     echo
-    echo "== E2E context: docs/harness-kit/context/e2e-context.md (read before acceptance) =="
+    echo "== E2E context: $KB/$a/context/e2e-context.md (read before acceptance) =="
     echo
     echo "== playbooks (${*:-list all}) =="
     if [ "$#" -eq 0 ]; then

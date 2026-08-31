@@ -21,11 +21,11 @@ you judge from the requirement + Rubric + run results + evidence only.
 
 | Action                       | workspace mode (kit session)                             | install mode (inside target repo)                          |
 | ---------------------------- | --------------------------------------------------------- | ------------------------------------------------------------ |
-| E2E case context             | `<repo>/docs/harness-kit/context/e2e-context.md`          | `.harness/context/testing/e2e-context.md`                    |
+| E2E case context             | `<kb>/<alias>/context/e2e-context.md` (see harness-dev §4 for `<kb>`) | `.harness/context/testing/e2e-context.md`              |
 | Rubric template              | `<kit>/.harness/rubric/rubric-template.md`                | `.harness/rubric/rubric-template.md`                         |
-| Task dir (Rubric location)   | `<repo>/docs/harness-kit/tasks/<task>/rubric.md`          | `.harness/tasks/<task>/rubric.md`                            |
+| Task dir (Rubric location)   | `<kb>/<alias>/tasks/<task>/rubric.md`                     | `.harness/tasks/<task>/rubric.md`                            |
 | build hard gate              | `bash <kit>/harness validate --stage build`               | `bash .harness/feedback/validate.sh --stage build`           |
-| E2E execution                | driven by HARNESS_E2E_CMD in the repo's docs/harness-kit/config.sh | driven by HARNESS_E2E_CMD in `.harness/config.sh`      |
+| E2E execution                | driven by HARNESS_E2E_CMD in `<kb>/<alias>/config.sh`     | driven by HARNESS_E2E_CMD in `.harness/config.sh`            |
 | Assertion lock               | `bash <kit>/harness lock verify`                         | `python3 .harness/feedback/lock-tests.py verify`             |
 | Failure evidence             | `bash <kit>/harness evidence <task> <kind>`              | `bash .harness/feedback/collect-evidence.sh <task> <kind>`   |
 
@@ -72,5 +72,5 @@ When a control tree exists, don't go pure-visual.
 - The same error 3 rounds in a row → `needs_human`, produce an ESCALATED handoff.
 - Prefer a fast, single-step-focused normal model for E2E execution; deep-thinking models
   overthink and slow things down.
-- Write verdicts and case-hardening lessons back: repo-specific → the repo's
-  `docs/harness-kit/notes.md` (workspace mode); cross-repo → `<kit>/playbooks/<topic>.md`.
+- Write verdicts and case-hardening lessons back: repo-specific →
+  `<kb>/<alias>/notes.md` (workspace mode); cross-repo → `<kit>/playbooks/<topic>.md`.

@@ -15,7 +15,8 @@ work must now change" for the user to decide.
 kit root = two levels up from this skill's physical dir (`skills/harness-change`;
 with symlinked deployment, `readlink -f` to resolve the real path first).
 Fallback: `/Users/yangjun/Desktop/my-ai/harness-kit`.
-Task dir = `<repo>/docs/harness-kit/tasks/<task>/` (kit holds no task data itself).
+Task dir = `<kb>/<alias>/tasks/<task>/` (`<kb>` = knowledge-base root; see
+harness-dev §4 — the kit holds no task data itself).
 
 ## Flow
 
