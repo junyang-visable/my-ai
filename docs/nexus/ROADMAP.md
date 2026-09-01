@@ -1,16 +1,16 @@
 # Nexus 项目 Roadmap
 
-> 状态：持续更新 · 版本 v0.7 · 最后更新 2026-08-31 · 已收录条目：5
+> 状态：持续更新 · 版本 v0.9 · 最后更新 2026-09-01 · 已收录条目：5
 
 ## 概览
 
-Nexus 项目 9 月首发需求为 **WhatsApp Integration**：9 月 7 日（周一）进入开发，9 月 22 日（周二）release，全程 16 天。**AI Lead Enrichment** 前端开发 9 月 14 日 ~ 9 月 18 日，联调 9 月 21 日 ~ 25 日，10 月 8 日提测、10 月 15 日 UAT、10 月 20 日发布。**GTM account** 排期尚未确定，预期 10 月 1 日（周四）发布，各节点待排期确认后补入。**BV Process** 前端开发 10 月 8 日 ~ 10 日（3 天，含周六），测试 / 发布时间待定。存量修复项目 **fixes for existing** 自 10 月起投入人力，9 月不占用资源。其余需求排期待补充，将陆续追加至本文档。
+Nexus 项目 9 月首发需求为 **WhatsApp Integration**：9 月 7 日（周一）进入开发，9 月 22 日（周二）release，全程 16 天。**AI Lead Enrichment** 前端开发 9 月 14 日 ~ 9 月 18 日，联调 9 月 21 日 ~ 25 日，10 月 8 日提测、10 月 15 日 UAT、10 月 20 日发布。**GTM account** 开发暂定 9 月 14 日 ~ 16 日（3 天），预期 10 月 1 日（周四）发布，联调 / 提测 / UAT 节点待排期确认后补入。**BV Process** 前端开发 10 月 8 日 ~ 10 日（3 天，含周六），测试 / 发布时间待定。存量修复项目 **fixes for existing** 自 10 月起投入人力，9 月不占用资源。其余需求排期待补充，将陆续追加至本文档。
 
 ## 时间线总览
 
 ```mermaid
 gantt
-    title Nexus 排期总览（2026-09 ~ 2026-10 · v0.4）
+    title Nexus 排期总览（2026-09 ~ 2026-10 · v0.8）
     dateFormat YYYY-MM-DD
     axisFormat %m-%d
     todayMarker off
@@ -21,6 +21,7 @@ gantt
     UAT     :milestone, 2026-09-17, 0d
     Release :milestone, 2026-09-22, 0d
     section GTM account
+    开发    :2026-09-14, 3d
     预期发布 :milestone, 2026-10-01, 0d
     section AI Lead Enrichment
     开发    :2026-09-14, 5d
@@ -34,7 +35,7 @@ gantt
     存量修复 :2026-10-01, 31d
 ```
 
-读图提示：WhatsApp Integration 的五个节点集中在 9 月 7 日至 22 日；AI Lead Enrichment 开发窗口 9.14 ~ 9.18（与 WhatsApp Integration 提测 / UAT 期重叠），10 月三个节点各隔一周；GTM account 排期未定，图中仅标出预期 10-01 发布节点；BV Process 开发窗口 10.8 ~ 10.10（3 天，末天为周六），测试 / 发布待定；fixes for existing 以 10-01 为示意起点，结束日期待需求范围明确后更新。
+读图提示：WhatsApp Integration 的五个节点集中在 9 月 7 日至 22 日；AI Lead Enrichment 开发窗口 9.14 ~ 9.18（与 WhatsApp Integration 提测 / UAT 期重叠），10 月三个节点各隔一周；GTM account 开发暂定 9.14 ~ 9.16，图中仅标出预期 10-01 发布节点；BV Process 开发窗口 10.8 ~ 10.10（3 天，末天为周六），测试 / 发布待定；fixes for existing 以 10-01 为示意起点，结束日期待需求范围明确后更新。
 
 ## 里程碑一览
 
@@ -43,6 +44,7 @@ gantt
 | 2026-09-07 ~ 09-08 | 周一 ~ 周二 | WhatsApp Integration | 开发 |
 | 2026-09-09 ~ 09-11 | 周三 ~ 周五 | WhatsApp Integration | 联调 |
 | 2026-09-14 ~ 09-18 | 周一 ~ 周五 | AI Lead Enrichment | 开发 |
+| 2026-09-14 ~ 09-16 | 周一 ~ 周三 | GTM account | 开发（暂定） |
 | 2026-09-14 | 周一 | WhatsApp Integration | 提测 |
 | 2026-09-17 | 周四 | WhatsApp Integration | UAT |
 | 2026-09-21 ~ 09-25 | 周一 ~ 周五 | AI Lead Enrichment | 联调 |
@@ -66,11 +68,12 @@ gantt
 | UAT | 09-17 | 周四 | — |
 | Release | 09-22 | 周二 | — |
 
-### GTM account（排期待定）
+### GTM account（开发暂定，其余待定）
 
-- **排期状态**：未定，开发 / 联调 / 提测 / UAT 节点均待确认
+- **排期状态**：开发暂定，联调 / 提测 / UAT 节点均待确认
+- **开发**：09-14 ~ 09-16（周一 ~ 周三，3 天，暂定）
 - **预期 Release**：2026-10-01（周四）
-- **备注**：v0.2 中记录的 9.7 ~ 9.22 排期经确认为 WhatsApp Integration 的排期，已在该条目下更正
+- **备注**：开发窗口与 AI Lead Enrichment 开发窗口（9.14 ~ 9.18）及 WhatsApp Integration 提测日（9.14）重叠，若为同一批前端人力需注意排布；v0.2 中记录的 9.7 ~ 9.22 排期经确认为 WhatsApp Integration 的排期，已在该条目下更正
 
 ### AI Lead Enrichment
 
@@ -110,7 +113,7 @@ gantt
 
 ## 待确认事项
 
-1. **GTM account 排期**：确认开发 / 联调 / 提测 / UAT 各节点，以及预期 10.1 发布日是否可行。
+1. **GTM account 排期**：确认联调 / 提测 / UAT 各节点，以及预期 10.1 发布日是否可行（开发暂定 9.14 ~ 9.16）。
 2. **BV Process 测试 / 发布时间**：开发窗口已定 10.8 ~ 10.10，测试与发布节点待确认。
 3. **fixes for existing 起始时点**：确认确切投入日期（10 月初或更晚）及首个迭代范围。
 
@@ -118,6 +121,8 @@ gantt
 
 | 版本 | 日期 | 变更 |
 |---|---|---|
+| v0.9 | 2026-09-01 | 排期图配色改为按阶段统一：开发蓝 / 联调橙 / 提测黄 / UAT 紫 / Release 红（项目归属仍由左侧项目名色块区分）；图例拆分提测与 UAT 项；补 WhatsApp 联调条缺失的阶段文字 |
+| v0.8 | 2026-09-01 | GTM account 开发窗口暂定 9.14 ~ 9.16（3 天），预期 10.1 发布不变；排期图同步新增开发条与图例对齐修正 |
 | v0.7 | 2026-08-31 | AI Lead Enrichment 新增联调节点 9.21 ~ 9.25（5 天）；排期图新增联调行，下游条目整体下移 |
 | v0.6 | 2026-08-31 | WhatsApp Integration 联调扩展为 9.9 ~ 9.11（3 天），原 9.9 ~ 9.10 空档取消，待确认事项同步删减 |
 | v0.5 | 2026-08-31 | BV Process 更正为前端需投入：开发 10.8 ~ 10.10（3 天），测试 / 发布待定；甘特图 / 里程碑 / 排期图同步更新 |
