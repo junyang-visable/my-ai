@@ -1,7 +1,7 @@
 ---
 name: harness-coding
 description: Implementer role of the coding harness. Use when doing requirement development, writing implementation code, or fixing bugs with harness-kit — whether you are inside a target repo with harness installed (install mode) or driving a repo cross-repo-style from the toolkit repo's session (workspace mode, usually dispatched by harness-dev). Covers clarify → approach → plan → code → self-test, produces code plus completion evidence, and must run validate at the end. Deliberately avoids the acceptance Rubric to prevent hardcoding to test cases.
-version: 1.3.0
+version: 1.4.0
 ---
 
 # Coding Harness — Implementer
@@ -25,17 +25,24 @@ to specific test cases.
 | Action      | workspace mode (kit session)                   | install mode (inside target repo)                          |
 | ----------- | ---------------------------------------------- | ----------------------------------------------------------- |
 | Full validation | `bash <kit>/harness validate [--strict]`   | `bash .harness/feedback/validate.sh [--strict]`              |
-| Task dir    | `<kb>/<alias>/tasks/<task>/` (see harness-dev §4 for `<kb>`) | `.harness/tasks/<task>/`                                     |
+| spec/plan   | `<repo>/docs/changes/<task>/` (project artifacts, committed with the branch) | `docs/changes/<task>/`                     |
+| Process state (current/result/history/evidence) | `<kb>/<alias>/tasks/<task>/` (see harness-dev §4 for `<kb>`) | `.harness/tasks/<task>/`                     |
 | Assertion lock | `bash <kit>/harness lock verify`            | `python3 .harness/feedback/lock-tests.py verify`             |
 | Failure evidence | `bash <kit>/harness evidence <task> <kind>` | `bash .harness/feedback/collect-evidence.sh <task> <kind>`   |
 | Evidence template | `<kit>/.harness/rubric/evidence-template.md` | `.harness/rubric/evidence-template.md`                      |
+
+Legacy tasks (created before 2026-09) keep spec/plan in their process dir —
+read them where they are; don't migrate.
 
 ## Before starting
 
 1. install mode: read the target repo's `AGENTS.md` (contract layer); workspace mode: paste the output of `bash <kit>/harness context` as the contract.
 2. Mode: read the task's current.md "mode" field — "minimal" (explicitly chosen by the user) skips spec/plan and patches directly; "standard" or unset means full discipline. When invoked directly without task context, default to standard; only skip when the user explicitly says "minimal / just change it" (mode rules: harness-dev §3).
 3. Standard-mode cross-file/cross-module work **requires a confirmed spec.md** (status line = `confirmed`): missing → run harness-spec first; draft → get user confirmation before starting. Minimal mode has no such requirement.
-4. When resuming an existing task, read `spec.md` (status and change log) and `current.md` first; before starting, run `bash <kit>/harness brief <keywords>` to pull the repo's notes and matching playbooks into context.
+4. When resuming an existing task, read spec.md at `<repo>/docs/changes/<task>/`
+   (status and change log) and `current.md` in the process dir first; before
+   starting, run `bash <kit>/harness brief <keywords>` to pull the repo's notes
+   and matching playbooks into context.
 5. With `plan.md`, execute Task/Step by Task/Step and tick items off: run each step's verification command; output not matching expectation = not done. The plan is adjustable (edit plan and note the reason at the step); the spec is not yours to change.
 6. Load the target repo's `docs/ARCHITECTURE.md` and `docs/DEVELOPMENT.md` on demand (not all at once).
 

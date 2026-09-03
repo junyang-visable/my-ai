@@ -1,7 +1,7 @@
 ---
 name: harness-change
 description: Requirement-change handling skill of the personal harness toolkit. Use when a requirement changes mid-development (scope/wording shifted, "drop this, make it…", the user says the requirement changed). Keeps spec.md in sync, appends to the change log, demotes the status back to draft, marks affected Tasks in the plan, and only resumes development after the user re-confirms. Appends history only, never deletes old content; never edits implementation code directly.
-version: 1.2.0
+version: 1.3.0
 ---
 
 # Harness Change — requirement change handling
@@ -15,12 +15,18 @@ work must now change" for the user to decide.
 kit root = two levels up from this skill's physical dir (`skills/harness-change`;
 with symlinked deployment, `readlink -f` to resolve the real path first).
 Fallback: `/Users/yangjun/Desktop/my-ai/harness-kit`.
-Task dir = `<kb>/<alias>/tasks/<task>/` (`<kb>` = knowledge-base root; see
-harness-dev §4 — the kit holds no task data itself).
+spec/plan are **project artifacts** at `<repo>/docs/changes/<task>/`; harness
+process state (current/result/history/evidence) lives at
+`<kb>/<alias>/tasks/<task>/` (`<kb>` = knowledge-base root, see
+harness-dev §4; install mode: process state at `<repo>/.harness/tasks/<task>/`).
+Legacy tasks (created before 2026-09) keep spec/plan in the process dir —
+read and edit them where they are.
 
 ## Flow
 
-1. Survey the current state: read the task's spec.md (with change log), plan.md (checkbox state), current.md,
+1. Survey the current state: read the task's spec.md (with change log),
+   plan.md (checkbox state), current.md — spec/plan at
+   `<repo>/docs/changes/<task>/`, current.md in the process dir —
    plus the target repo's `git -C <repo> status / diff --stat / log --oneline -5` —
    establish "what the docs say / where the plan stands / how much code changed".
 2. **Clarify the change**: compare the new requirement against the old spec point by point; list the deltas

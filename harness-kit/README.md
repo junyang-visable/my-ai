@@ -25,9 +25,13 @@ half of the "model capability × environment capability" equation.
 │   ├── config.sh                  # that repo's commands (the only file to adapt per stack)
 │   ├── notes.md                   # repo stack, verified commands, pitfalls
 │   ├── context/e2e-context.md     # E2E case context (entries/selectors/accounts)
-│   ├── tasks/<task>/              # spec / plan / current / result / history + evidence/
+│   ├── tasks/<task>/              # process state: current / result / history + evidence/
 │   └── .lock-baseline.json        # assertion-lock baseline
 └── (your own topic docs…)         # the KB is yours — top-level notes coexist freely
+
+<target-repo>/                     ← spec/plan are project artifacts of the repo itself
+└── docs/changes/<task>/           # spec.md / plan.md — committed with the feature branch
+                                    # (multi-app tasks: one copy in the primary repo)
 
 harness-kit/                       ← pure tool (this repo)
 ├── workspaces/<alias>.conf.sh     # thin registry: repo path (+ optional env defaults)
@@ -36,9 +40,10 @@ harness-kit/                       ← pure tool (this repo)
 ```
 
 `<kb>` defaults to the kit's sibling `knowledge-base/` dir; relocate it via
-`HARNESS_KB_HOME`. Target repos need zero installation and receive zero
-writes — the kit drives them from outside (workspace mode), while all
-knowledge accumulates centrally in your KB.
+`HARNESS_KB_HOME`. Target repos need zero installation: the kit drives them
+from outside (workspace mode), writing only each task's `docs/changes/<task>/`
+artifacts into the repo while process state and knowledge accumulate centrally
+in your KB.
 
 ## Five layers
 
@@ -48,7 +53,7 @@ knowledge accumulates centrally in your KB.
 | Context        | knowledge loaded on demand     | `templates/docs/`, `.harness/context/`                                                                            |
 | Tooling        | reusable skills/commands/hooks | `skills/`, `commands/`, `.harness/hooks/`                                                                         |
 | Validation     | mechanical enforcement         | `.harness/feedback/` (validate / lint-arch / lock-tests / collect-evidence)                                       |
-| Loop           | state & resume                 | `<kb>/<alias>/tasks/<task>/{spec,plan,current,result,history}.md + evidence/` (spec = boundary contract, plan = verifiable breakdown) |
+| Loop           | state & resume                 | repo `docs/changes/<task>/{spec,plan}.md` (project artifacts) + `<kb>/<alias>/tasks/<task>/{current,result,history}.md + evidence/` |
 
 ## Quick start (workspace mode: drive any repo from the kit's repo; targets need zero install)
 
@@ -126,7 +131,7 @@ CLI commands all act on the active repo:
 ./harness validate --strict         # full pipeline, three gate levels (blocking/warning/info)
 ./harness lock update               # record baseline once the smoke set is stable; verify detects tampering
 ./harness evidence task api         # collect evidence after failure; produces the next fix prompt
-./harness task new my-task          # create a task dir under <kb>/<active-repo>/tasks/
+./harness task new my-task          # process dir under <kb>/<active-repo>/tasks/, spec/plan in <repo>/docs/changes/my-task/
 ./harness context                   # print the contract text; paste it into agent sessions
 ./harness brief <keywords>          # kickoff pack: contract + repo notes + matching playbooks + tasks
 ```
@@ -148,8 +153,9 @@ in your central KB.
 ### Optional: install mode
 
 If you want a repo to carry its own harness (agents read AGENTS.md on entering), run
-`./install.sh <repo>`. Both modes coexist; workspace mode writes nothing into the
-target repo at all. Commands land in `.qoder/commands/` (Claude Code copies
+`./install.sh <repo>`. Both modes coexist; in workspace mode the kit writes only the
+task's `docs/changes/<task>/` artifacts into the target repo. In install mode, commands
+land in `.qoder/commands/` (Claude Code copies
 to `.claude/commands/`; the files are universal); the post-edit hook needs wiring in your
 CLI's hook config: `bash .harness/hooks/post-edit.sh <file>`.
 

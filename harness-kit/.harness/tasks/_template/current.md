@@ -7,6 +7,7 @@
 - Task name / ID:
 - mode: standard # standard / minimal — minimal must come from an explicit user request (harness-dev §3)
 - involved apps: <workspace alias(es); list them all for multi-app>
+- spec/plan: <repo>/docs/changes/<task>/ # project artifacts, committed with the feature branch
 - current stage: `clarify / design / plan / code / self-test / accept / done`
 - single next step: <one sentence, concrete enough to execute>
 - blockers (if any):

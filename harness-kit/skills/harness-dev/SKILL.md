@@ -1,7 +1,7 @@
 ---
 name: harness-dev
 description: Orchestrator entry point of the personal harness toolkit. Use when you want to develop another repo from the toolkit repo's session (e.g. "use harness-dev to work on repo X / do Y for repo X / cross-repo development") or mention harness-dev or registering a new workspace. Locates the kit, decides the execution mode (standard = default full flow with a multi-app design doc; minimal = skip design and patch directly, only on explicit request), registers or switches the target repo, runs health checks, creates tasks, enters the coding loop as the implementer, and distills lessons back into the kit at wrap-up.
-version: 1.3.0
+version: 1.4.0
 ---
 
 # Harness Dev — cross-repo development orchestrator
@@ -58,8 +58,10 @@ Below, `<kit>` refers to it.
    `<kb>/<alias>/context/e2e-context.md` when E2E needs arise.
 
 `<kb>` = the knowledge-base root: the kit's sibling `knowledge-base/` dir by
-default, overridable via `HARNESS_KB_HOME`. One tree per project alias; the
-target repo itself is never written.
+default, overridable via `HARNESS_KB_HOME`. One tree per project alias; it
+holds repo knowledge and task process state — a task's spec/plan, by
+contrast, are project artifacts committed in the target repo at
+`docs/changes/<task>/`.
 
 ## 5. Tasks and write permissions
 
@@ -67,11 +69,17 @@ target repo itself is never written.
   current Qoder workspace, file writes get blocked by the sandbox. Ask the
   user to add the repo to the workspace (Add Folder to Workspace) before
   starting — don't trial-and-error.
-- Harness-generated data lives **in the knowledge base** under
-  `<kb>/<alias>/` — never inside the target repo. Create tasks with
-  `bash <kit>/harness task new <name>` (lands in `<kb>/<alias>/tasks/<name>/`).
+- Harness-generated data splits by nature: **process state** (current /
+  result / history / evidence / rubric) lives in the knowledge base under
+  `<kb>/<alias>/tasks/<name>/`; **spec/plan are project artifacts** written
+  into the target repo at `docs/changes/<name>/` (committed with the feature
+  branch; multi-app tasks: one copy in the primary repo, cross-read by the
+  other apps' sessions). Create tasks with
+  `bash <kit>/harness task new <name>` — it creates both dirs.
   If a task with the same name exists, read its `current.md` (mode + stage +
   single next step) and resume — never start a parallel one.
+- Legacy tasks (created before 2026-09) keep spec/plan inside their KB task
+  dir — read them where they are; don't migrate.
 - **Kickoff pack**: `bash <kit>/harness brief <keywords>` — contract, the
   active repo's notes, and matching playbooks in one shot. Required reading
   before starting work.
@@ -86,7 +94,7 @@ target repo itself is never written.
 ### Standard mode (default)
 
 1. **Clarify & design**: route to harness-spec, which produces
-   `<kb>/<alias>/tasks/<name>/spec.md` (this *is* the design doc).
+   `<repo>/docs/changes/<name>/spec.md` (this *is* the design doc).
    - Single app: the spec covers that app.
    - **Multi-app: the spec must cover every involved app** — the app list,
      per-app changes/boundaries, and cross-app contracts (interfaces /
@@ -103,7 +111,8 @@ target repo itself is never written.
 
 ### Minimal mode (explicit user request only)
 
-1. `bash <kit>/harness task new <name>` creates a light task: current.md
+1. `bash <kit>/harness task new <name>` creates a light task (process state in
+   the KB, spec/plan skeleton at `<repo>/docs/changes/<name>/`): current.md
    records "mode: minimal" plus a one-line requirement; clarification Q&A
    conclusions go into spec.md as a few lines (no confirmed gate).
 2. Create a branch (hard prerequisite, same as §7).
