@@ -1,7 +1,7 @@
 ---
 name: harness-coding
 description: Implementer role of the coding harness. Use when doing requirement development, writing implementation code, or fixing bugs with harness-kit — whether you are inside a target repo with harness installed (install mode) or driving a repo cross-repo-style from the toolkit repo's session (workspace mode, usually dispatched by harness-dev). Covers clarify → approach → plan → code → self-test, produces code plus completion evidence, and must run validate at the end. Deliberately avoids the acceptance Rubric to prevent hardcoding to test cases.
-version: 1.4.0
+version: 1.5.0
 ---
 
 # Coding Harness — Implementer
@@ -26,7 +26,7 @@ to specific test cases.
 | ----------- | ---------------------------------------------- | ----------------------------------------------------------- |
 | Full validation | `bash <kit>/harness validate [--strict]`   | `bash .harness/feedback/validate.sh [--strict]`              |
 | spec/plan   | `<repo>/docs/changes/<task>/` (project artifacts, committed with the branch) | `docs/changes/<task>/`                     |
-| Process state (current/result/history/evidence) | `<kb>/<alias>/tasks/<task>/` (see harness-dev §4 for `<kb>`) | `.harness/tasks/<task>/`                     |
+| Process state (current/result/history/evidence) | `<hd>/<alias>/tasks/<task>/` (see harness-dev §4 for `<hd>`) | `.harness/tasks/<task>/`                     |
 | Assertion lock | `bash <kit>/harness lock verify`            | `python3 .harness/feedback/lock-tests.py verify`             |
 | Failure evidence | `bash <kit>/harness evidence <task> <kind>` | `bash .harness/feedback/collect-evidence.sh <task> <kind>`   |
 | Evidence template | `<kit>/.harness/rubric/evidence-template.md` | `.harness/rubric/evidence-template.md`                      |
@@ -68,7 +68,7 @@ No config or skill unavailable → silently use the default logic: no errors, no
 - File completion evidence per the template (see the Step 0 table): numbers must be reproducible; honestly declare uncovered scope.
 - Update the task's `current.md` (next step) and `history.md` (append one line).
 - **Write lessons back** (in workspace mode lessons live in the kit/its repos — this is the toolkit's core value):
-  - repo-specific pitfalls / verified commands / conventions → `<kb>/<alias>/notes.md`
+  - repo-specific pitfalls / verified commands / conventions → `<hd>/<alias>/notes.md`
   - practices that hold across repos → `<kit>/playbooks/<topic>.md` (start from `_template.md`)
 
 ## Three-way exit

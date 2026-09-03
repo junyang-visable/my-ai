@@ -53,8 +53,8 @@ harness_incremental_cmd() {
   esac
 }
 
-# --- workspace mode: load the project's knowledge-base config last ----------------
-# The harness CLI points HARNESS_CONF at the project's <kb>/<alias>/config.sh;
+# --- workspace mode: load the project's harness-data config last ----------------
+# The harness CLI points HARNESS_CONF at the project's <hd>/<alias>/config.sh;
 # loading it at the end of this file lets its assignments override the
 # defaults above. In install mode that variable is empty and this block is a
 # no-op.

@@ -1,7 +1,7 @@
 ---
 name: harness-change
 description: Requirement-change handling skill of the personal harness toolkit. Use when a requirement changes mid-development (scope/wording shifted, "drop this, make it…", the user says the requirement changed). Keeps spec.md in sync, appends to the change log, demotes the status back to draft, marks affected Tasks in the plan, and only resumes development after the user re-confirms. Appends history only, never deletes old content; never edits implementation code directly.
-version: 1.3.0
+version: 1.4.0
 ---
 
 # Harness Change — requirement change handling
@@ -17,7 +17,7 @@ with symlinked deployment, `readlink -f` to resolve the real path first).
 Fallback: `/Users/yangjun/Desktop/my-ai/harness-kit`.
 spec/plan are **project artifacts** at `<repo>/docs/changes/<task>/`; harness
 process state (current/result/history/evidence) lives at
-`<kb>/<alias>/tasks/<task>/` (`<kb>` = knowledge-base root, see
+`<hd>/<alias>/tasks/<task>/` (`<hd>` = the harness-data root, see
 harness-dev §4; install mode: process state at `<repo>/.harness/tasks/<task>/`).
 Legacy tasks (created before 2026-09) keep spec/plan in the process dir —
 read and edit them where they are.

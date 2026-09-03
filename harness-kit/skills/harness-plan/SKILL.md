@@ -1,7 +1,7 @@
 ---
 name: harness-plan
 description: Verifiable task-breakdown skill of the personal harness toolkit (a personal edition of superpowers writing-plans). Use when a task's spec.md is confirmed and task breakdown is needed (usually routed from harness-dev or harness-spec). Derives plan.md from the spec — Task → Step, each step carrying a verification command and a concrete expected output; the checkboxes are the progress, so an executing session can tick items one by one and prove each step done. Writes plans only, never implementation code.
-version: 1.3.0
+version: 1.4.0
 ---
 
 # Harness Plan — verifiable task breakdown
@@ -17,7 +17,7 @@ with symlinked deployment, `readlink -f` to resolve the real path first).
 Fallback: `/Users/yangjun/Desktop/my-ai/harness-kit`.
 spec/plan are **project artifacts** at `<repo>/docs/changes/<task>/`; harness
 process state (current/result/history/evidence) lives at
-`<kb>/<alias>/tasks/<task>/` (`<kb>` = knowledge-base root, see harness-dev §4;
+`<hd>/<alias>/tasks/<task>/` (`<hd>` = the harness-data root, see harness-dev §4;
 install mode: process state at `<repo>/.harness/tasks/<task>/`).
 Legacy tasks (created before 2026-09) keep spec/plan in the process dir —
 if `docs/changes/<task>/` has no plan.md but the process dir does, use the

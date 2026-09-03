@@ -1,7 +1,7 @@
 ---
 name: harness-spec
 description: Requirement-clarification and spec-writing skill of the personal harness toolkit. Use when a new requirement enters the development flow, the requirement itself is vague and needs grilling, or harness-dev routes here asking for a spec. Through Socratic questioning (or routing to a grill-type skill already available in the environment) pin the requirement down, produce the task's spec.md (requirement boundary / approach / acceptance boundary), and get the user to confirm it to confirmed status. Writes specs only — no task breakdown (harness-plan), no code.
-version: 1.3.0
+version: 1.4.0
 ---
 
 # Harness Spec — requirement clarification & spec
@@ -18,8 +18,8 @@ with symlinked deployment, `readlink -f` to resolve the real path first).
 Fallback: `/Users/yangjun/Desktop/my-ai/harness-kit`.
 Confirm the target repo with `bash <kit>/harness current`. spec/plan are
 **project artifacts** at `<repo>/docs/changes/<task>/`; harness process state
-(current/result/history/evidence) lives at `<kb>/<alias>/tasks/<task>/`
-(`<kb>` = knowledge-base root, see harness-dev §4; install mode:
+(current/result/history/evidence) lives at `<hd>/<alias>/tasks/<task>/`
+(`<hd>` = the harness-data root, see harness-dev §4; install mode:
 process state at `<repo>/.harness/tasks/<task>/`).
 Legacy tasks (created before 2026-09) keep spec/plan in the process dir —
 if `docs/changes/<task>/` has no spec.md but the process dir does, use the

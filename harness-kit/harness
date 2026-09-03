@@ -4,15 +4,15 @@
 # -----------------------------------------------------------------------------
 # Register, switch, and drive any repo from the kit directory; target repos
 # need zero installation. Data model: a task's spec.md/plan.md are project
-# artifacts living in the target repo at docs/changes/<task>/; harness process
-# state (current/result/history/evidence/rubric) and repo knowledge (commands,
-# notes, E2E context) live in a central knowledge base, one tree per project:
-# <kb>/<alias>/. <kb> defaults to the kit's sibling "knowledge-base" dir and
-# can be relocated via HARNESS_KB_HOME (useful when distributing the kit).
-# The kit keeps only a thin repo registry, the engine/skills, and playbooks.
+# artifacts living in the target repo at docs/changes/<task>/; harness data
+# (process state + repo knowledge: commands, notes, E2E context) lives under
+# a central harness-data root, one tree per project: <hd>/<alias>/. <hd>
+# defaults to the kit's sibling "harness-data" dir and can be relocated via
+# HARNESS_DATA_HOME (useful when distributing the kit). The kit keeps only a
+# thin repo registry, the engine/skills, and playbooks.
 #
 # Usage:
-#   ./harness add <alias> <repo-path>   Register a repo (init <kb>/<alias>/) and activate it
+#   ./harness add <alias> <repo-path>   Register a repo (init <hd>/<alias>/) and activate it
 #   ./harness link [skills-dir]         Symlink kit skills into a skills dir (default ../.agents/skills)
 #   ./harness use <alias>               Switch the active repo
 #   ./harness list                      List registered workspaces
@@ -20,7 +20,7 @@
 #   ./harness validate [selfcheck|--strict|--stage X]   Run the unified validation pipeline
 #   ./harness lock <update|verify|list> Assertion lock (scope = active repo's smoke set)
 #   ./harness evidence <task> [layout|api|render|generic]   Collect failure evidence
-#   ./harness task new <name>           Create a task: process dir under <kb>/<alias>/tasks/, spec/plan in <repo>/docs/changes/<name>/
+#   ./harness task new <name>           Create a task: process dir under <hd>/<alias>/tasks/, spec/plan in <repo>/docs/changes/<name>/
 #   ./harness task list                 List tasks of the active repo
 #   ./harness context                   Print the contract text (paste into agent sessions or save as AGENTS.md)
 #   ./harness brief [keywords...]       Kickoff pack: contract + repo notes + matching playbooks + task list
@@ -29,7 +29,7 @@
 set -euo pipefail
 
 KIT="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-KB="${HARNESS_KB_HOME:-$(cd "$KIT/.." && pwd)/knowledge-base}"
+DATA="${HARNESS_DATA_HOME:-$(cd "$KIT/.." && pwd)/harness-data}"
 WS="$KIT/workspaces"
 ACTIVE_F="$WS/.active"
 ENGINE="$KIT/.harness/feedback"
@@ -56,8 +56,8 @@ load_env() {
   source "$conf"
   repo="${HARNESS_REPO:-}"
   [ -n "$repo" ] && [ -d "$repo" ] || die "workspace '$a' repo not found: ${repo:-<HARNESS_REPO unset>}"
-  pdata="$KB/$a"
-  # The project's knowledge-base config carries the commands; source it so
+  pdata="$DATA/$a"
+  # The project's harness-data config carries the commands; source it so
   # doctor/brief see it, and export HARNESS_CONF so engine scripts re-source
   # it over kit defaults.
   if [ -f "$pdata/config.sh" ]; then
@@ -92,15 +92,15 @@ case "$cmd" in
     if [ -e "$conf" ]; then die "workspace already exists: $alias ($conf)"; fi
     cat > "$conf" <<EOF
 # workspace: $alias — thin registry (repo path + optional env defaults).
-# Repo knowledge + task process state live in the knowledge base at $KB/$alias/;
+# Repo knowledge + task process state live in the harness-data tree at $DATA/$alias/;
 # a task's spec/plan live in the repo itself at docs/changes/<task>/.
 HARNESS_REPO="$repo"
 EOF
 
-    # Knowledge-base data home for this project: commands + notes + E2E context
-    # (skip if already initialized; `add` writes only the KB — the repo's
-    # docs/changes/<task>/ appears later, at task new)
-    pdata="$KB/$alias"
+    # Harness-data home for this project: commands + notes + E2E context
+    # (skip if already initialized; `add` writes only harness-data — the
+    # repo's docs/changes/<task>/ appears later, at task new)
+    pdata="$DATA/$alias"
     if [ -e "$pdata" ]; then
       echo "  $pdata already exists — keeping it as is"
     else
@@ -232,7 +232,7 @@ NOTES_EOF
         dst="$HARNESS_TASKS_DIR/$name"
         [ -e "$dst" ] && die "task already exists: $dst"
         # spec/plan are project artifacts → the target repo's docs/changes/;
-        # the KB task dir keeps only process state (current/result/history/evidence).
+        # the harness-data task dir keeps only process state (current/result/history/evidence).
         docs="$HARNESS_REPO/docs/changes/$name"
         [ -e "$docs" ] && die "docs/changes dir already exists: $docs"
         mkdir -p "$dst/evidence" "$docs" \
@@ -262,9 +262,9 @@ NOTES_EOF
     echo "- on completion, file evidence per harness-kit/.harness/rubric/evidence-template.md"
     echo "- red lines: never delete assertions / change test expectations / @ts-ignore your way to green; build cannot be skipped."
     echo "- smoke tests are protected by the assertion lock: ./harness lock verify"
-    echo "- repo-specific notes and E2E context: $KB/$a/notes.md and $KB/$a/context/e2e-context.md"
+    echo "- repo-specific notes and E2E context: $DATA/$a/notes.md and $DATA/$a/context/e2e-context.md"
     echo "- a task's spec/plan are project artifacts in this repo at docs/changes/<task>/ (commit with the feature branch);"
-    echo "  process state (current/result/history/evidence) stays in the kit's knowledge base."
+    echo "  process state (current/result/history/evidence) stays in the kit's harness-data tree."
     echo
     echo "${c_dim}Full contract layer: templates/AGENTS.md. To have agents read it every session, copy it to the repo root as AGENTS.md.${c_rst}"
     ;;
@@ -278,10 +278,10 @@ NOTES_EOF
     echo "spec/plan: $HARNESS_REPO/docs/changes/<task>/ (project artifacts) | process state: $HARNESS_TASKS_DIR/<task>/"
     echo "evidence template: $KIT/.harness/rubric/evidence-template.md"
     echo
-    echo "== repo notes ($KB/$a/notes.md, full text) =="
-    cat "$KB/$a/notes.md" 2>/dev/null || echo "(missing)"
+    echo "== repo notes ($DATA/$a/notes.md, full text) =="
+    cat "$DATA/$a/notes.md" 2>/dev/null || echo "(missing)"
     echo
-    echo "== E2E context: $KB/$a/context/e2e-context.md (read before acceptance) =="
+    echo "== E2E context: $DATA/$a/context/e2e-context.md (read before acceptance) =="
     echo
     echo "== playbooks (${*:-list all}) =="
     if [ "$#" -eq 0 ]; then

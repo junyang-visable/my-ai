@@ -1,7 +1,7 @@
 ---
 name: harness-dev
 description: Orchestrator entry point of the personal harness toolkit. Use when you want to develop another repo from the toolkit repo's session (e.g. "use harness-dev to work on repo X / do Y for repo X / cross-repo development") or mention harness-dev or registering a new workspace. Locates the kit, decides the execution mode (standard = default full flow with a multi-app design doc; minimal = skip design and patch directly, only on explicit request), registers or switches the target repo, runs health checks, creates tasks, enters the coding loop as the implementer, and distills lessons back into the kit at wrap-up.
-version: 1.4.0
+version: 1.5.0
 ---
 
 # Harness Dev — cross-repo development orchestrator
@@ -49,16 +49,16 @@ Below, `<kit>` refers to it.
 
 1. Read the target repo's `package.json` / `Makefile` / `pyproject.toml` etc.
    and **infer** the lint / typecheck / build / test commands; write them into
-   the project's knowledge-base config `<kb>/<alias>/config.sh` (created by
+   the project's harness-data config `<hd>/<alias>/config.sh` (created by
    `harness add`). Tell the user the inference basis and ask for confirmation
    (leave uncertain ones empty — empty stages are skipped automatically).
 2. Run `bash <kit>/harness doctor` for a health check, and
    `bash <kit>/harness validate selfcheck` to prove the guardrails are real.
-3. Jot the repo's stack and pitfalls into `<kb>/<alias>/notes.md`; add
-   `<kb>/<alias>/context/e2e-context.md` when E2E needs arise.
+3. Jot the repo's stack and pitfalls into `<hd>/<alias>/notes.md`; add
+   `<hd>/<alias>/context/e2e-context.md` when E2E needs arise.
 
-`<kb>` = the knowledge-base root: the kit's sibling `knowledge-base/` dir by
-default, overridable via `HARNESS_KB_HOME`. One tree per project alias; it
+`<hd>` = the harness-data root: the kit's sibling `harness-data/` dir by
+default, overridable via `HARNESS_DATA_HOME`. One tree per project alias; it
 holds repo knowledge and task process state — a task's spec/plan, by
 contrast, are project artifacts committed in the target repo at
 `docs/changes/<task>/`.
@@ -70,16 +70,16 @@ contrast, are project artifacts committed in the target repo at
   user to add the repo to the workspace (Add Folder to Workspace) before
   starting — don't trial-and-error.
 - Harness-generated data splits by nature: **process state** (current /
-  result / history / evidence / rubric) lives in the knowledge base under
-  `<kb>/<alias>/tasks/<name>/`; **spec/plan are project artifacts** written
+  result / history / evidence / rubric) lives under the harness-data root at
+  `<hd>/<alias>/tasks/<name>/`; **spec/plan are project artifacts** written
   into the target repo at `docs/changes/<name>/` (committed with the feature
   branch; multi-app tasks: one copy in the primary repo, cross-read by the
   other apps' sessions). Create tasks with
   `bash <kit>/harness task new <name>` — it creates both dirs.
   If a task with the same name exists, read its `current.md` (mode + stage +
   single next step) and resume — never start a parallel one.
-- Legacy tasks (created before 2026-09) keep spec/plan inside their KB task
-  dir — read them where they are; don't migrate.
+- Legacy tasks (created before 2026-09) keep spec/plan inside their
+  harness-data task dir — read them where they are; don't migrate.
 - **Kickoff pack**: `bash <kit>/harness brief <keywords>` — contract, the
   active repo's notes, and matching playbooks in one shot. Required reading
   before starting work.
@@ -107,12 +107,12 @@ contrast, are project artifacts committed in the target repo at
    to switch the active repo, then harness-coding executes spec+plan Task by
    Task, checking items off.
 5. **Wrap up**: per-app validate + evidence; write lessons back to each
-   app's `<kb>/<app>/notes.md`.
+   app's `<hd>/<app>/notes.md`.
 
 ### Minimal mode (explicit user request only)
 
 1. `bash <kit>/harness task new <name>` creates a light task (process state in
-   the KB, spec/plan skeleton at `<repo>/docs/changes/<name>/`): current.md
+   harness-data, spec/plan skeleton at `<repo>/docs/changes/<name>/`): current.md
    records "mode: minimal" plus a one-line requirement; clarification Q&A
    conclusions go into spec.md as a few lines (no confirmed gate).
 2. Create a branch (hard prerequisite, same as §7).
@@ -184,7 +184,7 @@ git checkout --no-track -b <branch> origin/<default>
    (reproducible numbers; honestly declare uncovered scope; minimal mode may
    compress to a one-line validate summary).
 3. **Write lessons back** (this is the toolkit's whole value — never skip):
-   - repo-specific pitfalls / verified commands / conventions → `<kb>/<alias>/notes.md`
+   - repo-specific pitfalls / verified commands / conventions → `<hd>/<alias>/notes.md`
    - practices that hold across repos → `<kit>/playbooks/<topic>.md` (start from `_template.md`)
    - task-level detail → the task's `history.md`
 4. Remind the user: acceptance must happen in a **separate session** using the
