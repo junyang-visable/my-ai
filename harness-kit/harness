@@ -243,7 +243,7 @@ NOTES_EOF
         cp "$TPL/spec.md" "$TPL/plan.md" "$docs/"
         echo "created task: $dst (process state)"
         echo "spec/plan (project artifacts, commit with the feature branch): $docs"
-        echo "standard mode (default): harness-spec fills spec.md (confirmed) → harness-plan writes plan.md → coding loop; multi-app specs must cover every involved app."
+        echo "standard mode (default): harness-spec fills spec.md (confirmed) → harness-plan writes plan.md (confirmed) → coding loop; both spec and plan need explicit user confirmation before coding; multi-app specs must cover every involved app."
         echo "minimal mode (only on explicit user request): skip the full flow — record mode + one-liner in current.md; branch + validate guardrails still apply."
         ;;
       list)

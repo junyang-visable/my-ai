@@ -38,7 +38,7 @@ read them where they are; don't migrate.
 
 1. install mode: read the target repo's `AGENTS.md` (contract layer); workspace mode: paste the output of `bash <kit>/harness context` as the contract.
 2. Mode: read the task's current.md "mode" field — "minimal" (explicitly chosen by the user) skips spec/plan and patches directly; "standard" or unset means full discipline. When invoked directly without task context, default to standard; only skip when the user explicitly says "minimal / just change it" (mode rules: harness-dev §3).
-3. Standard-mode cross-file/cross-module work **requires a confirmed spec.md** (status line = `confirmed`): missing → run harness-spec first; draft → get user confirmation before starting. Minimal mode has no such requirement.
+3. Standard-mode cross-file/cross-module work **requires a confirmed spec.md AND a confirmed plan.md** (status lines = `confirmed`): spec draft/missing → run harness-spec first; plan draft/missing → run harness-plan first (it stops for user confirmation — never start coding on an unconfirmed plan). Plan.md without a status field = pre-2026-09-03 legacy task → ask the user whether to proceed. Minimal mode has no such requirements.
 4. When resuming an existing task, read spec.md at `<repo>/docs/changes/<task>/`
    (status and change log) and `current.md` in the process dir first; before
    starting, run `bash <kit>/harness brief <keywords>` to pull the repo's notes

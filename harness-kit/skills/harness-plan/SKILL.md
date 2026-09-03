@@ -1,7 +1,7 @@
 ---
 name: harness-plan
-description: Verifiable task-breakdown skill of the personal harness toolkit (a personal edition of superpowers writing-plans). Use when a task's spec.md is confirmed and task breakdown is needed (usually routed from harness-dev or harness-spec). Derives plan.md from the spec — Task → Step, each step carrying a verification command and a concrete expected output; the checkboxes are the progress, so an executing session can tick items one by one and prove each step done. Writes plans only, never implementation code.
-version: 1.4.0
+description: Verifiable task-breakdown skill of the personal harness toolkit (a personal edition of superpowers writing-plans). Use when a task's spec.md is confirmed and task breakdown is needed (usually routed from harness-dev or harness-spec). Derives plan.md from the spec — Task → Step, each step carrying a verification command and a concrete expected output; the checkboxes are the progress, so an executing session can tick items one by one and prove each step done. The plan itself needs user confirmation before coding starts (standard mode). Writes plans only, never implementation code.
+version: 1.5.0
 ---
 
 # Harness Plan — verifiable task breakdown
@@ -37,7 +37,13 @@ process-dir copy.
      Prefer existing engine commands (`bash <kit>/harness validate --stage lint` / the unit-test command);
      otherwise write a concrete command — mind the working directory in workspace mode.
 4. Granularity control: ≤ 8 Tasks; more means the requirement is too big — suggest splitting the task or going back to harness-spec to narrow the boundary.
-5. Hand off: tell the user harness-coding executes this plan (or harness-dev routes it).
+5. **Confirm** (standard mode): set plan.md's status line to `draft`, present
+   the plan highlights (task structure / commit split / verification
+   approach / risks), and **stop the turn** — wait for explicit user
+   agreement before changing status to `confirmed`. Confirmed must come from
+   the user — never self-award it, never proceed to coding in the same turn.
+   Minimal mode has no plan (nothing to confirm).
+6. Hand off: only after confirmation, route to harness-coding (or harness-dev) to execute the plan.
 
 ## Enhanced skill routing (optional)
 
@@ -50,5 +56,7 @@ No config or skill unavailable → silently use the default logic: no errors, no
 ## Hard constraints
 
 - Don't modify spec.md (boundary changes go through harness-change); don't write implementation code (not even "incidentally").
+- Never route to coding with the plan unconfirmed (standard mode) — the confirmation gate is the user's, not yours.
 - Expected outputs must be concrete (`OK` / `exit 0` / contains a specific line) — "passes" is not an expectation.
 - Verification commands in the plan must actually run — proofread syntax and paths after writing.
+- Plan adjustments *during execution* (extra step, changed command) stay in plan.md with a note at the step — that's harness-coding's business, not yours.

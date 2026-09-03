@@ -103,10 +103,13 @@ contrast, are project artifacts committed in the target repo at
 2. **Confirm**: the spec reaches `confirmed` (explicit user agreement).
 3. **Break down**: route to harness-plan to produce plan.md; for multi-app
    tasks, group Tasks by app and annotate cross-app dependency order.
-4. **Code**: per app, enter the coding loop — `bash <kit>/harness use <app>`
+4. **Confirm**: the plan reaches `confirmed` (explicit user agreement) — same
+   gate as the spec; present the plan highlights (task structure / commit
+   split / risks) and wait for the user's go-ahead before coding.
+5. **Code**: per app, enter the coding loop — `bash <kit>/harness use <app>`
    to switch the active repo, then harness-coding executes spec+plan Task by
    Task, checking items off.
-5. **Wrap up**: per-app validate + evidence; write lessons back to each
+6. **Wrap up**: per-app validate + evidence; write lessons back to each
    app's `<hd>/<app>/notes.md`.
 
 ### Minimal mode (explicit user request only)
@@ -154,10 +157,12 @@ git checkout --no-track -b <branch> origin/<default>
 
 - Clarify the requirement and acceptance boundaries before writing code; stop
   and ask when unsure.
-- Standard mode: before starting, check the spec status line = `confirmed`;
-  draft or missing → back to harness-spec, never start on a shaky spec. With
-  plan.md, execute Task/Step by Task/Step, ticking items off and running each
-  step's verification command against its expected output.
+- Standard mode: before starting, check the spec status line = `confirmed`
+  AND the plan status line = `confirmed` (plan gate added 2026-09-03; tasks
+  whose plan.md has no status field are legacy — ask the user, don't assume);
+  either draft or missing → back to harness-spec / harness-plan, never start
+  on a shaky artifact. Execute plan Task/Step by Task/Step, ticking items off
+  and running each step's verification command against its expected output.
 - Unit-test TDD (whenever the change is unit-testable, regardless of mode):
   write the test first, run it once to confirm RED (record the failing
   assertion in the task's `history.md`), then implement to green; for bugfix

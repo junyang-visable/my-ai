@@ -93,17 +93,19 @@ Note: the target repo must be part of your Qoder workspace, or writes get sandbo
 | --------------- | --------------------------------------------------------------- | -------------------- |
 | harness-dev     | orchestrator/routing + workspace mgmt + dual-mode decision     | cross-repo entry     |
 | harness-spec    | clarify → spec.md (confirmed gate; can route grill-type skills) | new/vague requirement |
-| harness-plan    | spec → plan.md (per-step verify command + expected output)      | after spec confirmed |
+| harness-plan    | spec → plan.md (per-step verify command + expected output; confirmed gate) | after spec confirmed |
 | harness-coding  | implementer: TDD + validate + tick plan Steps                  | coding               |
 | harness-testing | acceptor: separate session, Rubric + RED-first + assertion lock | acceptance           |
 | harness-change  | requirement change: demote spec to draft, mark plan            | requirement changed  |
 
 Standard-mode flow (default): vague requirement → spec (clarify + confirm; multi-app
-specs cover every involved app) → plan (verifiable breakdown, grouped by app) → coding
+specs cover every involved app) → plan (verifiable breakdown, grouped by app; **confirm
+before coding** — same gate as the spec) → coding
 (TDD + gates, per app) → testing (independent acceptance); requirement changes route
 through harness-change at any time, demoting the spec back to draft for re-confirmation.
 Minimal mode (explicitly tell harness-dev "minimal / just change it"): light task →
-locate & patch → validate, skipping design and planning. Every skill runs
+locate & patch → validate, skipping design and planning (and both confirmation gates).
+Every skill runs
 `./harness brief` first to pull repo knowledge into context.
 
 ### Enhanced skill routing (optional, local config)

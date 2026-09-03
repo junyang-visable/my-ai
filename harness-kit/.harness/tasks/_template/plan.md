@@ -1,7 +1,8 @@
 # plan — verifiable task breakdown
 
 > Derived from spec.md: spec = what & boundaries (frozen once confirmed),
-> plan = how (adjustable during execution; adjustments need no re-confirmation).
+> plan = how (frozen for scope once confirmed; step-level adjustments during
+> execution stay in this file with a note at the step).
 > Every step must carry a verification command and an expected output —
 > **output not matching expectation = not done**. Checkboxes are the progress;
 > a fresh session can resume from them (a personal edition of superpowers
@@ -9,6 +10,7 @@
 
 - Task name:
 - Based on spec: spec.md (status should be confirmed)
+- status: draft # draft / confirmed — confirmed must come from explicit user agreement (standard mode gate before coding; harness-coding refuses an unconfirmed plan)
 
 ## Task 1: <title, commit granularity>
 
