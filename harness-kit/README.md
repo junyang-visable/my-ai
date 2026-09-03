@@ -43,7 +43,8 @@ harness-kit/                       ← pure tool (this repo)
 `HARNESS_KB_HOME`. Target repos need zero installation: the kit drives them
 from outside (workspace mode), writing only each task's `docs/changes/<task>/`
 artifacts into the repo while process state and knowledge accumulate centrally
-in your KB.
+in your KB. Tasks created before 2026-09 keep their spec/plan inside the KB
+task dir — read them where they are; no migration.
 
 ## Five layers
 
