@@ -5,15 +5,16 @@
 
 ## Requirement
 
-- Task: FE-1064-remove-dead-code (Jira: FE-1064) — remove ~1,700 lines of verified dead code + 4 unused deps, zero behavior change
-- Branch: `FE-1064/remove-dead-code` from `origin/main` @ eea827f; commits 4f2605d → e01f252 → aa19214 → 064164e (docs)
-- Diff vs main: 14 files, +6/−1,975, all matching the ticket checklist
+- Task: FE-1064-remove-dead-code (Jira: FE-1064) — remove ~1,700 lines of verified dead code + 4 unused deps, zero behavior change; 2026-09-04 scope addition folded in 5 post-cleanup knip re-scan findings (user decision, harness-change trail in spec change log)
+- Branch: `FE-1064/remove-dead-code` from `origin/main` @ eea827f; commits 4f2605d → e01f252 → aa19214 → 064164e (docs) → 9ed1ad0 (re-scan additions) → 894df67 (docs)
+- Diff vs main: 16 files, +7/−1,997, all matching the (original + added) ticket checklist
 
 ## Verified conclusions
 
-- `bash harness-kit/harness validate --strict` → lint/typecheck/arch/build/lock ALL OK (production vite build included)
-- eslint: 0 errors / 6 warnings (5 pre-existing on main + 1 newly-exposed `API_URL_V2` unused, kept per scope boundary)
+- `bash harness-kit/harness validate --strict` → lint/typecheck/arch/build/lock ALL OK (production vite build included); re-run green after the 2026-09-04 scope addition
+- eslint after full cleanup: 0 errors / **2 warnings** (both pre-existing on main: Progress.vue, SuggestedTasks.vue) — down from 5 on main
 - Every ticket claim re-verified against the tree before deletion (zero live references); diff contains only checklist items + direct entailments (dead imports, lockfile −138 lines)
+- 2026-09-04 scope addition: 5 knip re-scan items removed in commit 9ed1ad0 (+1/−22); the eslint warnings they caused are gone
 
 ## Uncovered scope
 
@@ -27,6 +28,4 @@
 
 ## Pending-confirmation list (out of ticket scope, NOT acted on)
 
-1. `src/utils/request.ts:8` — `API_URL_V2` const now fully unused (only consumer `getUserInfo` was deleted); ticket said "drop export" only. Suggest deleting in a follow-up.
-2. `src/main.ts:14` — `// const env = getEnv()` commented line (ex-datadog wiring); safe to delete alongside.
-3. `src/App.vue:10` — pre-existing unused imports `getLocale` / `getCountryCode` / `updateIsInternalUser` (already warn on main).
+*(resolved 2026-09-04: all three former items were folded into the ticket via harness-change and removed in commit 9ed1ad0; list now empty)*

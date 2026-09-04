@@ -9,5 +9,5 @@
 - involved apps: customer-dashboard-frontend
 - spec/plan: /Users/yangjun/Desktop/project/customer-dashboard-frontend/docs/changes/FE-1064-remove-dead-code/ # project artifacts, committed with the feature branch
 - current stage: accept
-- single next step: acceptance in a SEPARATE session via harness-testing (role isolation); PR #37 open, CI + review pending
+- single next step: acceptance in a SEPARATE session via harness-testing (role isolation); PR #37 updated with re-scan scope, CI + review pending
 - blockers (if any):
