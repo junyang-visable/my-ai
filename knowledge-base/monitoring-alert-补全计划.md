@@ -3,6 +3,7 @@
 > 基于现有上报途径（Stability SDK → Sunfire、Datadog）与已配置告警规则的逐项盘点，罗列所有需要补充的监控告警。
 > Sentry 告警不在本计划范围内——客户端错误面已由 Stability SDK（Sunfire 告警）覆盖。
 > 基线数据截至 2026-08-26（[告警能力清单](./V-Frontend-Monitor-告警能力清单.md)）。
+> 2026-09-04 增补 user-frontend（08-26 基线审计未覆盖，现状数据源：[极端场景告警配置清单](./extreme-scenario-alert-config.md) 08-28 实测），部分接入状态待盘点。
 
 ---
 
@@ -38,8 +39,10 @@ SDK 采集 6 类错误事件至 ODPS，但 Sunfire 仅对其中 4 类建了告�
 | requests-frontend | ❌ * | ❌ * | ❌ * | ❌ * | ❌ * | ❌ * | ❌ |
 | visitors-frontend | ❌ * | ❌ * | ❌ * | ❌ * | ❌ * | ❌ * | ❌ |
 | conversations-frontend | ❌ * | ❌ * | ❌ * | ❌ * | ❌ * | ❌ * | ❌ |
+| user-frontend（09-04 增补） | ❌ * | ❌ * | ❌ * | ❌ * | ❌ * | ❌ * | ⚠️ 3 条 ECS |
 
 > `*` 标记的项目 SDK 接入状态待确认，需先完成 SDK 接入再建 Sunfire 告警。
+> user-frontend 为 2026-09-04 增补（不在 08-26 基线审计内）：Datadog 已接入（AWS ECS 集成确认），08-27 已建 3 条容器全灭 P1 告警（317035916 / 317035974 / 317048648，非标准模板）；Sunfire SDK 落库状态待确认；标准六件套为 0。
 
 ---
 
@@ -132,7 +135,20 @@ SDK 采集 6 类错误事件至 ODPS，但 Sunfire 仅对其中 4 类建了告�
 | S-41 | 客户端 API 错误 | `api_error` | delta_5m > 20 | 钉钉 |
 | S-42 | 脚本错误 | `script_error` | wow_delta_5m > 30 | 钉钉 |
 
-#### Sunfire 小计：42 条（其中 30 条依赖 SDK 接入确认）
+**user-frontend**（6 条，09-04 增补，归属核心项目 / 9.11 前完成）
+
+| # | 告警名 | event_type | 阈值建议 | 通知 |
+|---|---|---|---|---|
+| S-43 | 白屏 | `white_screen` | delta_5m > 10 | 钉钉 |
+| S-44 | SSR 渲染错误 | `ssr_error` | delta_5m > 10 | 钉钉 |
+| S-45 | 自定义业务错误 | `custom_error` | delta_5m > 10 | 钉钉 |
+| S-46 | 组件渲染错误 | `component_error` | delta_5m > 10 | 钉钉 |
+| S-47 | 客户端 API 错误 | `api_error` | delta_5m > 20 | 钉钉 |
+| S-48 | 脚本错误 | `script_error` | wow_delta_5m > 30 | 钉钉 |
+
+> user-frontend SDK 落库状态待确认，阈值需落库后按实际基线校准；通知群待确认（暂按钉钉）。
+
+#### Sunfire 小计：48 条（其中 36 条依赖 SDK 接入确认）
 
 ---
 
@@ -224,7 +240,22 @@ Datadog `enabled: true`，当前零规则。
 | D-34 | SSR 渲染错误 | log_alert | `service:"visable-dev/conversations-frontend" env:production @errorType:SSRRenderError` | 5min count > 5 (warn > 3) | 钉钉 |
 | D-35 | Status:error 日志过多 | log_alert | `service:"visable-dev/conversations-frontend" env:production status:error` | 5min count > 120 (warn > 80) | 钉钉 |
 
-#### Datadog 小计：33 条新建（company-overview 未接入 Datadog，跳过）
+#### 3.2.9 user-frontend — 补常规六件套（6 条，09-04 增补）
+
+Datadog 已接入（AWS ECS 集成确认，ECS servicename `visable-dev_user-frontend_v2_web_internal`），08-27 已建 3 条容器全灭 P1 告警（317035916 / 317035974 / 317048648，不计入标准模板）。常规六件套为 0，前置确认 APM trace / Logs 数据面后补建：
+
+| # | 告警名 | 类型 | 指标 / 查询 | 阈值 | 通知 |
+|---|---|---|---|---|---|
+| D-36 | Memory 使用率超限 | query_alert | `aws.ecs.service.memory_utilization.maximum{service:visable-dev/user-frontend}` | critical > 90%, warn > 80% | 待确认 |
+| D-37 | CPU 使用率超限 | query_alert | `aws.ecs.service.cpuutilization.maximum{service:visable-dev/user-frontend}` | critical > 90%, warn > 80% | 待确认 |
+| D-38 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:visable-dev/user-frontend,span.kind:server}` | critical > 1.2s, warn > 1s | 待确认 |
+| D-39 | Server Errors 过多 | query_alert | `trace.web.request.errors(sum){env:production,service:visable-dev/user-frontend,span.kind:server}.as_count()` by http.status_code | critical > 50, warn > 30 | 待确认 |
+| D-40 | SSR 渲染错误 | log_alert | `service:"visable-dev/user-frontend" env:production @errorType:SSRRenderError` | 5min count > 5 (warn > 3) | 待确认 |
+| D-41 | Status:error 日志过多 | log_alert | `service:"visable-dev/user-frontend" env:production status:error` | 5min count > 120 (warn > 80) | 待确认 |
+
+> Datadog 侧 service tag 暂按 `visable-dev/user-frontend`（与同域项目一致），建单前需按实际数据面核对；通知渠道待确认后填入。
+
+#### Datadog 小计：39 条新建（company-overview 未接入 Datadog，跳过；user-frontend 6 条以数据面确认为前提）
 
 ---
 
@@ -249,8 +280,8 @@ Datadog `enabled: true`，当前零规则。
 
 | 平台 | 适用项目数 | 当前已覆盖 | 当前覆盖率 | 补全后 | 补全后覆盖率 |
 |---|---|---|---|---|---|
-| Sunfire | 9（全部项目） | 3 | **33%** | 9 | **100%** |
-| Datadog | 8（Datadog 已启用） | 4 | **50%** | 8 | **100%** |
+| Sunfire | 10（全部项目，含 09-04 增补 user-frontend） | 3 | **30%** | 10 | **100%** |
+| Datadog | 9（Datadog 已启用，含 user-frontend） | 5 | **56%** | 9 | **100%** |
 
 #### 告警完整度（标准告警模板填充率）
 
@@ -258,13 +289,13 @@ Datadog `enabled: true`，当前零规则。
 
 | 平台 | 标准模板 | 应有总数 | 当前已有 | 当前完整度 | 补全后 | 补全后完整度 |
 |---|---|---|---|---|---|---|
-| Sunfire | 6 类 × 9 项目 | 54 | 12 | **22%** | 54 | **100%** |
-| Datadog | 6 条 × 8 项目 | 48 | 14 | **29%** | 48 | **100%** |
-| **合计** | — | **102** | **26** | **25%** | **102** | **100%** |
+| Sunfire | 6 类 × 10 项目 | 60 | 12 | **20%** | 60 | **100%** |
+| Datadog | 6 条 × 9 项目 | 54 | 14 | **26%** | 54 | **100%** |
+| **合计** | — | **114** | **26** | **23%** | **114** | **100%** |
 
-> Sunfire 当前 12 条明细：search 4/6 + homepage 4/6 + product-editor 4/6（均缺 api_error、script_error）；其余 6 个项目 0/6。扩展项目需先确认 SDK 接入。
+> Sunfire 当前 12 条明细：search 4/6 + homepage 4/6 + product-editor 4/6（均缺 api_error、script_error）；其余 7 个项目 0/6（含 09-04 增补的 user-frontend）。扩展项目需先确认 SDK 接入。
 >
-> Datadog 当前 14 条明细：search 6/6 + homepage 5/6 + unified-search 3/6（新规则，旧规则不计入标准模板）+ product-editor 0 + business-insights 0（现有 1 条为特定路由错误，不属于标准 6 类）+ requests 0 + visitors 0 + conversations 0。company-overview 未接入 Datadog，不纳入统计。
+> Datadog 当前 14 条明细：search 6/6 + homepage 5/6 + unified-search 3/6（新规则，旧规则不计入标准模板）+ product-editor 0 + business-insights 0（现有 1 条为特定路由错误，不属于标准 6 类）+ requests 0 + visitors 0 + conversations 0 + user-frontend 0（08-27 已建 3 条 ECS 容器全灭 P1 告警，不属于标准 6 类，不计入）。company-overview 未接入 Datadog，不纳入统计。
 
 #### 逐项目覆盖明细
 
@@ -279,43 +310,48 @@ Datadog `enabled: true`，当前零规则。
 | requests-frontend | 0/6 | 0/6 | 0/12 | 0% | **100%** |
 | visitors-frontend | 0/6 | 0/6 | 0/12 | 0% | **100%** |
 | conversations-frontend | 0/6 | 0/6 | 0/12 | 0% | **100%** |
+| user-frontend（09-04 增补） | 0/6 | 0/6 | 0/12 | 0% | **100%** |
 
 > `—` 表示该平台不适用（未接入 Datadog）。扩展项目 Sunfire 告警依赖 SDK 接入确认。
+> user-frontend：Datadog 已有 3 条 ECS 容器全灭 P1 告警（08-27 建），不属于标准 6 类模板故计 0/6，但计入项目级"已覆盖"；Sunfire SDK 落库状态待确认。
 
 ### 4.2 告警数量变化
 
 | 平台 | 新建 | 退役/清理 |
 |---|---|---|
-| Sunfire | **42** | — |
-| Datadog | **33** | **8** |
-| **合计** | **75** | **8** |
+| Sunfire | **48** | — |
+| Datadog | **39** | **8** |
+| **合计** | **87** | **8** |
 
 ---
 
 ## 五、执行优先级
 
-### Sprint 1：消除零告警盲区（~1 周）
+> 阶段划分对齐 FE Epic [FE-1066](https://visable.atlassian.net/browse/FE-1066)：阶段一 = [FE-1067](https://visable.atlassian.net/browse/FE-1067)（9.11 前），阶段二 = [FE-1068](https://visable.atlassian.net/browse/FE-1068)（9.18 前）。2026-09-04 调整：requests / conversations / user-frontend 归入阶段一。
+
+### 阶段一 · 核心项目（9.11 前 → FE-1067）
+
+search-frontend、homepage-frontend、product-editor-frontend、unified-search-frontend、requests-frontend、conversations-frontend、user-frontend 双平台补齐：
 
 - [ ] **D-01 ~ D-06** — product-editor Datadog 6 条全建
-- [ ] **S-01 ~ S-06** — 现有 3 项目补 Sunfire api_error + script_error
-
-### Sprint 2：补齐核心 4 项目双平台对称（~1 周）
-
+- [ ] **S-01 ~ S-06** — search / homepage / product-editor 补 Sunfire api_error + script_error
 - [ ] **S-07 ~ S-12** — unified-search Sunfire 全 6 类新建
 - [ ] **D-07 ~ D-08** — unified-search Datadog CPU/Memory
 - [ ] **D-09** — homepage Datadog SSR 渲染错误
 - [ ] **R-01 ~ R-03** — unified-search 旧规则退役
+- [ ] **S-25 ~ S-30 + D-18 ~ D-23** — requests-frontend 双平台（前置：SDK 接入确认）
+- [ ] **S-37 ~ S-42 + D-30 ~ D-35** — conversations-frontend 双平台（前置：SDK 接入确认）
+- [ ] **S-43 ~ S-48 + D-36 ~ D-41** — user-frontend 双平台（前置：SDK 落库 + Datadog 数据面盘点）
+- [ ] 核心项目全量验收 / 查漏补缺（9.11）
 
-### Sprint 3：扩展项目覆盖（~2 周）
+### 阶段二 · 长尾应用（9.18 前 → FE-1068）
 
-- [ ] 盘点 5 个扩展项目 Stability SDK 接入状态（前置任务）
-- [ ] **S-13 ~ S-42** — 扩展项目 Sunfire 全 6 类告警（已接入 SDK 的项目先行，未接入的完成接入后补建）
-- [ ] ~~D-10 ~ D-11 — company-overview：未接入 Datadog，跳过~~
-- [ ] **D-12 ~ D-17** — business-insights Datadog 全套 6 条
-- [ ] **D-18 ~ D-23** — requests-frontend Datadog 全套 6 条
-- [ ] **D-24 ~ D-29** — visitors-frontend Datadog 全套 6 条
-- [ ] **D-30 ~ D-35** — conversations-frontend Datadog 全套 6 条
-- [ ] **R-04** — v-content-generator 重复规则清理
+supplier 剩余长尾应用（company-overview、business-insights-frontend、visitors-frontend）：
+
+- [ ] **S-13 ~ S-18** — company-overview Sunfire 全 6 类（未接入 Datadog，跳过 Datadog）
+- [ ] **S-19 ~ S-24 + D-12 ~ D-17** — business-insights 双平台
+- [ ] **S-31 ~ S-36 + D-24 ~ D-29** — visitors-frontend 双平台
+- [ ] 监控方案决策（方案待定：supplier 域维度大盘监控 + 特定场景监控 vs 逐应用告警模板）
 
 ### 后续：阈值校准
 
