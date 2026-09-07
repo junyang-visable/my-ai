@@ -4,6 +4,7 @@
 > Sentry 告警不在本计划范围内——客户端错误面已由 Stability SDK（Sunfire 告警）覆盖。
 > 基线数据截至 2026-08-26（[告警能力清单](./V-Frontend-Monitor-告警能力清单.md)）。
 > 2026-09-04 增补 user-frontend（08-26 基线审计未覆盖，现状数据源：[极端场景告警配置清单](./extreme-scenario-alert-config.md) 08-28 实测），部分接入状态待盘点。
+> 2026-09-07 调整：**Datadog 标准模板定为 homepage-frontend 的 5 条**（Memory / CPU / p75 / Server Errors / Status:error），SSR 渲染错误监控从 Datadog 标准中剔除（ssr_error 由 Sunfire 共享项 FE-Ssr-Error 覆盖）。
 
 ---
 
@@ -154,17 +155,18 @@ SDK 采集 6 类错误事件至 ODPS，但 Sunfire 仅对其中 4 类建了告�
 
 ### 3.2 Datadog 告警
 
-#### 3.2.1 product-editor-frontend — 全套新建（6 条）
+> **标准模板（5 条，09-07 定版，以 homepage-frontend 为准）**：Memory / CPU / p75 延迟 / Server Errors / Status:error 日志。**SSR 渲染错误不再属于 Datadog 标准**——ssr_error 由 Sunfire 共享项 FE-Ssr-Error（6_spm_10362）覆盖，Datadog 侧不重复建设（search 已有的 SSR monitor 保留不强制清理）。
 
-当前最大 Datadog 盲区，零规则。参照 search-frontend 模板建立：
+#### 3.2.1 product-editor-frontend — 全套新建（5 条）
+
+当前最大 Datadog 盲区，零规则。参照 homepage-frontend 模板建立：
 
 | # | 告警名 | 类型 | 指标 / 查询 | 阈值 | 通知 |
 |---|---|---|---|---|---|
 | D-01 | Memory 使用率超限 | query_alert | `avg(last_5m):aws.ecs.service.memory_utilization.maximum{service:visable-dev/product-editor-frontend}` | critical > 90%, warn > 80% | 钉钉 vcn-frontend |
 | D-02 | CPU 使用率超限 | query_alert | `avg(last_5m):aws.ecs.service.cpuutilization.maximum{service:visable-dev/product-editor-frontend}` | critical > 90%, warn > 80% | 钉钉 vcn-frontend |
-| D-03 | p75 延迟超限 | query_alert | `percentile(last_5m):trace.web.request{env:production,service:visable-dev/product-editor-frontend,span.kind:server}` | critical > 1.2s, warn > 1s | 钉钉 vcn-frontend |
+| D-03 | p75 延迟超限 | query_alert | `percentile(last_5m):trace.web.request{env:production,service:visable-dev/product-editor-frontend,span.kind:server}` | critical > 1s, warn > 700ms | 钉钉 vcn-frontend |
 | D-04 | Server Errors 过多 | query_alert | `sum(last_5m):trace.web.request.errors{env:production,service:visable-dev/product-editor-frontend,span.kind:server}.as_count()` by http.status_code | critical > 50, warn > 30 | 钉钉 vcn-frontend |
-| D-05 | SSR 渲染错误 | log_alert | `service:"visable-dev/product-editor-frontend" env:production @errorType:SSRRenderError` | 5min count > 5 (warn > 3) | 钉钉 vcn-frontend |
 | D-06 | Status:error 日志过多 | log_alert | `service:"visable-dev/product-editor-frontend" env:production status:error` | 5min count > 120 (warn > 80) | 钉钉 vcn-frontend |
 
 #### 3.2.2 unified-search-frontend — 补基础设施（2 条）
@@ -176,45 +178,39 @@ SDK 采集 6 类错误事件至 ODPS，但 Sunfire 仅对其中 4 类建了告�
 | D-07 | Memory 使用率超限 | query_alert | `aws.ecs.service.memory_utilization.maximum{service:webdevs/unified-search-frontend}` | critical > 90%, warn > 80% | 钉钉 detailpages |
 | D-08 | CPU 使用率超限 | query_alert | `aws.ecs.service.cpuutilization.maximum{service:webdevs/unified-search-frontend}` | critical > 90%, warn > 80% | 钉钉 detailpages |
 
-#### 3.2.3 homepage-frontend — 补 SSR 渲染错误（1 条）
+#### 3.2.3 homepage-frontend — 已达标（5/5）
 
-已有 5 条，缺与 search 对齐的 SSR 渲染错误 log alert：
-
-| # | 告警名 | 类型 | 查询 | 阈值 | 通知 |
-|---|---|---|---|---|---|
-| D-09 | SSR 渲染错误 | log_alert | `service:"visable-dev/homepage-frontend" env:production @errorType:SSRRenderError` | 5min count > 5 (warn > 3) | 钉钉 vcn-frontend |
+homepage-frontend 即标准模板本体（233667959 / 233668208 / 233668367 / 233671589 / 270555958），无待补条目。原 D-09（SSR 渲染错误）已随 SSR 剔除标准而取消。
 
 #### 3.2.4 company-overview — 跳过
 
 > **不需要补 Datadog 告警。** 该项目未接入 Datadog（`enabled: false`，仅 access logs），无 APM trace / Logs 数据。待未来接入 Datadog 后再统一补建。
 
-#### 3.2.5 business-insights-frontend — 全套（6 条）
+#### 3.2.5 business-insights-frontend — 全套（5 条）
 
-Datadog `enabled: true`，已有 1 条 log alert（路由错误），补齐剩余 5 条 + 参照核心项目模板补 SSR 渲染错误。
+Datadog `enabled: true`，已有 1 条 log alert（路由错误），补齐标准 5 条：
 
 | # | 告警名 | 类型 | 指标 / 查询 | 阈值 | 通知 |
 |---|---|---|---|---|---|
 | D-12 | Memory 使用率超限 | query_alert | `aws.ecs.service.memory_utilization.maximum{service:business-insights-frontend}` | critical > 90%, warn > 80% | Teams pegasus-alerts |
 | D-13 | CPU 使用率超限 | query_alert | `aws.ecs.service.cpuutilization.maximum{service:business-insights-frontend}` | critical > 90%, warn > 80% | Teams pegasus-alerts |
-| D-14 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:business-insights-frontend,span.kind:server}` | critical > 1.2s, warn > 1s | Teams pegasus-alerts |
+| D-14 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:business-insights-frontend,span.kind:server}` | critical > 1s, warn > 700ms | Teams pegasus-alerts |
 | D-15 | Server Errors 过多 | query_alert | `trace.web.request.errors(sum){env:production,service:business-insights-frontend,span.kind:server}.as_count()` by http.status_code | critical > 50, warn > 30 | Teams pegasus-alerts |
-| D-16 | SSR 渲染错误 | log_alert | `service:"business-insights-frontend" env:production @errorType:SSRRenderError` | 5min count > 5 (warn > 3) | Teams pegasus-alerts |
 | D-17 | Status:error 日志过多 | log_alert | `service:"business-insights-frontend" env:production status:error` | 5min count > 120 (warn > 80) | Teams pegasus-alerts |
 
-#### 3.2.6 requests-frontend — 全套新建（6 条）
+#### 3.2.6 requests-frontend — 全套新建（5 条）
 
-Datadog `enabled: true`，当前零规则。
+Datadog `enabled: true`，已有 3 条（error-rate / error-logs / ECS-down），补齐标准 5 条（error-logs 可对标 Status:error，视存量规则口径决定新建或复用）：
 
 | # | 告警名 | 类型 | 指标 / 查询 | 阈值 | 通知 |
 |---|---|---|---|---|---|
 | D-18 | Memory 使用率超限 | query_alert | `aws.ecs.service.memory_utilization.maximum{service:visable-dev/requests-frontend}` | critical > 90%, warn > 80% | 钉钉 |
 | D-19 | CPU 使用率超限 | query_alert | `aws.ecs.service.cpuutilization.maximum{service:visable-dev/requests-frontend}` | critical > 90%, warn > 80% | 钉钉 |
-| D-20 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:visable-dev/requests-frontend,span.kind:server}` | critical > 1.2s, warn > 1s | 钉钉 |
+| D-20 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:visable-dev/requests-frontend,span.kind:server}` | critical > 1s, warn > 700ms | 钉钉 |
 | D-21 | Server Errors 过多 | query_alert | `trace.web.request.errors(sum){env:production,service:visable-dev/requests-frontend,span.kind:server}.as_count()` by http.status_code | critical > 50, warn > 30 | 钉钉 |
-| D-22 | SSR 渲染错误 | log_alert | `service:"visable-dev/requests-frontend" env:production @errorType:SSRRenderError` | 5min count > 5 (warn > 3) | 钉钉 |
 | D-23 | Status:error 日志过多 | log_alert | `service:"visable-dev/requests-frontend" env:production status:error` | 5min count > 120 (warn > 80) | 钉钉 |
 
-#### 3.2.7 visitors-frontend — 全套新建（6 条）
+#### 3.2.7 visitors-frontend — 全套新建（5 条）
 
 Datadog `enabled: true`，当前零规则。
 
@@ -222,40 +218,37 @@ Datadog `enabled: true`，当前零规则。
 |---|---|---|---|---|---|
 | D-24 | Memory 使用率超限 | query_alert | `aws.ecs.service.memory_utilization.maximum{service:visable-dev/visitors-frontend}` | critical > 90%, warn > 80% | 钉钉 |
 | D-25 | CPU 使用率超限 | query_alert | `aws.ecs.service.cpuutilization.maximum{service:visable-dev/visitors-frontend}` | critical > 90%, warn > 80% | 钉钉 |
-| D-26 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:visable-dev/visitors-frontend,span.kind:server}` | critical > 1.2s, warn > 1s | 钉钉 |
+| D-26 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:visable-dev/visitors-frontend,span.kind:server}` | critical > 1s, warn > 700ms | 钉钉 |
 | D-27 | Server Errors 过多 | query_alert | `trace.web.request.errors(sum){env:production,service:visable-dev/visitors-frontend,span.kind:server}.as_count()` by http.status_code | critical > 50, warn > 30 | 钉钉 |
-| D-28 | SSR 渲染错误 | log_alert | `service:"visable-dev/visitors-frontend" env:production @errorType:SSRRenderError` | 5min count > 5 (warn > 3) | 钉钉 |
 | D-29 | Status:error 日志过多 | log_alert | `service:"visable-dev/visitors-frontend" env:production status:error` | 5min count > 120 (warn > 80) | 钉钉 |
 
-#### 3.2.8 conversations-frontend — 全套新建（6 条）
+#### 3.2.8 conversations-frontend — 全套新建（5 条）
 
-Datadog `enabled: true`，当前零规则。
+Datadog `enabled: true`，已有 2 条（ECS-down + error-logs×2），补齐标准 5 条：
 
 | # | 告警名 | 类型 | 指标 / 查询 | 阈值 | 通知 |
 |---|---|---|---|---|---|
 | D-30 | Memory 使用率超限 | query_alert | `aws.ecs.service.memory_utilization.maximum{service:visable-dev/conversations-frontend}` | critical > 90%, warn > 80% | 钉钉 |
 | D-31 | CPU 使用率超限 | query_alert | `aws.ecs.service.cpuutilization.maximum{service:visable-dev/conversations-frontend}` | critical > 90%, warn > 80% | 钉钉 |
-| D-32 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:visable-dev/conversations-frontend,span.kind:server}` | critical > 1.2s, warn > 1s | 钉钉 |
+| D-32 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:visable-dev/conversations-frontend,span.kind:server}` | critical > 1s, warn > 700ms | 钉钉 |
 | D-33 | Server Errors 过多 | query_alert | `trace.web.request.errors(sum){env:production,service:visable-dev/conversations-frontend,span.kind:server}.as_count()` by http.status_code | critical > 50, warn > 30 | 钉钉 |
-| D-34 | SSR 渲染错误 | log_alert | `service:"visable-dev/conversations-frontend" env:production @errorType:SSRRenderError` | 5min count > 5 (warn > 3) | 钉钉 |
 | D-35 | Status:error 日志过多 | log_alert | `service:"visable-dev/conversations-frontend" env:production status:error` | 5min count > 120 (warn > 80) | 钉钉 |
 
-#### 3.2.9 user-frontend — 补常规六件套（6 条，09-04 增补）
+#### 3.2.9 user-frontend — 补常规五件套（5 条，09-04 增补）
 
-Datadog 已接入（AWS ECS 集成确认，ECS servicename `visable-dev_user-frontend_v2_web_internal`），08-27 已建 3 条容器全灭 P1 告警（317035916 / 317035974 / 317048648，不计入标准模板）。常规六件套为 0，前置确认 APM trace / Logs 数据面后补建：
+Datadog 已接入（AWS ECS 集成确认，ECS servicename `visable-dev_user-frontend_v2_web_internal`），08-27 已建 3 条容器全灭 P1 告警（317035916 / 317035974 / 317048648，不计入标准模板）。常规五件套为 0，前置确认 APM trace / Logs 数据面后补建：
 
 | # | 告警名 | 类型 | 指标 / 查询 | 阈值 | 通知 |
 |---|---|---|---|---|---|
 | D-36 | Memory 使用率超限 | query_alert | `aws.ecs.service.memory_utilization.maximum{service:visable-dev/user-frontend}` | critical > 90%, warn > 80% | 待确认 |
 | D-37 | CPU 使用率超限 | query_alert | `aws.ecs.service.cpuutilization.maximum{service:visable-dev/user-frontend}` | critical > 90%, warn > 80% | 待确认 |
-| D-38 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:visable-dev/user-frontend,span.kind:server}` | critical > 1.2s, warn > 1s | 待确认 |
+| D-38 | p75 延迟超限 | query_alert | `trace.web.request(p75){env:production,service:visable-dev/user-frontend,span.kind:server}` | critical > 1s, warn > 700ms | 待确认 |
 | D-39 | Server Errors 过多 | query_alert | `trace.web.request.errors(sum){env:production,service:visable-dev/user-frontend,span.kind:server}.as_count()` by http.status_code | critical > 50, warn > 30 | 待确认 |
-| D-40 | SSR 渲染错误 | log_alert | `service:"visable-dev/user-frontend" env:production @errorType:SSRRenderError` | 5min count > 5 (warn > 3) | 待确认 |
 | D-41 | Status:error 日志过多 | log_alert | `service:"visable-dev/user-frontend" env:production status:error` | 5min count > 120 (warn > 80) | 待确认 |
 
 > Datadog 侧 service tag 暂按 `visable-dev/user-frontend`（与同域项目一致），建单前需按实际数据面核对；通知渠道待确认后填入。
 
-#### Datadog 小计：39 条新建（company-overview 未接入 Datadog，跳过；user-frontend 6 条以数据面确认为前提）
+#### Datadog 小计：30 条新建（company-overview 未接入 Datadog 跳过；标准 = 每项目 5 条，SSR 剔除；user-frontend 5 条以数据面确认为前提）
 
 ---
 
@@ -285,43 +278,43 @@ Datadog 已接入（AWS ECS 集成确认，ECS servicename `visable-dev_user-fro
 
 #### 告警完整度（标准告警模板填充率）
 
-以各平台标准告警模板为基准：Sunfire 6 类事件 × 每项目、Datadog 6 条 × 每项目。
+以各平台标准告警模板为基准：Sunfire 6 类事件 × 每项目、Datadog 5 条（homepage 模板，09-07 定版）× 每项目。
 
 | 平台 | 标准模板 | 应有总数 | 当前已有 | 当前完整度 | 补全后 | 补全后完整度 |
 |---|---|---|---|---|---|---|
 | Sunfire | 6 类 × 10 项目 | 60 | 12 | **20%** | 60 | **100%** |
-| Datadog | 6 条 × 9 项目 | 54 | 14 | **26%** | 54 | **100%** |
-| **合计** | — | **114** | **26** | **23%** | **114** | **100%** |
+| Datadog | 5 条 × 9 项目 | 45 | 14 | **31%** | 45 | **100%** |
+| **合计** | — | **105** | **26** | **25%** | **105** | **100%** |
 
 > Sunfire 当前 12 条明细：search 4/6 + homepage 4/6 + product-editor 4/6（均缺 api_error、script_error）；其余 7 个项目 0/6（含 09-04 增补的 user-frontend）。扩展项目需先确认 SDK 接入。
 >
-> Datadog 当前 14 条明细：search 6/6 + homepage 5/6 + unified-search 3/6（新规则，旧规则不计入标准模板）+ product-editor 0 + business-insights 0（现有 1 条为特定路由错误，不属于标准 6 类）+ requests 0 + visitors 0 + conversations 0 + user-frontend 0（08-27 已建 3 条 ECS 容器全灭 P1 告警，不属于标准 6 类，不计入）。company-overview 未接入 Datadog，不纳入统计。
+> Datadog 当前 14 条明细（按 5 条标准口径，SSR 不计入）：search 5/5（SSR monitor 为标准外增量）+ homepage 5/5 + unified-search 3/5（Status:error / p75 / 5xx，旧规则不计入）+ product-editor 0 + business-insights 0（现有 1 条为特定路由错误，不属于标准 5 类）+ requests 1/5（error-rate 对标 Server Errors；error-logs / ECS-down 为标准外增量）+ visitors 0 + conversations 0（error-logs×2 / ECS-down 为标准外增量）+ user-frontend 0（3 条 ECS P1 为标准外增量）。company-overview 未接入 Datadog，不纳入统计。
 
 #### 逐项目覆盖明细
 
-| 项目 | Sunfire (满分 6) | Datadog (满分 6) | 总分 | 当前完整度 | 补全后 |
+| 项目 | Sunfire (满分 6) | Datadog (满分 5) | 总分 | 当前完整度 | 补全后 |
 |---|---|---|---|---|---|
-| search-frontend | 4/6 | 6/6 | 10/12 | 83% | **100%** |
-| homepage-frontend | 4/6 | 5/6 | 9/12 | 75% | **100%** |
-| product-editor-frontend | 4/6 | 0/6 | 4/12 | 33% | **100%** |
-| unified-search-frontend | 0/6 | 3/6 | 3/12 | 25% | **100%** |
+| search-frontend | 4/6 | 5/5 | 9/11 | 82% | **100%** |
+| homepage-frontend | 4/6 | 5/5 | 9/11 | 82% | **100%** |
+| product-editor-frontend | 4/6 | 0/5 | 4/11 | 36% | **100%** |
+| unified-search-frontend | 0/6 | 3/5 | 3/11 | 27% | **100%** |
 | company-overview | 0/6 | — | 0/6 | 0% | **100%** |
-| business-insights | 0/6 | 0/6 | 0/12 | 0% | **100%** |
-| requests-frontend | 0/6 | 0/6 | 0/12 | 0% | **100%** |
-| visitors-frontend | 0/6 | 0/6 | 0/12 | 0% | **100%** |
-| conversations-frontend | 0/6 | 0/6 | 0/12 | 0% | **100%** |
-| user-frontend（09-04 增补） | 0/6 | 0/6 | 0/12 | 0% | **100%** |
+| business-insights | 0/6 | 0/5 | 0/11 | 0% | **100%** |
+| requests-frontend | 0/6 | 1/5 | 1/11 | 9% | **100%** |
+| visitors-frontend | 0/6 | 0/5 | 0/11 | 0% | **100%** |
+| conversations-frontend | 0/6 | 0/5 | 0/11 | 0% | **100%** |
+| user-frontend（09-04 增补） | 0/6 | 0/5 | 0/11 | 0% | **100%** |
 
 > `—` 表示该平台不适用（未接入 Datadog）。扩展项目 Sunfire 告警依赖 SDK 接入确认。
-> user-frontend：Datadog 已有 3 条 ECS 容器全灭 P1 告警（08-27 建），不属于标准 6 类模板故计 0/6，但计入项目级"已覆盖"；Sunfire SDK 落库状态待确认。
+> user-frontend：Datadog 已有 3 条 ECS 容器全灭 P1 告警（08-27 建），不属于标准 5 条模板故计 0/5，但计入项目级"已覆盖"；Sunfire SDK 落库状态待确认。
 
 ### 4.2 告警数量变化
 
 | 平台 | 新建 | 退役/清理 |
 |---|---|---|
 | Sunfire | **48** | — |
-| Datadog | **39** | **8** |
-| **合计** | **87** | **8** |
+| Datadog | **30** | **8** |
+| **合计** | **78** | **8** |
 
 ---
 
@@ -333,15 +326,14 @@ Datadog 已接入（AWS ECS 集成确认，ECS servicename `visable-dev_user-fro
 
 search-frontend、homepage-frontend、product-editor-frontend、unified-search-frontend、requests-frontend、conversations-frontend、user-frontend 双平台补齐：
 
-- [ ] **D-01 ~ D-06** — product-editor Datadog 6 条全建
+- [ ] **D-01 ~ D-04, D-06** — product-editor Datadog 标准 5 条全建
 - [ ] **S-01 ~ S-06** — search / homepage / product-editor 补 Sunfire api_error + script_error
 - [ ] **S-07 ~ S-12** — unified-search Sunfire 全 6 类新建
 - [ ] **D-07 ~ D-08** — unified-search Datadog CPU/Memory
-- [ ] **D-09** — homepage Datadog SSR 渲染错误
 - [ ] **R-01 ~ R-03** — unified-search 旧规则退役
-- [ ] **S-25 ~ S-30 + D-18 ~ D-23** — requests-frontend 双平台（前置：SDK 接入确认）
-- [ ] **S-37 ~ S-42 + D-30 ~ D-35** — conversations-frontend 双平台（前置：SDK 接入确认）
-- [ ] **S-43 ~ S-48 + D-36 ~ D-41** — user-frontend 双平台（前置：SDK 落库 + Datadog 数据面盘点）
+- [ ] **S-25 ~ S-30 + D-18 ~ D-21, D-23** — requests-frontend 双平台（前置：SDK 接入确认）
+- [ ] **S-37 ~ S-42 + D-30 ~ D-33, D-35** — conversations-frontend 双平台（前置：SDK 接入确认）
+- [ ] **S-43 ~ S-48 + D-36 ~ D-39, D-41** — user-frontend 双平台（前置：SDK 落库 + Datadog 数据面盘点）
 - [ ] 核心项目全量验收 / 查漏补缺（9.11）
 
 ### 阶段二 · 长尾应用（9.18 前 → FE-1068）
@@ -349,8 +341,8 @@ search-frontend、homepage-frontend、product-editor-frontend、unified-search-f
 supplier 剩余长尾应用（company-overview、business-insights-frontend、visitors-frontend）：
 
 - [ ] **S-13 ~ S-18** — company-overview Sunfire 全 6 类（未接入 Datadog，跳过 Datadog）
-- [ ] **S-19 ~ S-24 + D-12 ~ D-17** — business-insights 双平台
-- [ ] **S-31 ~ S-36 + D-24 ~ D-29** — visitors-frontend 双平台
+- [ ] **S-19 ~ S-24 + D-12 ~ D-15, D-17** — business-insights 双平台
+- [ ] **S-31 ~ S-36 + D-24 ~ D-27, D-29** — visitors-frontend 双平台
 - [ ] 监控方案决策（方案待定：supplier 域维度大盘监控 + 特定场景监控 vs 逐应用告警模板）
 
 ### 后续：阈值校准
