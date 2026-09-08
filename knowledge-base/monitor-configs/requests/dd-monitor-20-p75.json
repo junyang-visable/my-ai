@@ -1,0 +1,18 @@
+{
+  "name": "Requests-frontend: p75 Latency is out of bound",
+  "type": "query alert",
+  "query": "percentile(last_5m):p75:trace.web.request{env:production,service:visable-dev/requests-frontend,span.kind:server} > 1",
+  "message": "env: {{log.tags.env}}\n\n{{#is_alert}}Alert: requests-frontend p75 latency is over 1 second for last 5 mins{{/is_alert}}{{#is_warning}}Warn: requests-frontend p75 latency is over 700 ms {{/is_warning}} {{#is_recovery}}Attention: Latency is back to stable status.{{/is_recovery}}\n\n{{log.timestamp}}\n{{log.message}}\n{{log.link}}\n\n@dingtalk-dingtalk-vcn-frontend",
+  "tags": [
+    "team:vcn-frontend"
+  ],
+  "priority": 2,
+  "options": {
+    "thresholds": {
+      "critical": 1,
+      "warning": 0.7,
+      "critical_recovery": 0.6,
+      "warning_recovery": 0.4
+    }
+  }
+}

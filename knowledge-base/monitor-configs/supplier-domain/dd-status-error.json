@@ -1,0 +1,11 @@
+{
+  "name": "[Supplier Domain] Status:error occurred too many times",
+  "type": "log alert",
+  "query": "logs(\"env:production (service:\\\"visable-dev/business-insights-frontend\\\" OR service:\\\"visable-dev/visitors-frontend\\\" OR service:\\\"visable-dev/supplier-onboarding-frontend\\\" OR service:\\\"visable-dev/ad-center-frontend\\\") status:error\").index(\"*\").rollup(\"count\").last(\"5m\") > 120",
+  "message": "env: production\n\n{{#is_alert}}Alert: {{service.name}} status:errors occurred over 120 times for last 5 mins.{{/is_alert}}{{#is_warning}}Warn: {{service.name}}'s status:errors occurred over 80 times for last 5 mins{{/is_warning}} {{#is_recovery}}Attention: status:error was recovered.{{/is_recovery}}\n\n{{log.timestamp}}\n{{log.message}}\n{{log.link}}\n\n@dingtalk-dingtalk-vcn-frontend",
+  "tags": ["team:vcn-frontend"],
+  "priority": 2,
+  "options": {
+    "thresholds": {"critical": 120, "warning": 80, "critical_recovery": 80, "warning_recovery": 40}
+  }
+}

@@ -1,0 +1,18 @@
+{
+  "name": "Product-editor-frontend: Status:error occurred too many times",
+  "type": "log alert",
+  "query": "logs(\"service:\\\"visable-dev/product-editor-frontend\\\" env:production status:error\").index(\"*\").rollup(\"count\").last(\"5m\") > 120",
+  "message": "env: production\n\n{{#is_alert}}Alert: product-editor-frontend status:errors occurred over 120 times for last 5 mins.{{/is_alert}}{{#is_warning}}Warn: product-editor-frontend's status:errors occurred over 80 times for last 5 mins{{/is_warning}} {{#is_recovery}}Attention: status:error was recovered.{{/is_recovery}}\n\n{{log.timestamp}}\n{{log.message}}\n{{log.link}}\n\n@dingtalk-dingtalk-vcn-frontend",
+  "tags": [
+    "team:vcn-frontend"
+  ],
+  "priority": 2,
+  "options": {
+    "thresholds": {
+      "critical": 120,
+      "warning": 80,
+      "critical_recovery": 80,
+      "warning_recovery": 40
+    }
+  }
+}

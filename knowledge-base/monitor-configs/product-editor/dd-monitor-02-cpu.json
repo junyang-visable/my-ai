@@ -1,0 +1,16 @@
+{
+  "name": "Product-editor-frontend: cpu usage out-of-bound",
+  "type": "query alert",
+  "query": "avg(last_5m):avg:aws.ecs.service.cpuutilization{env:production,service:visable-dev/product-editor-frontend} > 90",
+  "message": "env: {{log.tags.env}}\n\n{{#is_alert}}Alert: product-editor-frontend cpu usage is over 90% for last 5 mins. {{/is_alert}}{{#is_warning}}Warn: product-editor-frontend cpu usage is over 80% for last 5 mins.{{/is_warning}}{{#is_recovery}}Attention: cpu was recovered.{{/is_recovery}}\n\n{{log.timestamp}}\n{{log.message}}\n{{log.link}}\n\n@dingtalk-dingtalk-vcn-frontend",
+  "tags": [
+    "team:vcn-frontend"
+  ],
+  "priority": 2,
+  "options": {
+    "thresholds": {
+      "critical": 90,
+      "warning": 80
+    }
+  }
+}

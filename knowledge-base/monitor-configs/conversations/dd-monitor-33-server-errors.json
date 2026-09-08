@@ -1,0 +1,17 @@
+{
+  "name": "Conversations-frontend: Server errors occurred too many times",
+  "type": "query alert",
+  "query": "sum(last_5m):sum:trace.web.request.errors{env:production,service:visable-dev/conversations-frontend,span.kind:server} by {http.status_code}.as_count() > 50",
+  "message": "env: {{log.tags.env}}\n\n{{#is_alert}}Alert: conversations-frontend server errors occurred over 50 times for last 5 mins.{{/is_alert}}{{#is_warning}}Warn: conversations-frontend's server errors occurred over 30 times for last 5 mins{{/is_warning}} {{#is_recovery}}Attention: server errors were recovered.{{/is_recovery}}\n\n{{log.timestamp}}\n{{log.message}}\n{{log.link}}\n\n@dingtalk-dingtalk-vcn-frontend",
+  "tags": [
+    "team:vcn-frontend",
+    "domain:conversation"
+  ],
+  "priority": 2,
+  "options": {
+    "thresholds": {
+      "critical": 50,
+      "warning": 30
+    }
+  }
+}

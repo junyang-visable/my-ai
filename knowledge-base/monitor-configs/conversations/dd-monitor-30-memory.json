@@ -1,0 +1,17 @@
+{
+  "name": "Conversations-frontend: Memory usage out of bound",
+  "type": "query alert",
+  "query": "avg(last_5m):avg:aws.ecs.service.memory_utilization{env:production,service:visable-dev/conversations-frontend} > 90",
+  "message": "env: {{log.tags.env}}\n\n{{#is_alert}}Alert: conversations-frontend memory usage is over 90% for last 5 mins.{{/is_alert}}{{#is_warning}}Warn: conversations-frontend memory usage is over 80% {{/is_warning}} {{#is_recovery}}Attention: memory was recovered.{{/is_recovery}}\n\n{{log.timestamp}}\n{{log.message}}\n{{log.link}}\n\n@dingtalk-dingtalk-vcn-frontend",
+  "tags": [
+    "team:vcn-frontend",
+    "domain:conversation"
+  ],
+  "priority": 2,
+  "options": {
+    "thresholds": {
+      "critical": 90,
+      "warning": 80
+    }
+  }
+}
