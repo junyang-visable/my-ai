@@ -2,4 +2,4 @@
 v-accio
 # harness-data: project trees are tracked; local-only harness artifacts stay out
 harness-data/*/.lock-baseline.json
-harness-data/*/tasks/*/evidence/
+harness-data/tasks/*/evidence/
