@@ -30,7 +30,7 @@ process-dir copy.
 1. **Kickoff pack**: `bash <kit>/harness brief <keywords>` — contract, the repo's
    notes, and matching playbooks all in one shot, so you don't ask questions
    that already have answers.
-2. **Create the task** (if none yet): `bash <kit>/harness task new <task>`.
+2. **Create the task** (if none yet): `bash <kit>/harness task new <ticket> [short description]`.
 3. **Clarify**:
    - Vague requirement → check the "enhanced skill routing" section for an
      available grill-type skill under the `clarify` stage; otherwise do the

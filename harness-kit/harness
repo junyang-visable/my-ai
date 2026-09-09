@@ -20,7 +20,7 @@
 #   ./harness validate [selfcheck|--strict|--stage X]   Run the unified validation pipeline
 #   ./harness lock <update|verify|list> Assertion lock (scope = active repo's smoke set)
 #   ./harness evidence <task> [layout|api|render|generic]   Collect failure evidence
-#   ./harness task new <name>           Create a task: process dir under <hd>/<alias>/tasks/, spec/plan in <repo>/docs/changes/<name>/
+#   ./harness task new <ticket> [desc]   Create a task: e.g. ./harness task new CTOOL-634 whatsapp integration → CTOOL-634-whatsapp-integration
 #   ./harness task list                 List tasks of the active repo
 #   ./harness context                   Print the contract text (paste into agent sessions or save as AGENTS.md)
 #   ./harness brief [keywords...]       Kickoff pack: contract + repo notes + matching playbooks + task list
@@ -228,7 +228,15 @@ NOTES_EOF
     a="$(require_active)"; load_env "$a"
     case "$sub" in
       new)
-        name="${1:?usage: ./harness task new <name>}"
+        ticket="${1:?usage: ./harness task new <ticket> [short-description]}"
+        shift; desc="$*"
+        if [ -n "$desc" ]; then
+          # kebab-case the description: lowercase, spaces/underscores → hyphens, strip non-alnum
+          slug="$(echo "$desc" | tr '[:upper:]' '[:lower:]' | tr ' _' '-' | sed 's/[^a-z0-9-]//g; s/--*/-/g; s/^-//; s/-$//')"
+          name="${ticket}-${slug}"
+        else
+          name="$ticket"
+        fi
         dst="$HARNESS_TASKS_DIR/$name"
         [ -e "$dst" ] && die "task already exists: $dst"
         # spec/plan are project artifacts → the target repo's docs/changes/;

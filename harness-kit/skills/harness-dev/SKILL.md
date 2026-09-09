@@ -75,7 +75,8 @@ contrast, are project artifacts committed in the target repo at
   into the target repo at `docs/changes/<name>/` (committed with the feature
   branch; multi-app tasks: one copy in the primary repo, cross-read by the
   other apps' sessions). Create tasks with
-  `bash <kit>/harness task new <name>` — it creates both dirs.
+  `bash <kit>/harness task new <ticket> [short description]` — it creates both dirs
+  (e.g. `harness task new CTOOL-634 whatsapp integration` → `CTOOL-634-whatsapp-integration`).
   If a task with the same name exists, read its `current.md` (mode + stage +
   single next step) and resume — never start a parallel one.
 - Legacy tasks (created before 2026-09) keep spec/plan inside their
@@ -114,8 +115,8 @@ contrast, are project artifacts committed in the target repo at
 
 ### Minimal mode (explicit user request only)
 
-1. `bash <kit>/harness task new <name>` creates a light task (process state in
-   harness-data, spec/plan skeleton at `<repo>/docs/changes/<name>/`): current.md
+1. `bash <kit>/harness task new <ticket> [desc]` creates a light task (process state in
+   harness-data, spec/plan skeleton at `<repo>/docs/changes/<task>/`): current.md
    records "mode: minimal" plus a one-line requirement; clarification Q&A
    conclusions go into spec.md as a few lines (no confirmed gate).
 2. Create a branch (hard prerequisite, same as §7).

@@ -136,7 +136,7 @@ CLI commands all act on the active repo:
 ./harness validate --strict         # full pipeline, three gate levels (blocking/warning/info)
 ./harness lock update               # record baseline once the smoke set is stable; verify detects tampering
 ./harness evidence task api         # collect evidence after failure; produces the next fix prompt
-./harness task new my-task          # process dir under <hd>/<active-repo>/tasks/, spec/plan in <repo>/docs/changes/my-task/
+./harness task new CTOOL-634 whatsapp integration   # → CTOOL-634-whatsapp-integration (ticket + kebab-cased description)
 ./harness context                   # print the contract text; paste it into agent sessions
 ./harness brief <keywords>          # kickoff pack: contract + repo notes + matching playbooks + tasks
 ```
