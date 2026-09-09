@@ -1,6 +1,10 @@
 # Completion evidence template (Definition of Done)
 
-> Copy this into `.harness/tasks/<task>/result.md` or paste it into the session.
+> File this as `evidence/completion.md` in the task dir (workspace mode:
+> `<harness-data>/tasks/<task>/evidence/`; install mode:
+> `.harness/tasks/<task>/evidence/`) — `result.md` itself stays a
+> three-section distillation (verified conclusions / residual risks /
+> pending confirmation) and only points here.
 > The evidence template is the anti-false-reporting measure that needs the
 > **least infrastructure** — no evidence, no completion.
 > Key rule: numbers must be reproducible; "tests passed" alone doesn't count.

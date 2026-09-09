@@ -55,8 +55,10 @@ bash .harness/feedback/validate.sh
 A requirement's spec/plan are project artifacts at `docs/changes/<task>/`
 (committed with the feature branch). Its process state lives under
 `.harness/tasks/<task>/`: `current.md` (stage + single next step), `result.md`
-(valid conclusions + residual risks), `history.md` (append-only), `evidence/`
-(screenshots / reports). When resuming in a new session, read `current.md` first.
+(three-section distillation: verified conclusions / residual risks / pending
+confirmation), `history.md` (append-only), `evidence/`
+(screenshots / reports; raw completion evidence → `evidence/completion.md`).
+When resuming in a new session, read `current.md` first.
 
 ## Minimal MCP / tool set
 
