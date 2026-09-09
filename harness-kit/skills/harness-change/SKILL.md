@@ -17,8 +17,9 @@ with symlinked deployment, `readlink -f` to resolve the real path first).
 Fallback: `/Users/yangjun/Desktop/my-ai/harness-kit`.
 spec/plan are **project artifacts** at `<repo>/docs/changes/<task>/`; harness
 process state (current/result/history/evidence) lives at
-`<hd>/<alias>/tasks/<task>/` (`<hd>` = the harness-data root, see
-harness-dev §4; install mode: process state at `<repo>/.harness/tasks/<task>/`).
+`<hd>/tasks/<task>/` (`<hd>` = the harness-data root — the task pool is
+global, not per-repo; see harness-dev §4; install mode: process state at
+`<repo>/.harness/tasks/<task>/`).
 Legacy tasks (created before 2026-09) keep spec/plan in the process dir —
 read and edit them where they are.
 

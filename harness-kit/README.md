@@ -20,13 +20,13 @@ half of the "model capability × environment capability" equation.
 ## Data model
 
 ```
-<hd>/                              ← the harness-data root (one tree per project)
-├── <alias>/                       ← per-project data (committable, follows YOU not the repo)
+<hd>/                              ← the harness-data root
+├── <alias>/                       ← per-project repo knowledge (committable, follows YOU not the repo)
 │   ├── config.sh                  # that repo's commands (the only file to adapt per stack)
 │   ├── notes.md                   # repo stack, verified commands, pitfalls
 │   ├── context/e2e-context.md     # E2E case context (entries/selectors/accounts)
-│   ├── tasks/<task>/              # process state: current / result / history + evidence/
 │   └── .lock-baseline.json        # assertion-lock baseline
+└── tasks/<task>/                  ← global task pool (all repos): current / result / history + evidence/
 
 knowledge-base/                    ← your own topic docs (manually curated; not harness-managed)
 
@@ -36,7 +36,7 @@ knowledge-base/                    ← your own topic docs (manually curated; no
 
 harness-kit/                       ← pure tool (this repo)
 ├── workspaces/<alias>.conf.sh     # thin registry: repo path (+ optional env defaults)
-├── playbooks/                     # cross-repo methodology (your distilled practices)
+├── playbooks/                     ← cross-repo methodology (your distilled practices)
 └── skill-routes.local.yaml        # local skill-routing config (gitignored)
 ```
 
@@ -56,7 +56,7 @@ migration.
 | Context        | knowledge loaded on demand     | `templates/docs/`, `.harness/context/`                                                                            |
 | Tooling        | reusable skills/commands/hooks | `skills/`, `commands/`, `.harness/hooks/`                                                                         |
 | Validation     | mechanical enforcement         | `.harness/feedback/` (validate / lint-arch / lock-tests / collect-evidence)                                       |
-| Loop           | state & resume                 | repo `docs/changes/<task>/{spec,plan}.md` (project artifacts) + `<hd>/<alias>/tasks/<task>/{current,result,history}.md + evidence/` |
+| Loop           | state & resume                 | repo `docs/changes/<task>/{spec,plan}.md` (project artifacts) + `<hd>/tasks/<task>/{current,result,history}.md + evidence/` |
 
 ## Quick start (workspace mode: drive any repo from the kit's repo; targets need zero install)
 
@@ -147,7 +147,7 @@ CLI commands all act on the active repo:
 | ------------ | ---------------------------------------------- | ------------------------------------------------------------------------ |
 | Project-specific | `<hd>/<alias>/notes.md`                    | that repo's stack, verified commands, pitfalls, conventions              |
 | Cross-repo   | `playbooks/<topic>.md`                        | methodology that holds in any repo; one topic per file, traceable to tasks |
-| Task-level   | `<hd>/<alias>/tasks/<task>/history.md`        | append-only process record                                               |
+| Task-level   | `<hd>/tasks/<task>/history.md`                | append-only process record                                               |
 
 The skills (harness-dev / harness-coding / harness-testing) write back to all three
 layers at wrap-up. Division of labor with agent built-in memory: memory is isolated per

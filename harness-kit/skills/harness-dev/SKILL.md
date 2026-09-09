@@ -1,7 +1,7 @@
 ---
 name: harness-dev
 description: Orchestrator entry point of the personal harness toolkit. Use when you want to develop another repo from the toolkit repo's session (e.g. "use harness-dev to work on repo X / do Y for repo X / cross-repo development") or mention harness-dev or registering a new workspace. Locates the kit, decides the execution mode (standard = default full flow with a multi-app design doc; minimal = skip design and patch directly, only on explicit request), registers or switches the target repo, runs health checks, creates tasks, enters the coding loop as the implementer, and distills lessons back into the kit at wrap-up.
-version: 1.5.0
+version: 1.6.0
 ---
 
 # Harness Dev — cross-repo development orchestrator
@@ -58,10 +58,11 @@ Below, `<kit>` refers to it.
    `<hd>/<alias>/context/e2e-context.md` when E2E needs arise.
 
 `<hd>` = the harness-data root: the kit's sibling `harness-data/` dir by
-default, overridable via `HARNESS_DATA_HOME`. One tree per project alias; it
-holds repo knowledge and task process state — a task's spec/plan, by
-contrast, are project artifacts committed in the target repo at
-`docs/changes/<task>/`.
+default, overridable via `HARNESS_DATA_HOME`. It has two layers: a per-alias
+tree (`<hd>/<alias>/`) holding repo knowledge (config.sh / notes.md / context),
+and a **global task pool** (`<hd>/tasks/<name>/`) shared across repos — a
+task's spec/plan, by contrast, are project artifacts committed in the target
+repo at `docs/changes/<task>/`.
 
 ## 5. Tasks and write permissions
 
@@ -70,8 +71,11 @@ contrast, are project artifacts committed in the target repo at
   user to add the repo to the workspace (Add Folder to Workspace) before
   starting — don't trial-and-error.
 - Harness-generated data splits by nature: **process state** (current /
-  result / history / evidence / rubric) lives under the harness-data root at
-  `<hd>/<alias>/tasks/<name>/`; **spec/plan are project artifacts** written
+  result / history / evidence / rubric) lives in the global task pool at
+  `<hd>/tasks/<name>/` (not per-repo; ticket-id task names keep it
+  collision-free, multi-app tasks hang naturally under one dir; `harness
+  task list` shows all tasks across repos with apps + stage); **spec/plan are
+  project artifacts** written
   into the target repo at `docs/changes/<name>/` (committed with the feature
   branch; multi-app tasks: one copy in the primary repo, cross-read by the
   other apps' sessions). Create tasks with

@@ -26,7 +26,7 @@ to specific test cases.
 | ----------- | ---------------------------------------------- | ----------------------------------------------------------- |
 | Full validation | `bash <kit>/harness validate [--strict]`   | `bash .harness/feedback/validate.sh [--strict]`              |
 | spec/plan   | `<repo>/docs/changes/<task>/` (project artifacts, committed with the branch) | `docs/changes/<task>/`                     |
-| Process state (current/result/history/evidence) | `<hd>/<alias>/tasks/<task>/` (see harness-dev §4 for `<hd>`) | `.harness/tasks/<task>/`                     |
+| Process state (current/result/history/evidence) | `<hd>/tasks/<task>/` (global pool; see harness-dev §4 for `<hd>`) | `.harness/tasks/<task>/`                     |
 | Assertion lock | `bash <kit>/harness lock verify`            | `python3 .harness/feedback/lock-tests.py verify`             |
 | Failure evidence | `bash <kit>/harness evidence <task> <kind>` | `bash .harness/feedback/collect-evidence.sh <task> <kind>`   |
 | Evidence template | `<kit>/.harness/rubric/evidence-template.md` | `.harness/rubric/evidence-template.md`                      |

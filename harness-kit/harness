@@ -21,7 +21,7 @@
 #   ./harness lock <update|verify|list> Assertion lock (scope = active repo's smoke set)
 #   ./harness evidence <task> [layout|api|render|generic]   Collect failure evidence
 #   ./harness task new <ticket> [desc]   Create a task: e.g. ./harness task new CTOOL-634 whatsapp integration → CTOOL-634-whatsapp-integration
-#   ./harness task list                 List tasks of the active repo
+#   ./harness task list                 List all tasks across repos (global pool)
 #   ./harness context                   Print the contract text (paste into agent sessions or save as AGENTS.md)
 #   ./harness brief [keywords...]       Kickoff pack: contract + repo notes + matching playbooks + task list
 #   ./harness doctor                    Health check for the active workspace
@@ -48,6 +48,28 @@ require_active() {
   echo "$a"
 }
 
+# Global task pool ($DATA/tasks): one line per task — name | involved apps | stage.
+# Note: multibyte chars only as grep literals / bash patterns — never inside
+# sed/awk bracket classes (C-locale sed mangles UTF-8 there).
+list_tasks() {
+  local d name cur found=0 raw apps stage
+  for d in "$DATA/tasks"/*/; do
+    [ -d "$d" ] || continue
+    name="$(basename "$d")"
+    [ "$name" = "_template" ] && continue
+    found=1
+    cur="$d/current.md"
+    raw="$(grep -m1 -E '^[-*] *(involved apps:|involved apps：|涉及应用:|涉及应用：)' "$cur" 2>/dev/null || true)"
+    apps="${raw#*:}"; apps="${apps#*：}"; apps="${apps# }"
+    apps="$(printf '%s' "$apps" | sed 's/ *# .*//' || true)"
+    raw="$(grep -m1 -E '^[-*] *(current stage:|current stage：|当前阶段:|当前阶段：)' "$cur" 2>/dev/null || true)"
+    stage="${raw#*:}"; stage="${stage#*：}"; stage="${stage# }"
+    stage="$(printf '%s' "$stage" | sed -e 's/ *# .*//' -e 's/`//g' || true)"
+    printf '%s\n  apps: %s | stage: %s\n' "$name" "${apps:-(see current.md)}" "${stage:-(see current.md)}"
+  done
+  [ "$found" = 1 ] || echo "(no tasks)"
+}
+
 # Load the active workspace and export engine-facing variables, then exec engine scripts.
 load_env() {
   local a="$1" conf repo pdata
@@ -66,7 +88,10 @@ load_env() {
   fi
   export HARNESS_REPO="$repo"
   export HARNESS_CONF="$pdata/config.sh"
-  export HARNESS_TASKS_DIR="$pdata/tasks"
+  # Tasks are global (not per-repo): one flat pool at the harness-data root,
+  # so cross-repo review needs no repo switching. Task names include the
+  # ticket id, which keeps them collision-free across repos.
+  export HARNESS_TASKS_DIR="$DATA/tasks"
   export HARNESS_LOCK_BASELINE="$pdata/.lock-baseline.json"
   # lock/evidence scripts also need these when invoked directly.
   # ':'-less default: an explicitly emptied SMOKE_GLOB in config.sh means
@@ -92,8 +117,9 @@ case "$cmd" in
     if [ -e "$conf" ]; then die "workspace already exists: $alias ($conf)"; fi
     cat > "$conf" <<EOF
 # workspace: $alias — thin registry (repo path + optional env defaults).
-# Repo knowledge + task process state live in the harness-data tree at $DATA/$alias/;
-# a task's spec/plan live in the repo itself at docs/changes/<task>/.
+# Repo knowledge lives in the harness-data tree at $DATA/$alias/;
+# task process state is global at $DATA/tasks/<task>/;
+# a task's spec/plan live in the repo itself at docs/changes/<task>.
 HARNESS_REPO="$repo"
 EOF
 
@@ -104,7 +130,7 @@ EOF
     if [ -e "$pdata" ]; then
       echo "  $pdata already exists — keeping it as is"
     else
-      mkdir -p "$pdata/context" "$pdata/tasks"
+      mkdir -p "$pdata/context"
       cat > "$pdata/config.sh" <<'EOF'
 # harness-kit project config — the ONLY file to adapt per stack.
 # Commands run via `bash -c`; empty commands are skipped with an info line.
@@ -125,7 +151,7 @@ EOF
 # $alias — repo notes
 
 > Stack, verified commands, pitfalls, and conventions for this repo.
-> Task-level history lives in tasks/<task>/history.md under this dir;
+> Task-level history lives in the harness-data root's tasks/<task>/history.md;
 > cross-repo lessons graduate to the kit's playbooks/.
 
 ## Stack & verified commands
@@ -255,7 +281,7 @@ NOTES_EOF
         echo "minimal mode (only on explicit user request): skip the full flow — record mode + one-liner in current.md; branch + validate guardrails still apply."
         ;;
       list)
-        ls -1 "$HARNESS_TASKS_DIR" 2>/dev/null | grep -v '^_template$' || echo "(no tasks)"
+        list_tasks
         ;;
       *) die "unknown subcommand: task $sub" ;;
     esac
@@ -308,8 +334,8 @@ NOTES_EOF
       done
     fi
     echo
-    echo "== tasks (read current.md first when resuming) =="
-    ls -1 "$HARNESS_TASKS_DIR" 2>/dev/null | grep -v '^_template$' || echo "(no tasks)"
+    echo "== tasks (global pool; read current.md first when resuming) =="
+    list_tasks
     ;;
 
   doctor)

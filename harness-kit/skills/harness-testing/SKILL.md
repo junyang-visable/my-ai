@@ -23,7 +23,7 @@ you judge from the requirement + Rubric + run results + evidence only.
 | ---------------------------- | --------------------------------------------------------- | ------------------------------------------------------------ |
 | E2E case context             | `<hd>/<alias>/context/e2e-context.md` (see harness-dev §4 for `<hd>`) | `.harness/context/testing/e2e-context.md`              |
 | Rubric template              | `<kit>/.harness/rubric/rubric-template.md`                | `.harness/rubric/rubric-template.md`                         |
-| Task dir (Rubric location)   | `<hd>/<alias>/tasks/<task>/rubric.md`                     | `.harness/tasks/<task>/rubric.md`                            |
+| Task dir (Rubric location)   | `<hd>/tasks/<task>/rubric.md` (global pool)               | `.harness/tasks/<task>/rubric.md`                            |
 | build hard gate              | `bash <kit>/harness validate --stage build`               | `bash .harness/feedback/validate.sh --stage build`           |
 | E2E execution                | driven by HARNESS_E2E_CMD in `<hd>/<alias>/config.sh`     | driven by HARNESS_E2E_CMD in `.harness/config.sh`            |
 | Assertion lock               | `bash <kit>/harness lock verify`                         | `python3 .harness/feedback/lock-tests.py verify`             |
