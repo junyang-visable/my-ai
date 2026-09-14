@@ -24,3 +24,9 @@
 - eslint baseline on main: 5 warnings (App.vue ×3 unused imports, Progress.vue, SuggestedTasks.vue) — 0 errors; warnings don't fail the gate
 - `@visable-dev/routing` is a transitive dep of `@visable-dev/vue` (via biz-launch-app-sdk) even after the direct dep was removed (FE-1064) — knip/depcheck will keep "finding" it installed; that's not a signal to re-add
 - Branch/commit convention: `FE-XXXX/<short-desc>` from latest origin/main, ticket id in every commit message (FE-1042/FE-1064 pattern)
+
+## CTOOL-679 round (2026-09-12)
+- Banner integration pattern (no Nuxt — plain Vite+vue-router SPA): `src/utils/alibabaOnboardingApi.ts` (native fetch + credentials:include against same-origin gateway path) + `src/composables/useAlibabaOnboarding.ts` (13 ALIBABA_EVENTS + GA4 via `useContextStore().googleAnalytics4` — this store carries the tracker, NOT a nuxtApp plugin) + App.vue mount between header and main. Whole app is logged-in-only, so visibility = composable's fail-closed gate alone.
+- GA4 payload here is free-form (`{event:'navigate', event_label, event_position}`) — unlike product-editor's typed EventSpecificPayloadGA4; don't copy types across repos.
+- Dev symlink for unpublished visable-vue components: `rm -rf node_modules/@visable-dev/vue && ln -s ../../../../project/visable-vue node_modules/@visable-dev/vue` (repo sits one level deeper: Desktop/project/customer-dashboard-frontend). No test stage configured in harness (no unit tests) — eslint fallback + type-check + build are the gates.
+- (CTOOL-679 design-align) Banner constrained to content width: wrap in `px-2 lg:px-4` outer + `mx-auto xl:max-w-[1440px]` inner (mirrors main's container classes exactly — note max-w only applies at xl in this app). Verify with getBoundingClientRect, not scaled screenshots.
