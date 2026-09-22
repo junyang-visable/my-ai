@@ -1,0 +1,33 @@
+{
+  "business-insights-frontend": {
+    "install": "yarn install",
+    "dev": "yarn dev",
+    "route": "/en/my-account/business-insights/{supplierId}"
+  },
+  "supplier-onboarding-frontend": {
+    "install": "pnpm install",
+    "dev": "pnpm dev",
+    "route": "/en/company-editor/{supplierId}/basic-info"
+  },
+  "visitors-frontend": {
+    "install": "npm install",
+    "dev": "npm run dev",
+    "route": "/en/my-account/visitors/{supplierId}"
+  },
+  "ad-center-frontend": {
+    "install": "npm install",
+    "dev": "npm run dev",
+    "route": "/en/campaigns/{supplierId}"
+  },
+  "product-editor-frontend": {
+    "install": "pnpm install",
+    "dev": "pnpm dev",
+    "route": "/en/my-account/supplier/{supplierId}/products-services"
+  },
+  "customer-dashboard-frontend": {
+    "install": "pnpm install",
+    "dev": "pnpm dev",
+    "route": "/en/company-overview/{supplierId}",
+    "portFlag": "--port"
+  }
+}
