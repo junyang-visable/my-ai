@@ -3,3 +3,7 @@ v-accio
 # harness-data: project trees are tracked; local-only harness artifacts stay out
 harness-data/*/.lock-baseline.json
 harness-data/tasks/*/evidence/
+# python bytecode caches
+__pycache__/
+# scratch env with live staging session cookie, local-only
+.scratch/memleak-stress/env.sh
