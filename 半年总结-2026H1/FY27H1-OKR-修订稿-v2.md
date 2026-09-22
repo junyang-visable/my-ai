@@ -16,7 +16,7 @@
 
 ## O1：【业务增长】构建 AI 驱动的商品管理与内容优化体系，通过 A/B 实验验证策略，提升商家效率与商品质量，支撑商品规模翻倍与质量提升的业务目标
 
-> **对部门目标的贡献**：O1 主体属业务线交付（Product Editor 改版与 AI 采纳率），不直接映射部门技术 O；其数据底座（GA4 迁移）同时是部门 O3-KR2 Defensive Tracking GA4 防线的收尾部分。
+> **对部门目标的贡献**：O1 主体属业务线交付（Product Editor 改版与 AI 采纳率），不直接映射部门技术 O；其数据底座（GA4 迁移）同时是部门 O3-KR2 Defensive Tracking GA4 防线的收尾部分；9 月起扩展承接 supplier 域 Nexus 业务需求（见 KR7）。
 
 ### KR1 【修订】数据基建
 
@@ -70,6 +70,20 @@
 * ~~技能完成率 ≥70%、写操作成功率 ≥90%~~ —— 指标未回收；后续重心转向 team plugin / marketplace 体系，并入 O2 呈现
 
 **部门对齐**：并入 O2-KR1（AI 基础设施的早期探索部分）。
+
+### KR7 【新增】Supplier 域 Nexus 项目群
+
+> KR7 【新增】：【Supplier 域 Nexus 项目群】以域级集成交付模式承接 Nexus supplier 前端需求，建立可复用的跨仓交付范式（2026-09 启动；H1 里程碑：WhatsApp staging + GTM Phase 1 合入）
+
+* KA1 - 跨仓集成范式：WhatsApp 设置页（CTOOL-634）横跨 5 仓一次打通——routing-lib 路由常量、visable-vue 导航入口、product-editor 设置页、wlw_nginx 边缘路由与 settings BFF 契约、iac 环境域名；routing 22.10.0-beta.1 六仓统一节奏。**5 仓集成需求 4 天到 Ready for QA（09-07 建票 → 09-11，Jira 时戳可查）**；范式直接复用于后续 BV（CTOOL-683）、AI Lead Enrichment（FE-1075）
+* KA2 - GTM Phase 1 账号创建（CTOOL-679 Epic）：六应用依赖统一升级（beta.7→beta.8，4/6 验证完成）+ supplier-id 注入 + 403 错误页门控（替代白屏）；提前定位 bv/status 403 为前端 X-Supplier-Id 缺失，消解跨团队阻塞（CTOOL-684/685/686 已完成，8 PR 推进中）
+* KA3 - 防御性交付：WA-2530 埋点与需求同步就位（0 事后补埋）；实验桶冲突提前治理
+* KA4 - 交付过程工程化：全程走个人 harness 工具链（spec→plan→code→test 门禁 + 全局任务池），CTOOL-679 累计 33+ 轮迭代留痕（my-ai git log 可查），跨仓决策可回溯
+* 状态说明：本 KR 于 2026-09 启动，H1 尾以里程碑呈现（WhatsApp staging + GTM 合入），主体交付在 H2（Fill Score / BV / AI Lead Enrichment）
+
+**部门对齐**：业务不映射部门 KR；KA4 仅作为 H2 认领 O2-KR2 Dev Agent（「≥70% 新需求」，现 20%）的流程迁移基础——**当期不作为贡献申报**（尚未使用 dev-agent，如实呈现）。
+
+**EN**: KR7 (new): Nexus supplier-frontend requirements delivered via a domain-level integration pattern — WhatsApp settings page spanning 5 repos in one pass (routing constant, nav entry, settings page, edge routes + BFF contract, IaC env), reaching Ready-for-QA in 4 days; GTM Phase 1 across 6 apps with unified beta pinning, supplier-id injection and 403 gating; tracking (WA-2530) shipped with the feature, zero retrofit. Delivery process itself engineered on the personal harness toolchain (33+ recorded iteration rounds). Started Sep 2026; H1 milestone = WhatsApp staging + GTM merge; main delivery lands in H2.
 
 ---
 
@@ -173,12 +187,12 @@
 | # | 事项 | 对应部门缺口/目标 | 说明 |
 |---|---|---|---|
 | 1 | **Monitoring Agent MVP 收尾**：≥5 次真实发布端到端跑通 + auto Jira 回流闭环 | O2-KR2 · Monitoring Agent（40%，9/30 到期） | 我是其交付人，9 月内直接拉到达成 |
-| 2 | **Dev Agent 采用率**：日常需求（Nexus 等）全部走 jira-lifecycle/dev-agent 流程并留度量 | O2-KR2 · Dev Agent「≥70% 新需求」（20%，部门最拖后腿） | CTOOL-634/679 本就走此流程，补度量记录即可，帮 O2 把 31.7% 拉起来 |
+| 2 | **Dev Agent 试点与采用**：以 1-2 个 Nexus 需求试点 dev-agent 流程，跑通后逐步全量并留度量 | O2-KR2 · Dev Agent「≥70% 新需求」（20%，部门最拖后腿） | 当前交付走个人 harness 工具链、尚未用 dev-agent——需真实切换试点后才可计入采用率；个人 harness 流程是迁移基础 |
 | 3 | **GA4 防线补全**：visitors / business-insights 迁移合并发布 + 防线覆盖业务 KPI | O3-KR2 · GA4（50% Pending） | 收尾交付人 |
 | 4 | **Stability 存量治理启动**：buyer 核心场景（HP/CSERP/PSERP/CPP/PDP/RFQ）问题 remediation | O3-KR4（80%） | 主体交付人的最后一段 |
 | 5 | **harness orchestrator dashboard**：全局任务池 + Jira 状态流转追踪 | O2-KR1 · dashboard 子目标（40/100，8/15 已过期） | harness-kit 任务池是现成雏形 |
 | 6 | **Loop Engineering 立项**：harness 全链路（spec→plan→code→test→commit）自闭环 MVP | O2-KR3（0% 未启动） | H2 个人立项方向，抢占部门空白 |
-| 7 | **Nexus 项目群交付**：WhatsApp（CTOOL-634，Ready for QA→合并+staging）→ GTM Phase 1（CTOOL-679）→ Fill Score（CTOOL-678）→ BV（CTOOL-683）→ AI Lead Enrichment（FE-1075） | ——（H2 业务范围） | 按 roadmap 推进 |
+| 7 | **Nexus 项目群交付**（即 KR7 主体，H2 范围）：Fill Score（CTOOL-678）→ BV（CTOOL-683，10-01 发版）→ AI Lead Enrichment（FE-1075）；H1 尾收 WhatsApp staging + GTM Phase 1 合入 | ——（H2 业务范围） | 按 roadmap 推进 |
 | 8 | **Supplier 技术重构**（FE-1062）+ 长线：unified-search / visitors Nuxt 4（FE-740/745）、cr-frontend HITL 2.0（FE-1043/1076/1077） | —— | 依赖整合方案拍板 |
 
 ## 一页速览（含部门对齐）
@@ -191,6 +205,7 @@
 | O1-KR4 | 维持划线 | —— | 原样 |
 | O1-KR5 | 改写 | O3-KR3 · 参与者 | HITL 落地；独立 AB 框架划线 |
 | O1-KR6 | 改写收尾态 | 并入 O2-KR1 | 架构交付写实；上线指标划线 |
+| O1-KR7 | **新增** | ——（业务）；KA4 为 H2 Dev Agent 迁移基础 | Nexus 跨仓范式：5 仓 4 天到 QA、埋点随发就位、GTM 六仓统一 |
 | O2-KR1 | 改写 | O2-KR1 RepoWiki · **交付人** | 资产规范 100% 写死；AI Lines 删除给替代口径 |
 | O2-KR2 | 超额标注 | O2-KR1 FE AI Plugin · **交付人** | 1 skill → 双端分发 + 4 项迭代 + marketplace |
 | O2-KR3 | 超额标注 | O2-KR1 Skills 计数 · 贡献者 | ≥1 工作流 → 实际 3 个 |

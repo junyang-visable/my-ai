@@ -67,7 +67,7 @@ flowchart TD
 
 ## 四、可认领的部门缺口（低投入高回报）
 
-1. **O2-KR2 · Dev Agent「≥70% 新需求走 dev agent」仅 20% 且 Pending** —— 部门 O2 最拖后腿的一条。你的 CTOOL-634/679 等需求本来就全程走 jira-lifecycle/dev-agent 流程，把日常需求切过去并留度量记录，即是最低成本的增量贡献，同时帮 O2 把 31.7% 拉起来。
+1. **O2-KR2 · Dev Agent「≥70% 新需求走 dev agent」仅 20% 且 Pending** —— 部门 O2 最拖后腿的一条。注意：我当前的需求交付走的是个人 harness 工具链（spec→plan→code→test 门禁），**尚未使用团队 dev-agent**；H2 若以 1-2 个 Nexus 需求试点 dev-agent 并逐步全量、留度量记录，即成为该子目标的增量贡献，同时帮 O2 把 31.7% 拉起来。个人 harness 流程是现成的迁移基础，但从 0 到「≥70% 采用」仍需真实切换与度量，不可提前申报。
 2. **O2-KR1 · harness orchestrator dashboard**（8/15 目标，40/100 Pending）—— harness-kit 全局任务池 + task 状态机（f48279e）是现成雏形，补 Jira 状态流转追踪即可。
 3. **O2-KR3 · Loop Engineering 0% 未启动** —— harness 全链路（spec→plan→code→test→commit）是自闭环的天然种子，H2 可作为个人立项方向抢占先机。
 

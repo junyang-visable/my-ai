@@ -64,6 +64,18 @@
 * 已交付：Visable Assistant（Accio）插件架构（v-agent-hub-bamboo）、supplier-backend-mcp-service MCP 工具、三技能脚手架、跨用户上下文串用缺陷修复（CTOOL-589）
 * ~~技能完成率 ≥70%、写操作成功率 ≥90%~~ —— 指标未回收；后续重心已转向 team plugin / marketplace 体系，该方向并入 O2 呈现
 
+### KR7 【新增】Supplier 域 Nexus 项目群
+
+> KR7 【新增】：【Supplier 域 Nexus 项目群】以域级集成交付模式承接 Nexus supplier 前端需求，建立可复用的跨仓交付范式（2026-09 启动；H1 里程碑：WhatsApp staging + GTM Phase 1 合入）
+
+* KA1 - 跨仓集成范式：WhatsApp 设置页（CTOOL-634）横跨 5 仓一次打通——routing-lib 路由常量、visable-vue 导航入口、product-editor 设置页、wlw_nginx 边缘路由与 settings BFF 契约、iac 环境域名；routing 22.10.0-beta.1 六仓统一节奏。**5 仓集成需求 4 天到 Ready for QA（09-07 建票 → 09-11，Jira 时戳可查）**；范式直接复用于后续 BV（CTOOL-683）、AI Lead Enrichment（FE-1075）
+* KA2 - GTM Phase 1 账号创建（CTOOL-679 Epic）：六应用依赖统一升级（beta.7→beta.8，4/6 验证完成）+ supplier-id 注入 + 403 错误页门控（替代白屏）；提前定位 bv/status 403 为前端 X-Supplier-Id 缺失，消解跨团队阻塞（CTOOL-684/685/686 已完成，8 PR 推进中）
+* KA3 - 防御性交付：WA-2530 埋点与需求同步就位（0 事后补埋）；实验桶冲突提前治理
+* KA4 - 交付过程工程化：全程走个人 harness 工具链（spec→plan→code→test 门禁 + 全局任务池），CTOOL-679 累计 33+ 轮迭代留痕（my-ai git log 可查），跨仓决策可回溯
+* 状态说明：本 KR 于 2026-09 启动，H1 尾以里程碑呈现（WhatsApp staging + GTM 合入），主体交付在 H2（Fill Score / BV / AI Lead Enrichment）
+
+**EN**: KR7 (new): Nexus supplier-frontend requirements delivered via a domain-level integration pattern — WhatsApp settings page spanning 5 repos in one pass (routing constant, nav entry, settings page, edge routes + BFF contract, IaC env), reaching Ready-for-QA in 4 days; GTM Phase 1 across 6 apps with unified beta pinning, supplier-id injection and 403 gating; tracking (WA-2530) shipped with the feature, zero retrofit. Delivery process itself engineered on the personal harness toolchain (33+ recorded iteration rounds). Started Sep 2026; H1 milestone = WhatsApp staging + GTM merge; main delivery lands in H2.
+
 ---
 
 ## O2：【效率效能】深化 AI Coding 应用，规范 Supplier 侧技术资产，沉淀可复用的 AI 开发工作流，显著提升个人及团队研发效率
@@ -172,6 +184,7 @@
 | O1-KR4 | 维持划线 | 原样 |
 | O1-KR5 | 改写 | HITL 实践落地；独立 AB 框架划线，实验桶治理如实呈现 |
 | O1-KR6 | 改写收尾态 | 架构交付写实；上线指标划线；方向并入 O2 |
+| O1-KR7 | **新增** | Nexus supplier 域跨仓交付范式：WhatsApp 5 仓 4 天到 QA、GTM 六仓统一、埋点随发就位 |
 | O2-KR1 | 改写 | 资产规范 100% 写死；AI Lines 80% 删除并给 H2 口径替代 |
 | O2-KR2 | 超额标注 | 1 个 skill → 双端分发 + 4 项能力迭代 + marketplace |
 | O2-KR3 | 超额标注 | ≥1 个工作流 → 实际 3 个 |
@@ -180,4 +193,4 @@
 | O3-KR2 | 探索→交付 | Monitoring Agent Phase 1 + fe-stability 自动化 + QA 平台 |
 | O3-KR3 | 改写 | 错误总量 XX% → 误报治理专项；总量口径 H2 回收 |
 | O3-KR4 | **新增** | Supplier 域交接与技术治理（8 月新增职责） |
-| Nexus 项目群 | 不入 H1 | WhatsApp/GTM/FillScore/BV/AI Lead Enrichment → 「接下来的规划」/ H2 OKR 雏形 |
+| Nexus 项目群（H2 主体） | 已入 O1-KR7（H1 里程碑：WhatsApp staging + GTM 合入）；FillScore/BV/AI Lead Enrichment → 「接下来的规划」/ H2 OKR 雏形 |
