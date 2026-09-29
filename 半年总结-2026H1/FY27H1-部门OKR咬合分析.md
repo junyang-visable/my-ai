@@ -50,7 +50,7 @@ flowchart TD
 
 | # | 部门 KR | 进度 | 个人对应交付（证据） | 该 KR 剩余缺口 = 你的收尾范围 |
 |---|---|---|---|---|
-| 1 | **O2-KR2 · Monitoring Agent MVP**（9/30） | 40% | FE-907 Phase 1 全部 Done（M1 Subagent+Skill 脚手架 / M2 四路监控能力 / M3 编排+报告+触发 / M4 集成验证），FE-984 v2 进行中（五信号源含 AWS、按错误类型展示、能力目录、失败模式推导、置信评估）+ 4 份生命周期文档（FE-923/924/925/926） | ≥5 次真实发布端到端跑通；auto Jira 回流闭环（异常→工单→回流）。**9 月收尾正好完成这条部门 KR** |
+| 1 | **O2-KR2 · Monitoring Agent MVP**（9/30） | 40% | FE-907 Phase 1 全部 Done（M1 Subagent+Skill 脚手架 / M2 四路监控能力 / M3 编排+报告+触发 / M4 集成验证），FE-984 v2 进行中（五信号源含 AWS、按错误类型展示、能力目录、失败模式推导、置信评估）+ 4 份生命周期文档（FE-923/924/925/926） | ≥5 次真实发布端到端跑通；auto Jira 回流闭环（异常→工单→回流）。**9/30 未达成——留作 H2 收尾缺口（不写入本期 KR）** |
 | 2 | **O3-KR4 · Frontend Stability** | 80% | Stability SDK 8 站点组合全量推全（FE-849~852）+ 多国站点接入（FE-789）；supplier 6 应用可观测性补齐（FE-1028/1029~1034/1045，5/6 缺失→全部达基线）；Datadog 统一模板批量导入订阅（FE-1066/1067/1068 Done）；fe-stability-analysis 打通 ODPS；BI 接 Sentry；FE-1037 误报治理 | 存量问题 remediation 启动、buyer 核心场景治理收尾。**你承担了这条 KR 的主体交付** |
 | 3 | **O2-KR1 · RepoWiki 全应用初始化**（Q1 目标，现 90%） | 90% | 个人完成 7 个仓库初始化并发布：supplier 6 应用（#94/#317/#242/#584/#31/#76）+ product-editor schema v2 重建（#88/#94） | 剩余为其他团队应用，你无欠账 |
 | 4 | **O2-KR1 · FE AI Plugin v1**（H1 团队采用） | — | Visable FE AI Plugin：Team AI Rules SSOT（.mdc 双端）+ cr-frontend Skill + visable-plugin-marketplace 统一分发（Cursor+Qoder）+ 使用指南推广（FE-845/788/1042） | 推广使用率数据回收 |
@@ -82,14 +82,16 @@ flowchart TD
 
 | 个人 KR | 部门 OKR 对齐 | 关系说明 |
 |---|---|---|
-| O2-KR2 工具沉淀（cr-frontend + marketplace） | O2-KR1 Frontend AI Infrastructure（FE AI Plugin v1） | 交付人 |
-| O2-KR4【新增】AI 管理平台 | O2-KR1（AI 基础设施的一部分） | 交付人 |
-| O3-KR2 AI 智能运维（Monitoring Agent） | **O2-KR2 Harness Agent Orchestration · Monitoring Agent MVP（9/30）** | 交付人 |
+| O2-KR1 Monitoring Agent | O2-KR2 Harness Agent Orchestration · Monitoring Agent（Phase 1 已交付；MVP 子目标未完成，H2 收尾） | 交付人（MVP 子目标除外） |
+| O2-KR2 监控覆盖度诊断 | O2-KR2（覆盖度诊断 FE-984） | 交付人 |
+| O2-KR3 AI 资产平台 | O2-KR1（AI 基础设施的承载平台；含 QA Evaluation Platform FE-930） | 交付人 |
+| O2-KR4 AI 资产沉淀（cr-frontend + 插件套件 + 规则单源化 + repoWiki） | O2-KR1 Frontend AI Infrastructure（FE AI Plugin v1 + RepoWiki 全应用初始化 + ≥15 Skills 计数） | 交付人 |
 | O3-KR1 监控全覆盖（全域 100%） | **O3-KR4 Frontend Stability（9/30 SDK 全集成+四路数据连通）** | 主体交付人 |
 | O3-KR3 误报治理专项 | O3-KR4（存量问题治理的组成部分） | 贡献者 |
 | O1-KR1 数据基建（GA4 迁移） | O3-KR2 Defensive Tracking · GA4 防线（50%→收尾） | 收尾交付人 |
-| O2-KR1 资产规范（repoWiki 6/6） | O2-KR1 · RepoWiki 全应用初始化（90%） | 交付人（供应商域部分） |
-| O1-KR2 新商转化 / O2-KR3 流程创新 | （团队业务线 / O2-KR1 Skills 计数） | 参与者 |
+| O1-KR2 新商转化 | （团队业务线） | 参与者 |
 | Nexus 项目群（H2） | ——（H2 范围，暂不映射） | —— |
+
+> 注：2026-09-28 按领导意见完成 O2 重组——「效率效能」→「前端 Harness 工程」两条主线（Monitoring Agent / AI 基建），原 O3-KR2「AI 智能运维」移入 O2-KR1/KR2，原 O2-KR1/KR2/KR3 合并为 O2-KR4、原 O2-KR4 调整为 O2-KR3。上表按新编号。
 
 **一句话总结**：部门 O2（AI-native 工程基座，31.7%）是当前短板，而你的 Monitoring Agent、FE AI Plugin、RepoWiki、Skills 正是 O2-KR1/KR2 的实际交付物；部门 O3-KR4（Stability）和 O3-KR2 GA4 两条已进入收尾期的 KR 也由你承担主体/收尾。你的半年工作恰好压在部门 OKR 最需要的两个方向上。

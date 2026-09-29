@@ -3,7 +3,7 @@
 > 基准：[FY27 H1 OKR - Yang, Eric](https://visable.atlassian.net/wiki/spaces/~71202075c2285d8115445a8b9dc5244bebf36f)（v1，2026-06-11）
 > 部门目标：[OKRs FY2027 - FE Department](https://home.atlassian.com/o/132de72c-a57c-4f54-8d6f-b60a3f8fcf4f/s/6661348b-dad9-44d9-b90d-e6ab64f9f894/goal/VISAB3-118/about)（VISAB3-118，Ran Wang，66.2%；三个 O owner 均为 Bin Xu，2026-09-21 实测）
 > v1 → v2 变化：每条 KR 增加**部门 OKR 对齐**行；每个 O 增加对部门目标的贡献摘要；「接下来的规划」按部门缺口认领重排。修订原则与划线留痕同 v1（见 `FY27H1-OKR-修订稿.md`）
-> 标记：~~删除线~~ = 取消/移出；`[修订]` = 原文改写；`[新增]` = 本期新增 KR；**交付人 / 主体交付 / 收尾 / 参与者** = 与部门 KR 的关系
+> 标记：~~删除线~~ = 取消/移出；`[修订]` = 原文改写；`[新增]` = 本期新增 KR；**交付人 / 主体交付 / 收尾 / 参与者** = 与部门 KR 的关系；【重组】= O2 结构调整（2026-09 领导意见）的移入/合并
 > 本文仅为本地审阅稿，未经确认不更新 Confluence 页面
 
 ---
@@ -87,56 +87,63 @@
 
 ---
 
-## O2：【效率效能】深化 AI Coding 应用，规范 Supplier 侧技术资产，沉淀可复用的 AI 开发工作流，显著提升个人及团队研发效率
+## O2：【前端 Harness 工程】建设前端研发 Harness，聚焦 Monitoring Agent 与 AI 研发基建两个方向，沉淀可复用的工具与工作流，显著提升团队研发效率
 
-> **对部门目标的贡献**：**本条是部门 O2（AI-native 工程基座，31.7%，部门当前最大短板）的主要推进项**。部门 O2 的量化目标是 H1 需求吞吐 +100% / H2 +300%；其 KR1（AI 基础设施，60%）的 RepoWiki、FE AI Plugin、Skills 计数、人日评估 agent 四个子项我均有直接交付。
+> **对部门目标的贡献**：**本条是部门 O2（AI-native 工程基座，31.7%，部门当前最大短板）的主要推进项**，且两条主线与部门 O2 两条 KR 一一对应——主线一 Monitoring Agent ↔ 部门 O2-KR2 Harness Agent Orchestration（35%，我是其 Monitoring Agent 主体的交付人）；主线二 AI 基建 ↔ 部门 O2-KR1 Frontend AI Infrastructure（60%）的 RepoWiki、FE AI Plugin、Skills 计数、人日评估 agent 子项，我均有直接交付。
+>
+> （O 描述按领导 2026-09 意见改写：由「泛效率」收敛为「前端 Harness 工程」两条明确主线。原 O2 四条 KR 并入下方 KR3 / KR4；原 O3-KR2「AI 智能运维」整条移入主线一 KR1 / KR2——与部门 OKR 将 Monitoring Agent 归于 O2 的归属一致，避免双处申报）
 
-### KR1 【修订】资产规范 & AI 渗透
+### KR1 【重组·自 O3-KR2 移入】Monitoring Agent
 
-> KR1：【资产规范 & AI 渗透】完成 supplier 侧全部 6 个前端应用的技术资产规范化，达标率 100%（Q2 达成）
+> KR1:【Monitoring Agent】交付 Monitoring Agent 线上监控能力，实现多信号源自动采集、自动总结与巡检报告（Phase 1 已交付）
 
-* KA1: repoWiki 知识库 6/6 初始化并全量发布（schema v2），另完成 product-editor schema v2 重建——**共 7 仓**
-* KA2: Cursor Rules 升级为团队级 Team AI Rules 单一源（.mdc），Cursor / CLAUDE.md 双端同步，marketplace 统一分发
-* ~~个人 AI Lines 占比提升至 80%~~ —— 无回收口径，移除（H2 替代：Qoder / Cursor 面板 AI 归因占比，月度记录）
+* KA1: Monitoring Agent Phase 1（FE-907，M1-M4 全 Done）：五信号源自动采集（Datadog / Sentry / 稳定性 SDK / Defensive SEO / 埋点巡检 + 新增 AWS 第 5 源）、定时巡检、结构化监控报告
+* KA2: fe-stability-analysis Skill（FE-872）：稳定性周报端到端自动化，覆盖核心应用，故障定位数据获取从小时级降到分钟级
+* 来源：原 O3-KR2「AI 智能运维」的 Phase 1 与 fe-stability-analysis 部分移入
 
-**部门对齐**：**O2-KR1 Frontend AI Infrastructure（VISAB3-153，60%）—— 交付人**。其子目标「RepoWiki 标准定稿+全应用初始化（Q1）」现 90%，我承担供应商域全部 7 仓，无欠账。
+**部门对齐**：**O2-KR2 Harness Agent Orchestration（VISAB3-186，35%）—— 交付人**：Monitoring Agent Phase 1 与四份生命周期文档（FE-923/924/925/926）是该 KR Monitoring Agent 线的主体交付；MVP 子目标（≥5 次端到端发布 + auto Jira）9/30 未达成，**不写入本期 KR，留作 H2 收尾缺口**（见「接下来的规划」第 1 项）。
 
-### KR2 【超额达成】工具沉淀
+### KR2 【重组·自 O3-KR2 移入】监控覆盖度诊断
 
-> KR2：【工具沉淀】沉淀并落地可复用的 Cursor Skills/Agent 并在团队内推广（Q1 达成；实际交付超出 ≥1 目标）
+> KR2:【监控覆盖度诊断】建立需求级监控覆盖度诊断机制——覆盖诊断 → 筛选登记 → 上线核对（v2 进行中）
 
-* KA1: cr-frontend Code Review Skill 搭建完成并推广到全域（Cursor + Qoder 双端 marketplace 安装）
-* KA2: 能力持续迭代 4 项：HITL 修复确认、SSR 安全规则（FE-1042）、SEO 评估合并、AB 实验清理评估
-* KA3: visable-plugin-marketplace 统一分发仓库建立（含 manage_github 配置与《使用指南》推广）
+* KA1（进行中）: v2 监控覆盖度诊断（FE-984）：需求链路解析、失败模式推导、现有信号匹配器、置信评估模型
+* KA2: 配套机制 —— 覆盖筛选登记（coverage-filter）与上线核对（requirement-guard）技能，与覆盖度诊断组成需求级闭环
+* 来源：原 O3-KR2 的 v2 部分移入，QA Evaluation Platform 移入 KR3；原 O2-KR3「AI 辅助 PRD 解析工作流」并入需求链路解析
 
-**部门对齐**：**O2-KR1 · 「FE AI Plugin v1 团队采用（H1）」—— 交付人**；同时计入「≥15 个生产级 AI Skills 覆盖 Intake→Spec→Dev→Deploy→QA」份额（harness 六件套 + jira-lifecycle 全家桶 + cr-frontend + fe-stability-analysis + GA4 校验等）。
+**部门对齐**：**O2-KR2 Harness Agent Orchestration —— 交付人**（覆盖度诊断属部门 Monitoring Agent 线）。
 
-### KR3 【超额达成】流程创新
+### KR3 【并入原 O2-KR4】AI 资产平台
 
-> KR3：【流程创新】输出并落地可复用的 AI 工作流并形成最佳实践（Q2 达成；实际交付 ≥2 个，超出 ≥1 目标）
-
-* KA1: AI 驱动 Code Review 工作流（cr-frontend，团队可用）
-* KA2: AI 辅助 PRD 解析工作流（Monitoring Agent 需求链路：PRD → AC → feature_list → commit/PR）
-* KA3: 稳定性报告自动化工作流（fe-stability-analysis：每周 1-2 小时人工分析 → 分钟级自动报告）
-
-**部门对齐**：O2-KR1 · Skills/工作流计数 —— 贡献者（多项计入 15-Skills 目标）。
-
-### KR4 【新增】AI 能力管理平台
-
-> KR4 【新增】：【AI 平台建设】交付 AI Management Platform Phase 1，为内部 Skill / MCP 资产提供统一的发现、安装、发布入口（8 月达成）
+> KR3:【AI 资产平台】交付 AI Management Platform Phase 1，为内部 Skill / MCP / 规则资产提供统一的发现、安装、发布入口（8 月达成）；同步交付 QA Evaluation Platform 支撑 AI 质量评估（FE-930）
 
 * 背景：6-8 月最大单项工程产出，原 OKR 未覆盖，补录为正式 KR
 * KA1: v-ai-platform 从 0 到 1（React + Vite、企业 SSO、开放市场：发现/详情/收藏/发布/安装/个人中心），12 子任务全部 Done（FE-831）
 * KA2: 部署与基础设施（staging + 生产流水线、IaC、独立域名 ai.visable.com，PIT-3398）
 * KA3: 过程资产：中英双语 PRD、SSO 技术方案、Nuxt 4 迁移、repoWiki 同步
+* KA4: QA Evaluation Platform 前端（FE-930，6 子任务 Done），支撑 AI 质量评估——自原 O3-KR2 配套移入
+* 来源：原 O2-KR4 整条并入 + QA Evaluation Platform（原 O3-KR2 配套）移入
 
-**部门对齐**：O2-KR1（AI 基础设施的承载平台）—— 交付人；同时是部门「人工 vs AI 人日评估 agent + 效率基准」（50% 子目标）的对口能力底座（legacy-pd-estimator Skill + Codex 古法人日评估 Question Log）。
+**部门对齐**：O2-KR1（AI 基础设施的承载平台，含 QA Evaluation Platform）—— 交付人；同时是部门「人工 vs AI 人日评估 agent + 效率基准」（50% 子目标）的对口能力底座（legacy-pd-estimator Skill + Codex 古法人日评估 Question Log）。
+
+### KR4 【重组·合并原 O2-KR1/KR2/KR3】AI 资产沉淀
+
+> KR4:【AI 资产沉淀】产出并推广团队级 AI 研发资产——cr-frontend 代码审查技能、域代理插件套件双端分发、团队级编码规则单源化、repoWiki 知识库（Q1-Q2 达成；实际交付远超原「≥1 个 Skill」目标）
+
+* KA1: cr-frontend Code Review Skill 搭建完成并推广到全域（Cursor + Qoder 双端 marketplace 安装）；能力持续迭代 4 项：HITL 修复确认、SSR 安全规则（FE-1042）、SEO 评估合并、AB 实验清理评估
+* KA2: 域代理插件套件双端分发（Cursor + Qoder），覆盖 Intake→Spec→Dev→Deploy→QA 全链路（harness 六件套 + jira-lifecycle 全家桶 + fe-stability-analysis + GA4 校验等，计入部门「≥15 个生产级 AI Skills」份额）；visable-plugin-marketplace 统一分发仓库（含 manage_github 配置与《使用指南》推广）
+* KA3: 团队级编码规则单源化 —— Cursor Rules 升级为 Team AI Rules 单一源（.mdc），Cursor / CLAUDE.md 双端同步，marketplace 统一分发
+* KA4: repoWiki 知识库 6/6 初始化并全量发布（schema v2），另完成 product-editor schema v2 重建——**共 7 仓**，作为规则与技能的知识内容源
+* ~~个人 AI Lines 占比提升至 80%~~ —— 无回收口径，移除（H2 替代：Qoder / Cursor 面板 AI 归因占比，月度记录）
+* 来源：原 O2-KR1（资产规范）、KR2（工具沉淀）、KR3（流程创新）并入——原 KR3 的 CR 工作流并入 KA1、稳定性报告自动化移入 KR1、PRD 解析移入 KR2
+
+**部门对齐**：**O2-KR1 Frontend AI Infrastructure（VISAB3-153，60%）—— 交付人**：「FE AI Plugin v1 团队采用（H1）」我交付；「RepoWiki 标准定稿+全应用初始化（Q1）」现 90%，供应商域全部 7 仓由我承担、无欠账；Skills 计入「≥15 个生产级 AI Skills 覆盖 Intake→Spec→Dev→Deploy→QA」份额。
 
 ---
 
 ## O3：【稳定性】保障前端全域应用稳定性，完善监控告警与应急响应体系，确保持续零 P0/P1 故障
 
-> **对部门目标的贡献**：部门 O3-KR4 Frontend Stability（VISAB3-151，80%）的**主体交付人**——其 9/30 目标「全核心应用 Stability SDK 集成 + Datadog/Sentry/ODPS/埋点巡检四路数据连通」即我的 O3-KR1/KR2/KR3 交付物；同时作为 **O2-KR2 Monitoring Agent MVP 的交付人**反向支撑部门 O2。
+> **对部门目标的贡献**：部门 O3-KR4 Frontend Stability（VISAB3-151，80%）的**主体交付人**——其 9/30 目标「全核心应用 Stability SDK 集成 + Datadog/Sentry/ODPS/埋点巡检四路数据连通」即我的 O3-KR1/KR3 交付物（原 O3-KR2 Monitoring Agent 已移入 O2 主线一，作为部门 O2-KR2 Monitoring Agent MVP 的交付人直接支撑部门 O2）。
 
 ### KR1 【修订·范围扩大】监控全覆盖
 
@@ -148,16 +155,11 @@
 
 **部门对齐**：**O3-KR4 Frontend Stability（VISAB3-151，80%）—— 主体交付人**。其描述中「Sentry & Sunfire 100% SDK 覆盖 + Datadog/Sentry/ODPS/埋点巡检数据连通」四路对应我 KA1~KA3 + fe-stability-analysis 的 ODPS 链路。
 
-### KR2 【修订·探索→交付】AI 智能运维
+### KR2 【移出，划线留痕】AI 智能运维
 
-> KR2：【AI 智能运维】交付 Monitoring Agent 线上监控能力，实现多信号源自动采集、自动总结与巡检报告（Phase 1 已交付；v2 覆盖度诊断进行中）
+~~KR2：【AI 智能运维】交付 Monitoring Agent 线上监控能力，实现多信号源自动采集、自动总结与巡检报告~~
 
-* KA1: Monitoring Agent Phase 1（FE-907，M1-M4 全 Done）：五信号源自动采集（含 AWS 第 5 源）、定时巡检、结构化监控报告
-* KA2: fe-stability-analysis Skill（FE-872）：稳定性周报端到端自动化，数据获取从小时级降到分钟级
-* KA3（进行中）: v2 监控覆盖度诊断（FE-984）：需求链路解析、失败模式推导、信号匹配器、置信评估模型
-* 配套：QA Evaluation Platform 前端（FE-930，6 子任务 Done）
-
-**部门对齐**：**O2-KR2 Harness Agent Orchestration（VISAB3-186，35%）· Monitoring Agent MVP（9/30：e2e 回归、埋点校验、异常检测、auto Jira，≥5 次端到端发布）—— 交付人**。该子目标现 40%，我的 9 月收尾（≥5 次真实发布跑通 + auto Jira 回流）直接把它拉到达成；四份生命周期文档（FE-923/924/925/926）就是其交付物。
+* 移出原因：领导 2026-09 意见将 O2 收敛为「前端 Harness 工程」两条主线（Monitoring Agent / AI 基建），Monitoring Agent 整条移入 O2-KR1 / KR2——与部门 OKR 将 Monitoring Agent 归于 O2（Harness Agent Orchestration）的归属一致，避免 O2 / O3 双处申报
 
 ### KR3 【修订】误报治理专项
 
@@ -186,7 +188,7 @@
 
 | # | 事项 | 对应部门缺口/目标 | 说明 |
 |---|---|---|---|
-| 1 | **Monitoring Agent MVP 收尾**：≥5 次真实发布端到端跑通 + auto Jira 回流闭环 | O2-KR2 · Monitoring Agent（40%，9/30 到期） | 我是其交付人，9 月内直接拉到达成 |
+| 1 | **Monitoring Agent MVP 收尾**：≥5 次真实发布端到端跑通 + auto Jira 回流闭环 | O2-KR2 · Monitoring Agent（40%，9/30 到期） | 我是该子目标交付人；MVP 9/30 未达成，H2 收尾（本期 KR 已如实排除） |
 | 2 | **Dev Agent 试点与采用**：以 1-2 个 Nexus 需求试点 dev-agent 流程，跑通后逐步全量并留度量 | O2-KR2 · Dev Agent「≥70% 新需求」（20%，部门最拖后腿） | 当前交付走个人 harness 工具链、尚未用 dev-agent——需真实切换试点后才可计入采用率；个人 harness 流程是迁移基础 |
 | 3 | **GA4 防线补全**：visitors / business-insights 迁移合并发布 + 防线覆盖业务 KPI | O3-KR2 · GA4（50% Pending） | 收尾交付人 |
 | 4 | **Stability 存量治理启动**：buyer 核心场景（HP/CSERP/PSERP/CPP/PDP/RFQ）问题 remediation | O3-KR4（80%） | 主体交付人的最后一段 |
@@ -206,12 +208,13 @@
 | O1-KR5 | 改写 | O3-KR3 · 参与者 | HITL 落地；独立 AB 框架划线 |
 | O1-KR6 | 改写收尾态 | 并入 O2-KR1 | 架构交付写实；上线指标划线 |
 | O1-KR7 | **新增** | ——（业务）；KA4 为 H2 Dev Agent 迁移基础 | Nexus 跨仓范式：5 仓 4 天到 QA、埋点随发就位、GTM 六仓统一 |
-| O2-KR1 | 改写 | O2-KR1 RepoWiki · **交付人** | 资产规范 100% 写死；AI Lines 删除给替代口径 |
-| O2-KR2 | 超额标注 | O2-KR1 FE AI Plugin · **交付人** | 1 skill → 双端分发 + 4 项迭代 + marketplace |
-| O2-KR3 | 超额标注 | O2-KR1 Skills 计数 · 贡献者 | ≥1 工作流 → 实际 3 个 |
-| O2-KR4 | **新增** | O2-KR1 · **交付人** | AI 管理平台 Phase 1（6-8 月最大单项） |
+| O2 | 改写 | 部门 O2 两条 KR 双主线对齐 | 「效率效能」→「前端 Harness 工程」（领导 2026-09 意见）：Monitoring Agent + AI 基建 |
+| O2-KR1 | 移入重组 | **部门 O2-KR2 Monitoring Agent · 交付人** | 原 O3-KR2 移入：Phase 1 Done + fe-stability 自动化；MVP 子目标未完成不入 KR |
+| O2-KR2 | 移入重组 | **部门 O2-KR2 · 交付人** | 覆盖度诊断 FE-984 + 覆盖筛选/上线核对（QA 平台移入 KR3） |
+| O2-KR3 | 编号调整 | 部门 O2-KR1 · **交付人** | AI 管理平台 Phase 1（6-8 月最大单项）+ QA Evaluation Platform |
+| O2-KR4 | 三合一 | 部门 O2-KR1 · **交付人**（FE AI Plugin + RepoWiki + Skills 计数） | 原 KR1 资产规范 + KR2 工具沉淀 + KR3 流程创新；AI Lines 删除 |
 | O3-KR1 | 范围扩大 | **O3-KR4 Stability · 主体交付人** | Buyer → 全域；双平台；9 月收官 |
-| O3-KR2 | 探索→交付 | **O2-KR2 Monitoring Agent · 交付人** | Phase 1 Done + v2 进行中 + QA 平台 |
+| O3-KR2 | 整条移出 | ——（移入个人 O2 主线一） | Monitoring Agent 移入 O2-KR1/KR2，划线留痕 |
 | O3-KR3 | 改写 | O3-KR4 remediation · 贡献者 | 总量 XX% → 误报治理专项 |
 | O3-KR4 | **新增** | 组织职责（O3-KR4 覆盖扩张的前提） | Supplier 交接 + 治理盘点 + 整合方案 |
 | Nexus | 不入 H1 | —— | 移「接下来的规划」，作 H2 OKR 雏形 |
