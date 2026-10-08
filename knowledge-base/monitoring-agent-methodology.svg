@@ -1,0 +1,198 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1680 1200" font-family="'PingFang SC','Hiragino Sans GB','Microsoft YaHei','Noto Sans SC',sans-serif">
+  <defs>
+    <linearGradient id="entryGrad" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#1e3a8a"/>
+      <stop offset="1" stop-color="#2563eb"/>
+    </linearGradient>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7.5" markerHeight="7.5" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrowBlue" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="8" markerHeight="8" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#93c5fd"/>
+    </marker>
+  </defs>
+
+  <!-- 背景 -->
+  <rect x="0" y="0" width="1680" height="1200" rx="20" fill="#f8fafc"/>
+
+  <!-- 标题 -->
+  <text x="840" y="60" text-anchor="middle" font-size="33" font-weight="700" fill="#0f172a">Monitoring Agent 方法论全景</text>
+  <text x="840" y="94" text-anchor="middle" font-size="16.5" fill="#475569">脚本做确定性采集 · Agent 做叙述分析 · 绝不伪造数据</text>
+
+  <!-- ① 意图入口条 -->
+  <rect x="80" y="128" width="1520" height="84" rx="16" fill="url(#entryGrad)"/>
+  <text x="120" y="166" font-size="21" font-weight="700" fill="#ffffff">monitoring-agent · 统一意图入口</text>
+  <text x="120" y="194" font-size="13.5" fill="#dbeafe">「巡检一下」「发布后稳定性」「这个需求监控覆盖了吗」「激活筛选条件」「上线后核对」</text>
+  <text x="1560" y="178" text-anchor="end" font-size="13.5" fill="#bfdbfe">按生命周期阶段路由 → 5 个捆绑 skill</text>
+
+  <!-- 入口 → 闭环 连接箭头 -->
+  <line x1="840" y1="212" x2="840" y2="250" stroke="#93c5fd" stroke-width="2.2" marker-end="url(#arrowBlue)"/>
+
+  <!-- 区块①标签 -->
+  <rect x="80" y="264" width="5" height="22" rx="2.5" fill="#2563eb"/>
+  <text x="96" y="282" font-size="17" font-weight="700" fill="#0f172a">① 全生命周期闭环 — 五个 skill 各守一段</text>
+
+  <!-- 生命周期节点 a: coverage-diagnosis -->
+  <g>
+    <rect x="80" y="296" width="272" height="230" rx="14" fill="#ffffff" stroke="#c4b5fd" stroke-width="1.4"/>
+    <rect x="100" y="314" width="96" height="26" rx="13" fill="#7c3aed"/>
+    <text x="148" y="332" text-anchor="middle" font-size="13" fill="#ffffff">发布前</text>
+    <text x="100" y="372" font-size="17.5" font-weight="700" fill="#0f172a">coverage-diagnosis</text>
+    <line x1="100" y1="386" x2="332" y2="386" stroke="#e2e8f0"/>
+    <text x="100" y="414" font-size="13" fill="#334155">· AC / Feature List 推导失败模式</text>
+    <text x="100" y="440" font-size="13" fill="#334155">· 四档判定 + 同跑补强建议</text>
+    <text x="100" y="466" font-size="13" fill="#334155">· 静默失败 → 明示盲区</text>
+    <text x="100" y="492" font-size="13" fill="#334155">· filter 校正 + wiring check</text>
+  </g>
+
+  <!-- 生命周期节点 b: release-guard -->
+  <g>
+    <rect x="392" y="296" width="272" height="230" rx="14" fill="#ffffff" stroke="#fdba74" stroke-width="1.4"/>
+    <rect x="412" y="314" width="96" height="26" rx="13" fill="#ea580c"/>
+    <text x="460" y="332" text-anchor="middle" font-size="13" fill="#ffffff">发布时</text>
+    <text x="412" y="372" font-size="17.5" font-weight="700" fill="#0f172a">release-guard</text>
+    <line x1="412" y1="386" x2="644" y2="386" stroke="#e2e8f0"/>
+    <text x="412" y="414" font-size="13" fill="#334155">· 发布时间自然语言归一化</text>
+    <text x="412" y="440" font-size="13" fill="#334155">· 自动算 deployed_at→now 窗口</text>
+    <text x="412" y="466" font-size="13" fill="#334155">· pop 基线 = 发布前等长对比</text>
+    <text x="412" y="492" font-size="13" fill="#334155">· 委托 orchestrator 引擎采集</text>
+  </g>
+
+  <!-- 生命周期节点 c: monitoring-orchestrator -->
+  <g>
+    <rect x="704" y="296" width="272" height="230" rx="14" fill="#ffffff" stroke="#6ee7b7" stroke-width="1.4"/>
+    <rect x="724" y="314" width="96" height="26" rx="13" fill="#059669"/>
+    <text x="772" y="332" text-anchor="middle" font-size="13" fill="#ffffff">日常巡检</text>
+    <text x="724" y="372" font-size="17.5" font-weight="700" fill="#0f172a">monitoring-orchestrator</text>
+    <line x1="724" y1="386" x2="956" y2="386" stroke="#e2e8f0"/>
+    <text x="724" y="414" font-size="13" fill="#334155">· 5 路信号并行采集</text>
+    <text x="724" y="440" font-size="13" fill="#334155">· baseline 自动推断 dod/wow/pop</text>
+    <text x="724" y="466" font-size="13" fill="#334155">· 「上周」≠「过去一周」严格区分</text>
+    <text x="724" y="492" font-size="13" fill="#334155">· script 采集 + agent 叙述分析</text>
+  </g>
+
+  <!-- 生命周期节点 d: coverage-filter -->
+  <g>
+    <rect x="1016" y="296" width="272" height="230" rx="14" fill="#ffffff" stroke="#a5b4fc" stroke-width="1.4"/>
+    <rect x="1036" y="314" width="96" height="26" rx="13" fill="#4f46e5"/>
+    <text x="1084" y="332" text-anchor="middle" font-size="13" fill="#ffffff">登记激活</text>
+    <text x="1036" y="372" font-size="17.5" font-weight="700" fill="#0f172a">coverage-filter</text>
+    <line x1="1036" y1="386" x2="1268" y2="386" stroke="#e2e8f0"/>
+    <text x="1036" y="414" font-size="13" fill="#334155">· 诊断筛选持久化为 YAML</text>
+    <text x="1036" y="440" font-size="13" fill="#334155">· draft→active→retired 生命周期</text>
+    <text x="1036" y="466" font-size="13" fill="#334155">· 仅用户显式触发激活</text>
+    <text x="1036" y="492" font-size="13" fill="#334155">· 只管筛选，不做验证</text>
+  </g>
+
+  <!-- 生命周期节点 e: requirement-guard -->
+  <g>
+    <rect x="1328" y="296" width="272" height="230" rx="14" fill="#ffffff" stroke="#67e8f9" stroke-width="1.4"/>
+    <rect x="1348" y="314" width="96" height="26" rx="13" fill="#0891b2"/>
+    <text x="1396" y="332" text-anchor="middle" font-size="13" fill="#ffffff">持续核对</text>
+    <text x="1348" y="372" font-size="17.5" font-weight="700" fill="#0f172a">requirement-guard</text>
+    <line x1="1348" y1="386" x2="1580" y2="386" stroke="#e2e8f0"/>
+    <text x="1348" y="414" font-size="13" fill="#334155">· active 筛选对活信号核对</text>
+    <text x="1348" y="440" font-size="13" fill="#334155">· 三态：健康 / 异常 / 无信号</text>
+    <text x="1348" y="466" font-size="13" fill="#334155">· 零事件同时给两种解释</text>
+    <text x="1348" y="492" font-size="13" fill="#334155">· 缓存复用优先，省 API</text>
+  </g>
+
+  <!-- 节点间箭头 -->
+  <line x1="356" y1="411" x2="386" y2="411" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="668" y1="411" x2="698" y2="411" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="980" y1="411" x2="1010" y2="411" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+  <line x1="1292" y1="411" x2="1322" y2="411" stroke="#64748b" stroke-width="2" marker-end="url(#arrow)"/>
+
+  <!-- 闭环回环箭头 -->
+  <path d="M 1464 526 L 1464 562 L 216 562 L 216 534" fill="none" stroke="#94a3b8" stroke-width="1.8" stroke-dasharray="6 5" marker-end="url(#arrow)"/>
+  <rect x="664" y="550" width="352" height="24" fill="#f8fafc"/>
+  <text x="840" y="567" text-anchor="middle" font-size="12.5" fill="#64748b">发现异常 → 修复 → 重新诊断 · 闭环回归</text>
+
+  <!-- 区块②标签 -->
+  <rect x="80" y="612" width="5" height="22" rx="2.5" fill="#7c3aed"/>
+  <text x="96" y="630" font-size="17" font-weight="700" fill="#0f172a">② 三大设计支柱 — 让 AI 生成的监控结论值得信任</text>
+
+  <!-- 支柱 1 -->
+  <g>
+    <rect x="80" y="644" width="482" height="300" rx="16" fill="#ffffff" stroke="#dbe3ec" stroke-width="1.2"/>
+    <rect x="104" y="668" width="46" height="46" rx="12" fill="#2563eb"/>
+    <text x="127" y="699" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">1</text>
+    <text x="164" y="686" font-size="18.5" font-weight="700" fill="#0f172a">确定性优先 · 分工架构</text>
+    <text x="164" y="708" font-size="13" fill="#64748b">Script 干确定性的活，Agent 干判断的活</text>
+    <line x1="104" y1="736" x2="538" y2="736" stroke="#e2e8f0"/>
+    <circle cx="114" cy="766" r="3" fill="#2563eb"/>
+    <text x="128" y="771" font-size="13.5" fill="#334155">signal_collector.py 并行采集 5 路信号</text>
+    <circle cx="114" cy="796" r="3" fill="#2563eb"/>
+    <text x="128" y="801" font-size="13.5" fill="#334155">Agent 只读 report.json 写叙述分析</text>
+    <circle cx="114" cy="826" r="3" fill="#2563eb"/>
+    <text x="128" y="831" font-size="13.5" fill="#334155">Matcher 确定性评分，禁止人工覆盖</text>
+    <circle cx="114" cy="856" r="3" fill="#2563eb"/>
+    <text x="128" y="861" font-size="13.5" fill="#334155">3600 行能力目录不进模型上下文</text>
+    <circle cx="114" cy="886" r="3" fill="#2563eb"/>
+    <text x="128" y="891" font-size="13.5" fill="#334155">12 个测试文件守护契约</text>
+  </g>
+
+  <!-- 支柱 2 -->
+  <g>
+    <rect x="599" y="644" width="482" height="300" rx="16" fill="#ffffff" stroke="#dbe3ec" stroke-width="1.2"/>
+    <rect x="623" y="668" width="46" height="46" rx="12" fill="#7c3aed"/>
+    <text x="646" y="699" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">2</text>
+    <text x="683" y="686" font-size="18.5" font-weight="700" fill="#0f172a">反幻觉链路</text>
+    <text x="683" y="708" font-size="13" fill="#64748b">每一环都在压缩「编造」的空间</text>
+    <line x1="623" y1="736" x2="1057" y2="736" stroke="#e2e8f0"/>
+    <circle cx="633" cy="766" r="3" fill="#7c3aed"/>
+    <text x="647" y="771" font-size="13.5" fill="#334155">信号信封 available / partial / unavailable</text>
+    <circle cx="633" cy="796" r="3" fill="#7c3aed"/>
+    <text x="647" y="801" font-size="13.5" fill="#334155">filter 值经注册表自动校正</text>
+    <circle cx="633" cy="826" r="3" fill="#7c3aed"/>
+    <text x="647" y="831" font-size="13.5" fill="#334155">page_id 未过 wiring check 强制降级</text>
+    <circle cx="633" cy="856" r="3" fill="#7c3aed"/>
+    <text x="647" y="861" font-size="13.5" fill="#334155">静默失败显式标记 uncoverable</text>
+    <circle cx="633" cy="886" r="3" fill="#7c3aed"/>
+    <text x="647" y="891" font-size="13.5" fill="#334155">禁止用样例数据替代真实调用</text>
+  </g>
+
+  <!-- 支柱 3 -->
+  <g>
+    <rect x="1118" y="644" width="482" height="300" rx="16" fill="#ffffff" stroke="#dbe3ec" stroke-width="1.2"/>
+    <rect x="1142" y="668" width="46" height="46" rx="12" fill="#059669"/>
+    <text x="1165" y="699" text-anchor="middle" font-size="22" font-weight="700" fill="#ffffff">3</text>
+    <text x="1202" y="686" font-size="18.5" font-weight="700" fill="#0f172a">诚实降级</text>
+    <text x="1202" y="708" font-size="13" fill="#64748b">缺什么就说什么，不假装成功</text>
+    <line x1="1142" y1="736" x2="1576" y2="736" stroke="#e2e8f0"/>
+    <circle cx="1152" cy="766" r="3" fill="#059669"/>
+    <text x="1166" y="771" font-size="13.5" fill="#334155">MISSING CONFIG 预检，缺凭证告知填什么</text>
+    <circle cx="1152" cy="796" r="3" fill="#059669"/>
+    <text x="1166" y="801" font-size="13.5" fill="#334155">信号自动降级 unavailable 不中断</text>
+    <circle cx="1152" cy="826" r="3" fill="#059669"/>
+    <text x="1166" y="831" font-size="13.5" fill="#334155">Sentry / Datadog 直查未实现 → 明示</text>
+    <circle cx="1152" cy="856" r="3" fill="#059669"/>
+    <text x="1166" y="861" font-size="13.5" fill="#334155">零事件同时给两种解释，不自动消歧</text>
+    <circle cx="1152" cy="886" r="3" fill="#059669"/>
+    <text x="1166" y="891" font-size="13.5" fill="#334155">新激活 48h 内提醒人工核看首份报告</text>
+  </g>
+
+  <!-- ③ 工程化细节条 -->
+  <rect x="80" y="976" width="1520" height="136" rx="16" fill="#eef2f7" stroke="#dbe3ec" stroke-width="1.2"/>
+  <rect x="112" y="996" width="5" height="20" rx="2.5" fill="#0891b2"/>
+  <text x="128" y="1012" font-size="16" font-weight="700" fill="#0f172a">③ 工程化细节</text>
+
+  <text x="112" y="1048" font-size="14" font-weight="700" fill="#1e3a5f">凭据与安全</text>
+  <text x="112" y="1070" font-size="12.5" fill="#64748b">凭据文件留在执行仓库根目录，</text>
+  <text x="112" y="1090" font-size="12.5" fill="#64748b">gitignore 永不随插件分发</text>
+
+  <text x="484" y="1048" font-size="14" font-weight="700" fill="#1e3a5f">产物归档</text>
+  <text x="484" y="1070" font-size="12.5" fill="#64748b">.v-harness/&lt;JiraKey&gt;/monitoring-agent/</text>
+  <text x="484" y="1090" font-size="12.5" fill="#64748b">复跑原地替换，按 Jira key 归档</text>
+
+  <text x="856" y="1048" font-size="14" font-weight="700" fill="#1e3a5f">可分享报告</text>
+  <text x="856" y="1070" font-size="12.5" fill="#64748b">report.html 内联 SVG 图表，</text>
+  <text x="856" y="1090" font-size="12.5" fill="#64748b">单文件可直接分发</text>
+
+  <text x="1228" y="1048" font-size="14" font-weight="700" fill="#1e3a5f">多宿主支持</text>
+  <text x="1228" y="1070" font-size="12.5" fill="#64748b">Cursor / Claude 原生 agent，</text>
+  <text x="1228" y="1090" font-size="12.5" fill="#64748b">Codex 走路由 skill · 防递归</text>
+
+  <!-- 页脚 -->
+  <text x="840" y="1158" text-anchor="middle" font-size="12" fill="#94a3b8">visable-plugin-marketplace · plugins/visable-fe-domain-agents · monitoring-agent v1.0 / orchestrator v4.0 / coverage-diagnosis v1.2 / requirement-guard v3.0</text>
+</svg>

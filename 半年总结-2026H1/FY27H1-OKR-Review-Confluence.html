@@ -1,0 +1,273 @@
+<h2>一、OKR结果和个人贡献 / OKR Results and Individual Contributions</h2>
+<table data-width="1218"><tbody>
+<tr>
+<td colspan="2" data-background="#b3d4ff" data-colwidth="154,266" style="background-color: #b3d4ff"><p></p></td>
+<td data-background="#b3d4ff" data-colwidth="266" style="background-color: #b3d4ff"><p><strong>OKR描述</strong></p></td>
+<td data-background="#b3d4ff" data-colwidth="266" style="background-color: #b3d4ff"><p><strong>KR结果</strong></p></td>
+<td data-background="#b3d4ff" data-colwidth="266" style="background-color: #b3d4ff"><p><strong>个人亮点贡献</strong></p></td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p><strong>O1</strong></p></td>
+<td colspan="4" data-colwidth="266,266,266,266"><p><strong>【业务增长】构建 AI 驱动的商品管理与内容优化体系，通过 A/B 实验验证策略，提升商家效率与商品质量，支撑商品规模翻倍与质量提升的业务目标</strong></p></td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR1</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【数据基建】完成商家后台 4 个应用共计 9 个模块的 GA4 埋点迁移与数据层验收</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，1 期商家后台 4 个应用的 9 个模块 GA4 埋点迁移全部完成；2 期已发布 1 个模块、另有 2 个模块完成开发与验证待发布；剩余 2 个业务模块待迁移。</p>
+</td>
+<td data-colwidth="266"><p></p></td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR2</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【新商转化】升级商品管理后台全流程体验，通过 A/B 实验验证，提高 AI 的商家采纳率 &gt;60%，提升平台每日人均保存商品数</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，AI 商家采纳率 UV 级 Keywords 57.6% → 70.3%、Category 42.0% → 64.8%（目标 &gt;60%）；Quick Editor A/B 实验组每日人均保存商品数 5.41 → 7.28（+34.7%），推全后平台日均人均 6.34 → 7.13（+12.5%）。</p>
+<p>口径：基线 = 2026-01~02 加权，推全后 = 2026-05~08 加权；数据源 Redash 查询 5682 / 5683 / 1338 / 1340。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li>定下采纳率主口径为新建商品流程（eventlabel='new'），该场景建议量占约 1/3、采纳量占约 73%</li>
+<li>4.2 推全时建议触发逻辑有变更，改以 UV 级判定达标，避免事件级口径失真</li>
+<li>用按周衰减解释实验与全量的差距：W1 +68.7% 收敛到 W5 +9.4%，与推全后 +12.5% 自洽</li>
+<li>核齐 A/B 样本与 8 个 save 事件口径，确认 Quick Editor 无漏计</li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR3</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【Accio Work】完成 Accio Work Visable 核心架构建设，交付三个技能（Performance Insights、Company Profile Optimization、Product Optimization）的插件形态落地</p></td>
+<td data-colwidth="266">
+<p>◐ 部分达成，Accio Work Visable 双仓库架构（Plugin 配置包 + MCP Server）与 visable-assistant 插件包首版落地（34 文件 / 4,476 行），三个技能均以插件形态交付；H1 末态 Performance Insights 留存并被团队生产化至 v2.2.2（65 行 → 1,087 行），另两个技能在团队重构 PR #13 / #16 中移除；PRD 上线指标未回收，插件发布 CI 闭环未建。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li><strong>定下 Visable 侧的接入路线，而不是等平台给方案</strong>：三种形态中选定 MCP，并把双仓库耦合面收敛到 connectors.json 的一条 URL，后端接口演进不再牵动插件发版，该边界后续被团队沿用</li>
+<li><strong>插件包从 0 到 1 一次成型，成为团队后续全部迭代的载体</strong>：PR #1 单次 30 文件 +3,804 行，团队 4 位同学的迭代都跑在这个骨架上，main 上该目录提交数本人 18 个，与两位主要贡献者持平</li>
+<li><strong>把身份链路打通</strong>：accio_id 从 client 到 service 到 tool 全链路贯通，是多公司供应商场景不串号的前提，也让 CTOOL-589 能被定位到会话与记忆层</li>
+<li><strong>风险前置</strong>：10 项依赖 Accio 的未知项按 P0/P1/P2 摊开并标明阻塞阶段，同时保留 Browser Session 轻量备选路线，联调期没有空转</li>
+<li><strong>CTOOL-589 跨用户数据串用用策略硬约束收口</strong>：prompt 层立 Memory Policy 4 条，堵住工具失败时回退查记忆的旁路，不走加提示词的软路径</li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR4</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【Nexus &amp; GTM】承接 supplier 域 Nexus 系列前端需求，探索跨应用开发方式</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，承接 Nexus / GTM 系列前端需求 5 项（其中 2 项主开发），横跨 11 个仓库交付 18 个 PR，已进入 product-editor、user-frontend、business-insights 的团队 staging 集成分支，主干合并由发版火车接力推进；harness 跨应用开发方式跑通，单需求单任务最大统管 8 个仓库，沉淀 10 个仓库工作区。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li><strong>把工作单元从仓库换成需求</strong>：任务做成全局池，CTOOL-634 单任务统管 5 个仓、CTOOL-679 统管 8 个仓，依赖顺序与合并窗口在一个上下文里推完</li>
+<li><strong>零侵入设计，跨仓开发不需要任何仓库 owner 批准</strong>：公司仓库不落任何工具文件，因此能同时改动 11 个仓，含我并不拥有的 nginx 边缘配置仓与 iac 基础设施仓</li>
+<li><strong>仓知识资产化</strong>：每个注册仓一份 config.sh、notes.md、e2e-context.md，4 种包管理器、主干分支命名不一致、装包缺 token 静默降级这类坑不再重踩</li>
+<li><strong>实现者与验收者分离，流程轻重由人显式决定</strong>：验收走独立测试技能与 validate / verify 命令，standard 与 minimal 两档只能由人切换，AI 驱动但判断权在人</li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p><strong>O2</strong></p></td>
+<td colspan="4" data-colwidth="266,266,266,266"><p><strong>【前端 Harness 工程】建设前端研发 Harness，聚焦 Monitoring Agent 与 AI 研发基建两个方向，沉淀可复用的工具与工作流，显著提升团队研发效率</strong></p></td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR1</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【Monitoring Agent】交付 Monitoring Agent 线上监控能力，实现多信号源自动采集、自动总结与巡检报告</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，Phase 1 交付并投入真实使用（FE-907 与 M1~M4 全 Done）：5 类信号源自动采集、11 个前端应用在案、08-12~09-24 累计 21 次真实运行，产出结构化巡检报告与可检索能力目录；技能以 monitoring-orchestrator v4.0.0 随团队插件四端分发。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li>Phase 1 四个里程碑独立设计并交付，建单、方案、验收均由我产出，是唯一交付人</li>
+<li>第 5 信号源 AWS ECS 由我提出并改走 Datadog AWS 集成取数，不引入 AWS 凭据与 CloudWatch 直连，一套 key 覆盖五源</li>
+<li>主导拆分采集引擎与发布生命周期，evidence 与窗口边界走标准接口，KR2 覆盖度诊断直接复用</li>
+<li>定下「只做真实调用」纪律：缺凭据、超时、空响应如实报 partial 或 unavailable，不生成合成指标</li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR2</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【监控覆盖度诊断】建立需求级监控覆盖度诊断机制，支持需求上线的覆盖评估</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，覆盖度诊断建成四技能闭环（coverage-diagnosis v1.2.0、gap-recommendation v1.1.0、coverage-filter v1.0.0、requirement-guard v3.0.0），在真实需求 CTOOL-637 跑通：推导 11 个业务失败模式，判定 6 个可被现有监控检测、5 个为静默失败盲区。完整诊断目前只在 1 个需求上跑通，尚未形成每个上线需求都诊断的常态。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li>独立设计方法论：从需求证据推导失败模式，用失败模式匹配现有监控能力，按四档置信口径出结论，把「监控够不够」从主观判断变成可复核产物</li>
+<li>定下判定纪律：凭据或内网不可达时标 unverified 并强制降置信，5 个盲区如实标为不可覆盖，不折算成已覆盖</li>
+<li>打通需求侧与监控侧产物协议，intake bundle、诊断产物、筛选条件用统一目录规范串起来（FE-1060/1061，随插件 0.5.0 落地）</li>
+<li>两条实战教训回写为技能规则并升到 v1.2.0：混合失败模式必须拆开单独判定，page_id 接线要核实 definePageMeta 与 virtualPageTitle 链</li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR3</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【AI 资产平台】建设团队级 AI 资产平台与 AI 质量评估平台，统一 Skill、MCP、规则等研发资产的发现、安装与发布</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，AI Management Platform Phase 1 从 0 到 1 建成并部署（FE-831 + 12 子任务全 Done），覆盖 agent / skill / mcp 三类资产的发现、详情、发布、版本与个人中心，含企业 SSO，前端、后端、IaC 三仓自建；QA Evaluation Platform 交付 6 个评估界面（FE-930 + 6 子任务全 Done）。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li>6~8 月最大单项工程产出：技术选型、SSO 方案、市场功能、部署流水线与 IaC 一人从 0 到 1 交付，12 个子任务全 Done</li>
+<li>中途完成 Nuxt/Vue 到 Vite/React 迁移，并把已交付能力整体移植到 React 架构，迁移未丢功能</li>
+<li>SSO 三条路径（登录、回调、鉴权失败）各有独立页面，设计规范与实施计划均留文档</li>
+<li>产出中英双语 PRD，使平台对非中文团队可用</li>
+<li>QA Evaluation Platform 前端从 0 到 1，为团队 AI 质量评估提供界面载体</li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR4</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【AI 资产沉淀】沉淀并推广团队级 AI 研发资产，形成团队内可直接复用的资产库</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，统一分发仓 4 插件 / 56 技能，覆盖 intake、spec、dev、verify、deploy、monitoring 六个阶段，支持 Codex / Cursor / Qoder / Claude Code 四端安装；团队编码规则单源化为 6 个 .mdc；repoWiki 承担 7 仓；marketplace 33 次提交中 13 次来自 4 位同事。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li>建立 visable-plugin-marketplace 统一分发仓，把散在各处的技能收敛为四插件四端可安装的团队资产，并产出使用指南向全团队推广</li>
+<li>团队采用有提交记录实证：4 位同事共 13 次提交，资产从「只有我在用」变成「团队共同维护」</li>
+<li>cr-frontend 代码评审技能由我搭建并迭代五项能力，覆盖埋点契约、SSR 安全、SEO 与 AB 实验清理等团队高频回归面</li>
+<li>把 Cursor Rules 升级为 Team AI Rules 单一源，消除多端规则漂移</li>
+<li>承担 supplier 域 6 仓 repoWiki 初始化与 product-editor schema v2 重建，为规则与技能提供知识内容源</li>
+<li>harness-kit 沉淀跨仓交付方法论，cross-repo-rollout playbook 从 CTOOL-634 与 CTOOL-679 两个真实项目提炼</li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p><strong>O3</strong></p></td>
+<td colspan="4" data-colwidth="266,266,266,266"><p><strong>【稳定性】保障前端全域应用稳定性，完善监控告警与应急响应体系，确保持续零 P0/P1 故障</strong></p></td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR1</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【监控全覆盖】深化前端稳定性 SDK 集成，打通 ODPS 数据链路，基于 Sunfire 建立日志驱动告警体系。实现前端应用监控 100% 覆盖，支持白屏、API 错误及自定义核心指标的实时告警</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，前端监控从 3 个项目有告警推进到全域覆盖：项目级 Sunfire 30% → 100%、Datadog 56% → 100%，告警条目级 26/105 → 105/105；api_error 与 script_error 从零告警到全覆盖；Buyer 侧 8 站点组合与 5 国站点、Supplier 侧 6 应用全部接入稳定性 SDK，ODPS 数据链路打通至 Sunfire。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li><strong>全域基线审计是这轮治理的起点</strong>：2026-08-26 独立完成 Sunfire / Datadog / Sentry 三平台逐项盘点，把「覆盖了多少」从主观感受变成数字台账，同时暴露 api_error 与 script_error 全域无告警</li>
+<li><strong>主导确立两套告警标准口径</strong>：Sunfire = 共享项 + 按项目规则，Datadog = homepage 5-monitor 模板，并拍板 SSR 渲染错误由 Sunfire 承接以避免两平台重复告警，成为后续项目建告警的复用模板</li>
+<li><strong>用 sunfire-cli 打通 API 化建告警链路，并实测排除两个平台级陷阱</strong>：API 创建的白名单专项监控项不产数据、API create 会自动注入 tenant:"default" 导致控制台不渲染评估视图，两个都不可从平台文档推导</li>
+<li><strong>把补全工作做成可交接的工程产物</strong>：编号化补全计划 + ROADMAP v1.2 + drawio 可视化，与 Jira FE-1066/1067/1068 双向对齐，44 条 Datadog 导入 JSON 可直接控制台导入</li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR2</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【监控误报治理】主导稳定性监控误报专项治理，识别并消除 SDK 已知误报源，提升告警可信度</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，定位并消除 3 类 SDK 误报源，4 个 PR 合入 frontend-monitoring（#47 / #48 / #49 / #50）；清理 3 条失效告警并确立 script_error 同比降噪口径；治理路径为修 SDK 源码而非调阈值压噪音。降噪幅度暂无量化口径，H2 以 ODPS 稳定性数据环比回收。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li><strong>治理路径的选择：修 SDK 而不是调阈值</strong>：三类误报源全部在 SDK 层解决，所有接入应用一次性受益，阈值不必为迁就噪音而失真</li>
+<li><strong>建立「真实事故 vs 噪音」的判别方法</strong>：CloudFront 错误激增表征与 CDN 故障一致，靠流量构成分析定位为爬虫，避免跨团队拉动与无谓应急响应，方法沉淀成报告</li>
+<li><strong>用告警数据反向验证治理成效</strong>：white_screen 最大 5 个告警窗口与真实事故时间逐点对齐，Sentry 回归当天 39,642 条日志（常态约 1,100 条）被完整捕获，证明降噪没有以灵敏度为代价</li>
+</ul>
+</td>
+</tr>
+
+<tr>
+<td data-colwidth="154"><p>KR3</p></td>
+<td colspan="2" data-colwidth="266,266"><p>【Supplier 域交接】完成 supplier 前端域知识转移与技术治理盘点，产出项目整合方案与技术重构立项，落地核心技术债务改造工作，确保无线上故障</p></td>
+<td data-colwidth="266">
+<p>✅ 达成，VEU 到 VCN 交接零断点完成（11 篇 Confluence 文档 + 14 项 In-Flight 清单 + 6 应用 repoWiki 全量初始化）；产出 6 → 2-3 应用整合方案（分 4 步）并推动 FE-1062 重构 Epic 立项；FE-1063 CI 门禁与 FE-1064 死代码清理已合并主干（净删 1,997 行）；定位 business-insights 线上内存泄漏根因并给出修复路径，修复待执行。</p>
+</td>
+<td data-colwidth="266">
+<ul>
+<li><strong>8 月新增的组织职责，一个人把交接做完且无断点</strong>：11 篇文档覆盖路由、接口调用形态、本地调试、稳定性现状、在途项目、改造必要性六个维度，团队可直接按文档上手 6 个此前完全陌生的仓库</li>
+<li><strong>没有停在接手，而是把交接变成治理起点</strong>：主动产出整合方案与 P0/P1/P2 改造清单，推动 FE-1062 重构 Epic 立项，从维护别人的代码转到决定这些代码该长成什么样</li>
+<li><strong>方案自己先跑通第一批</strong>：FE-1063 与 FE-1064 均由本人实现并合并主干，净删 1,997 行、零行为变更、门禁全绿，证明整合方案不是纸面规划</li>
+<li><strong>内存泄漏排查是本期技术含量最高的一次独立定位</strong>：自研零依赖压测工具，九轮压测把模糊现象钉成约 350 req/task 的确定性阈值，再做 BI / SO / PE 三方对照找到已生产验证的修复路径，结论交付到可直接决策的程度</li>
+<li><strong>供应商域 repoWiki 全部 7 仓由本人承担、无欠账</strong>：同时支撑部门 O2-KR1「RepoWiki 标准定稿 + 全应用初始化」的 90% 进度</li>
+</ul>
+</td>
+</tr>
+</tbody></table>
+
+<h2>二、AI相关成果 / AI-related Achievements</h2>
+<p><strong>AI相关的成果 / AI-related achievements</strong></p>
+<table data-width="1800"><tbody>
+<tr>
+<td data-background="#b3d4ff" data-colwidth="65" style="background-color: #b3d4ff"><p></p></td>
+<td data-background="#b3d4ff" data-colwidth="711" style="background-color: #b3d4ff"><p><strong>成果 / Achievements</strong></p></td>
+<td data-background="#b3d4ff" data-colwidth="1022" style="background-color: #b3d4ff"><p><strong>亮点 / Highlights</strong></p></td>
+</tr>
+<tr>
+<td data-colwidth="65"><p>1</p></td>
+<td data-colwidth="711"><p><strong>Monitoring Agent 线上监控能力（O2-KR1）</strong></p><p>5 类信号源自动采集（Datadog Logs、Sentry、稳定性 SDK / ODPS、埋点巡检、AWS ECS），11 个前端应用在案，08-12~09-24 累计 21 次真实运行，产出 HTML + Markdown 结构化报告与可检索能力目录；配套稳定性周报自动化（FE-872，8 子任务）。</p></td>
+<td data-colwidth="1022"><p>Phase 1 四个里程碑独立设计并交付，是唯一交付人；第 5 信号源 AWS ECS 改走 Datadog AWS 集成取数，不引入 AWS 凭据与 CloudWatch 直连，一套 key 覆盖五源；拆分采集引擎与发布生命周期，evidence 与窗口边界走标准接口，被覆盖度诊断直接复用；定下「只做真实调用」纪律，缺凭据或空响应如实报 partial / unavailable，不生成合成指标。技能以 monitoring-orchestrator v4.0.0 随团队插件四端分发。</p></td>
+</tr>
+<tr>
+<td data-colwidth="65"><p>2</p></td>
+<td data-colwidth="711"><p><strong>需求级监控覆盖度诊断闭环（O2-KR2）</strong></p><p>四技能闭环：coverage-diagnosis v1.2.0、gap-recommendation v1.1.0、coverage-filter v1.0.0、requirement-guard v3.0.0（另 release-guard v2.0.0）。在真实需求 CTOOL-637 跑通：输入结构化 intake bundle（24 需求 / 8 开放问题 / 65 证据），推导 11 个业务失败模式，判定 6 个可被现有监控检测、5 个为静默失败盲区。</p></td>
+<td data-colwidth="1022"><p>独立设计方法论，把「监控够不够」从主观判断变成可复核产物（四档置信口径 + 6 份落盘产物）；定下判定纪律，凭据或内网不可达时标 unverified 并强制降置信，盲区如实标为不可覆盖、不折算成已覆盖；打通需求侧与监控侧产物协议，三段用统一目录规范串起来（FE-1060/1061，随插件 0.5.0 落地）；两条实战教训回写为技能规则并升到 v1.2.0。</p></td>
+</tr>
+<tr>
+<td data-colwidth="65"><p>3</p></td>
+<td data-colwidth="711"><p><strong>AI 资产平台与 AI 质量评估平台（O2-KR3）</strong></p><p>AI Management Platform Phase 1 从 0 到 1 建成并部署（FE-831 + 12 子任务全 Done），覆盖 agent / skill / mcp 三类资产的发现、详情、发布、版本与个人中心，含企业 SSO，前后端与 IaC 三仓自建；QA Evaluation Platform（FE-930 + 6 子任务全 Done）交付 6 个评估界面。</p></td>
+<td data-colwidth="1022"><p>6~8 月最大单项工程产出，技术选型、SSO 方案、市场功能、部署流水线与 IaC 一人交付；中途完成 Nuxt/Vue 到 Vite/React 迁移并把已交付能力整体移植，迁移未丢功能；SSO 三条路径各有独立页面且设计规范留文档；产出中英双语 PRD，使平台对非中文团队可用。</p></td>
+</tr>
+<tr>
+<td data-colwidth="65"><p>4</p></td>
+<td data-colwidth="711"><p><strong>团队级 AI 研发资产库（O2-KR4）</strong></p><p>visable-plugin-marketplace 统一分发仓 4 插件 / 56 技能，覆盖 intake、spec、dev、verify、deploy、monitoring 六个阶段，支持 Codex / Cursor / Qoder / Claude Code 四端安装；团队编码规则单源化为 6 个 .mdc；repoWiki 承担 7 仓；cr-frontend 代码评审技能迭代五项能力。</p></td>
+<td data-colwidth="1022"><p>把散在各处的技能收敛为四插件四端可安装的团队资产并产出使用指南向全团队推广；团队采用有提交记录实证（marketplace 33 次提交中 13 次来自 4 位同事），资产从「只有我在用」变成「团队共同维护」；把 Cursor Rules 升级为 Team AI Rules 单一源，消除多端规则漂移；cr-frontend 覆盖埋点契约、SSR 安全、SEO 与 AB 实验清理等团队高频回归面。</p></td>
+</tr>
+<tr>
+<td data-colwidth="65"><p>5</p></td>
+<td data-colwidth="711"><p><strong>Accio Work Visable 接入架构与插件（O1-KR3）</strong></p><p>双仓库架构（Plugin 配置包 v-agent-hub-bamboo + MCP Server supplier-backend-mcp-service）设计完成并落地首版；visable-assistant 插件包首版 34 文件 / 4,476 行（Agent 层 + 三个业务技能 + 插件记忆机制 + 连接器与引导资源）；三个技能以插件形态交付，Performance Insights 留存并被团队生产化至 v2.2.2。</p></td>
+<td data-colwidth="1022"><p>在三种接入形态中选定 Connector(MCP) 并给出三条论证，把双仓库耦合面收敛到 connectors.json 的一条 URL，后端接口演进不再牵动插件发版，该边界后续被团队沿用；插件包从 0 到 1 一次成型，团队后续 4 位同学的迭代都跑在这个骨架上；accio_id 身份参数从 client 到 service 到 tool 全链路贯通，是多公司供应商场景不串号的前提；跨用户上下文串用缺陷 CTOOL-589 用 Memory Policy 硬约束收口而非加提示词。</p></td>
+</tr>
+<tr>
+<td data-colwidth="65"><p>6</p></td>
+<td data-colwidth="711"><p><strong>harness 跨应用开发方式（O1-KR4）</strong></p><p>以个人工具仓驱动公司多仓开发，目标仓零安装；承接 Nexus / GTM 系列前端需求 5 项（2 项主开发），横跨 11 个仓库交付 18 个 PR，单个需求单任务最大统管 8 个仓库，已沉淀 10 个仓库工作区。</p></td>
+<td data-colwidth="1022"><p>把工作单元从「仓库」换成「需求」，任务做成全局池，一个任务条目同时持有多个仓的 spec、plan、进度与证据，依赖顺序与合并窗口在一个上下文里推完；零侵入设计使跨仓开发不需要任何仓库 owner 批准，能同时改动包括 nginx 边缘配置仓、iac 基础设施仓在内的 11 个仓；仓知识资产化（config.sh + notes.md + e2e-context.md）让 4 种包管理器、主干分支命名不一致等坑不再重踩；实现者与验收者分离、流程轻重由人显式切换，AI 驱动但判断权在人。cross-repo-rollout playbook 从 CTOOL-634 与 CTOOL-679 两个真实项目提炼。</p></td>
+</tr>
+<tr>
+<td data-colwidth="65"><p>7</p></td>
+<td data-colwidth="711"><p><strong>AI 能力带来的业务结果（O1-KR2）</strong></p><p>商品管理后台 AI 建议（Keywords / Category）全流程升级并经 A/B 验证：AI 商家采纳率 UV 级 Keywords 57.6% → 70.3%、Category 42.0% → 64.8%（目标 &gt;60% 达标）；Quick Editor A/B 实验组每日人均保存商品数 5.41 → 7.28，+34.7%；推全后平台日均人均保存商品数 6.34 → 7.13，+12.5%。</p></td>
+<td data-colwidth="1022"><p>定下采纳率判定口径（以新建商品流程 eventlabel='new' 为主口径，该场景建议量占约 1/3、采纳量占约 73%），并在 4.2 推全建议触发逻辑变更后改以 UV 级判定达标，避免事件级口径失真；用按周衰减趋势（W1 +68.7% 收敛到 W5 +9.4%）解释实验与全量口径的差距，证明 +12.5% 是稳态而非效果虚高；A/B 样本与 8 个 save 事件口径核齐，确认无漏计。</p></td>
+</tr>
+</tbody></table>
+
+<h2>三、思考和反思 / Summary and Reflection</h2>
+
+<p><strong>1. 指标口径应该在需求上线前定，而不是在写结果时补</strong></p>
+<p>AI 采纳率有事件级与 UV 级两套口径，4 月 2 日推全时建议触发逻辑有变更，事件级读数会失真；Quick Editor A/B 的 +34.7% 与推全后平台的 +12.5% 差了一倍多，最后靠按周衰减趋势（W1 +68.7% 收敛到 W5 +9.4%）才把两个数解释到自洽。这两次都是在要写结果的时候才把口径补齐的。</p>
+<p>启示：口径不定，数字既不能用来做判断，也不能用来对外说。主口径、分子分母、对比窗口、哪些月份要排除，应该在 A/B 开跑前就写进方案。</p>
+<p>下一步行动：H2 把指标口径当作需求交付物之一，与埋点验收一起过；覆盖度诊断沿用同一做法，先定判定口径再出结论。</p>
+
+<p><strong>2. 交付了能力，但没有交付能力的证据</strong></p>
+<p>四处是同一个毛病：Accio Work 的 PRD 定义了 9 项上线指标与 4 项 30 天健康指标，一条都没有回收；AI 资产平台没有注册资产数、安装次数与活跃用户数；误报治理只能给出定性清单，拿不出降噪幅度；原 OKR 里的 AI Lines 80% 与错误总量下降 XX% 因为无口径被划掉。工具与平台类交付没有产品同学替我盯数据，做完了不等于做到了。</p>
+<p>启示：度量方式、取数来源与回收时间点要跟功能一起排期，否则半年之后只能靠提交记录自证。</p>
+<p>下一步行动：H2 每个工具或平台类 KR 立项时写一行度量口径；AI 资产平台的注册与安装数据从后端库取，误报治理的降噪幅度用 ODPS 稳定性数据做环比。</p>
+
+<p><strong>3. 诊断做得比修复快，结论缺一个执行归口</strong></p>
+<p>business-insights 内存泄漏九轮压测把死亡阈值钉到约 350 req/task，根因、正解与止血方案都交付到可直接决策的程度，但 nuxt 4.4.4 升级没有执行，visitors 的 PR #245 仍 Open；告警补全计划已 100% 排布，Datadog 侧 44 条只导入 4 条；覆盖度诊断机制建成，只在 1 个真实需求上完整跑通；Monitoring Agent 的 MVP 子目标（≥5 次真实发布与 auto Jira 回流）9 月 30 日未达成。</p>
+<p>启示：把模糊问题钉成确定性结论是我的强项，但结论之后的落地要跨团队排期与发版窗口，这部分我没有提前占位，于是诊断完成与问题解决之间断了一段。</p>
+<p>下一步行动：H2 诊断类产出直接绑执行载体，出报告时就带 Jira 票、责任人与预计落地窗口，不再交付没有归口的结论。</p>
+
+<p><strong>4. 个人工具跑通了，离团队资产还差一步</strong></p>
+<p>harness 跨应用开发方式在 CTOOL-634（5 仓）与 CTOOL-679（8 仓）两个真实项目上完整跑通，注册 10 个仓库工作区，但目前只有我在用。对照 marketplace：4 位同事共 13 次提交，说明资产只要装上就能被共同维护。</p>
+<p>启示：差别在于 marketplace 是装了就有效，harness 是先要理解我的工作方式才有效。方法论沉淀成了 playbook，但没有沉淀成别人能直接跑起来的入口。</p>
+<p>下一步行动：H2 找 1 到 2 位同事在真实需求上试用 harness，按他们的卡点改安装与上手路径；先拿到第二个人的可复用证据，不追求推广面。</p>
+
+<p><strong>5. 能被别人接着改的产出，才算真的沉淀下来</strong></p>
+<p>本期最有说服力的三件事都不是我最后收尾的：我搭的 supplier settings hub 成为后续 Nexus AI Lead Enrichment 的载体，同事在同一 staging 分支上直接叠加；Performance Insights 的 65 行骨架被团队生产化到 v2.2.2、1,087 行；两套告警标准口径被后续项目直接复制。共同点是我在设计时就把边界收敛到一个耦合点，把口径写成可复制的模板。</p>
+<p>启示：反面同样清楚，Accio 插件在团队两次重构中被大幅移除，我没有留下足够的说明让重构者知道哪些约束不能动。</p>
+<p>下一步行动：H2 交付资产时同时交付一页边界说明，写清哪些是可替换的实现、哪些是不能动的约束。</p>
+
+<h2>四、接下来的规划 / Next Plan</h2>
+<p></p>
