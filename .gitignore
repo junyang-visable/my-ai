@@ -7,3 +7,4 @@ harness-data/tasks/*/evidence/
 __pycache__/
 # scratch env with live staging session cookie, local-only
 .scratch/memleak-stress/env.sh
+.scratch
