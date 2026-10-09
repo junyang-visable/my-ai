@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Minimal MCP Streamable HTTP client for mcp.atlassian.com (JSON-RPC over POST + SSE)."""
-import json, sys, urllib.request, urllib.error
+import json, os, sys, urllib.request, urllib.error
 
 TOKEN_FILE = "/Users/yangjun/.mcp-auth/mcp-remote-v1/01910c24c5f2edcaf999bd1eaaeaeee8_tokens.json"
 URL = "https://mcp.atlassian.com/v1/mcp"
@@ -71,9 +71,14 @@ def main():
                 print("===", t["name"])
                 print(json.dumps(t.get("inputSchema", {}), indent=1, ensure_ascii=False)[:2500])
     elif cmd == "call":
-        name, args = sys.argv[2], json.loads(sys.argv[3]) if len(sys.argv) > 3 else {}
+        raw_args = sys.argv[3] if len(sys.argv) > 3 else "{}"
+        if raw_args.startswith("@"):
+            raw_args = open(raw_args[1:], encoding="utf-8").read()
+        name, args = sys.argv[2], json.loads(raw_args)
         res = rpc("tools/call", {"name": name, "arguments": args})
-        print(json.dumps(res, indent=2, ensure_ascii=False)[:6000])
+        limit = int(os.environ.get("MCP_OUT_LIMIT", "0"))
+        out = json.dumps(res, indent=2, ensure_ascii=False)
+        print(out[:limit] if limit else out)
 
 
 if __name__ == "__main__":
