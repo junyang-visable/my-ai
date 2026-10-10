@@ -17,7 +17,8 @@ AI agent 写码会系统性产出 "slop" 模式：复述代码的注释、为不
 
 技术基座（已核实）：
 
-- **anti-slop**（dmmulroy/anti-slop，MIT）：19 条 opinionated Oxlint JS 插件规则，
+- **anti-slop**（dmmulroy/anti-slop，MIT）：18 条 opinionated Oxlint JS 插件通用规则
+  （+ `oxc/no-accumulating-spread` 合计 19 条显式 entries），
   官方定位为 vendor 分发（拷入自己的仓库，读、改、拥有）。Effect 规则组独立，不适用。
 - **oxc/oxlint**：50-100x ESLint；`.vue` 文件 lint 其 `<script>` 块；JS 插件
   （alpha，兼容 ESLint v9 API）；`-c/--config` 接受任意路径配置；jsPlugins 的
@@ -132,8 +133,8 @@ runner.sh --repo <path> [--base <ref>] [--files <显式文件列表>] [--out <fi
 - `ignorePatterns`：`.agent/ .agents/ .claude/ .codex/ .cursor/ .gemini/` 等
   agent 工具目录（参考 anti-slop README，勿广泛忽略所有点目录）。
 - `jsPlugins`：`anti-slop`（`./anti-slop/index.ts`）+ `slop-local`（`./rules/index.ts`）。
-- `rules`：anti-slop 19 条通用规则全 `error` + `oxc/no-accumulating-spread` +
-  oxlint correctness 默认预设。Effect 规则组不注册。
+- `rules`：anti-slop 18 条通用规则全 `error` + `oxc/no-accumulating-spread`
+  （合计 19 条显式 entries）+ oxlint correctness 默认预设。Effect 规则组不注册。
 - 此文件是机械层唯一调优点（开/关/调级），属个人判定依据，更新不整替（§12）。
 
 ## 6. 规则体系
@@ -141,7 +142,7 @@ runner.sh --repo <path> [--base <ref>] [--files <显式文件列表>] [--out <fi
 | 规则 | 位置 | 执行者 | 性质 |
 |---|---|---|---|
 | oxlint 原生 + `oxc/no-accumulating-spread` | `engine/oxlintrc.json` | runner.sh | 确定 |
-| anti-slop 19 条 | `engine/anti-slop/` + oxlintrc 注册 | runner.sh | 确定 |
+| anti-slop 18 条通用规则（+ `oxc/no-accumulating-spread` 合计 19 条显式 entries） | `engine/anti-slop/` + oxlintrc 注册 | runner.sh | 确定 |
 | 自定义 JS 规则（slop-local） | `engine/rules/` | runner.sh | 确定（来源是判断沉淀） |
 | 自然语言规则（SR-*） | `semantic-rules.md` | agent 判断层 | 提议-确认 |
 | 仓特有规则 | `<hd>/<alias>/notes.md` lint 段 | agent 判断层 | 提议-确认 |
@@ -305,7 +306,7 @@ diff → 逐条 adopt/reject（reject 写 tombstone）→ 本地改过的种子�
 | 待验证 | 失败时的降级 | 实测结论 |
 |---|---|---|
 | `.oxlintrc.json`（json 配置）能加载 `./anti-slop/index.ts` 的 TS 插件 | 换 `oxlint.config.ts`（TS 配置，jiti 运行） | 实测：通过，未用降级。spike 样本（oxlint 1.78.0 + @oxlint/plugins 1.78.0）从 json 配置直接加载 TS 插件，`sloppy.ts` 报 15 条 anti-slop 诊断，含全部预期 code；stderr 仅有 Node 的 `MODULE_TYPELESS_PACKAGE_JSON` 警告（无碍 stdout JSON） |
-| jsPlugins 规则覆盖 `.vue` script 块 | `.vue` 退回 oxlint 原生规则 + 语义层覆盖，`.ts` 保持全套 | 实测：覆盖，未用降级。`sloppy.vue` script 块内 `anti-slop(no-runtime-typeof)` 与 `require-readable-spacing` 均触发，行号相对 script 内容（§6 兜底不生效，Task 2 的 .vue 断言走"覆盖"分支） |
+| jsPlugins 规则覆盖 `.vue` script 块 | `.vue` 退回 oxlint 原生规则 + 语义层覆盖，`.ts` 保持全套 | 实测：覆盖，未用降级。`sloppy.vue` script 块内 `anti-slop(no-runtime-typeof)` 与 `require-readable-spacing` 均触发，行号为 .vue 原文件坐标（非 script 内容相对）（§6 兜底不生效，Task 2 的 .vue 断言走"覆盖"分支） |
 | `-f json` schema 稳定可解析 | 换 `-f agent` format | 实测：可解析，未用降级。但顶层是包装对象 `{diagnostics, number_of_files, number_of_rules, threads_count, start_time}` 而非裸数组——jq 提取必须走 `.diagnostics[]`（裸 `.[]` 会报错）；真实字段名见下方记录 |
 | `--disable-nested-config` + 显式 `-c` 组合行为符合预期 | 调整为仅显式文件列表传参 | 实测：符合，未用降级。cwd 放 `{"rules":{"anti-slop/no-runtime-typeof":"off"}}` 的 `.oxlintrc.json` 后仍显式 `--config` 运行：该规则仍报 1 条、总诊断 15 条、启用规则 115 条，与无本地配置时完全一致——本地 off 未泄漏，kit 配置完全接管 |
 
