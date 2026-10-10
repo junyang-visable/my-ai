@@ -339,7 +339,7 @@ git -C "$TMP" config user.name t
 printf 'export const one = 1;\n' > "$TMP/a.ts"
 git -C "$TMP" add a.ts
 git -C "$TMP" commit -qm base
-printf 'export const one = 1;\nexport const two = 2;\nexport const three = 3;\n' > "$TMP/a.ts"
+printf 'export const one = 1;\nexport const flag = typeof one === "object";\nexport const three = 3;\n' > "$TMP/a.ts"
 git -C "$TMP" commit -qam change
 JSON="$(bash "$ENGINE_DIR/runner.sh" --repo "$TMP" --base HEAD~1)"
 if printf '%s' "$JSON" | jq -e '.files[0].path == "a.ts" and .files[0].changedLines == [[2,3]]' >/dev/null; then
@@ -365,7 +365,7 @@ if [[ "$FAIL" -eq 0 ]]; then echo "selfcheck PASS"; else echo "selfcheck FAIL"; 
 exit "$FAIL"
 ```
 
-（`.nothingToLint` 那条：`--base HEAD` 即 diff HEAD...HEAD 为空。注意 `a.ts` 含 `export` 三行在 no-unknown-returns 等规则下是否产 findings 未定，所以诊断断言用 `>= 1` 只验管道通；若实测为 0，把该断言改为 `has key .diagnostics` 存在性检查。）
+（`.nothingToLint` 那条：`--base HEAD` 即 diff HEAD...HEAD 为空。第二行 `typeof one === "object"` 必触发 anti-slop/no-runtime-typeof（非 "undefined" 存在性探测），保证诊断断言 `>= 1` 成立；changedLines 仍为 [[2,3]]。）
 
 - [ ] **Step 3: 跑 selfcheck 确认当前失败**
 
@@ -382,6 +382,7 @@ Expected: FAIL（`runner.sh: No such file or directory` / JSON 为空）。
 ```bash
 #!/usr/bin/env bash
 # slop-linter engine — deterministic mechanical layer (spec §5.1)
+# NOTE: bash-3.2 compatible (this machine's /bin/bash is 3.2.57): no mapfile, no declare -A.
 # Usage: runner.sh --repo <path> [--base <ref>] [--files <p1,p2>] [--out <file>]
 # Exit: 0 = clean or nothing-to-lint · 1 = error-tier findings · 2 = usage/setup failure
 set -euo pipefail
@@ -422,30 +423,36 @@ fi
 DIRTY=false
 if [[ -n "$(git -C "$REPO" status --porcelain)" ]]; then DIRTY=true; fi
 
-# changed file set
+# changed file set (bash 3.2: while-read into indexed array, no mapfile)
+FILE_ARR=()
 if [[ -n "$FILES" ]]; then
-  mapfile -t FILE_ARR < <(printf '%s\n' "$FILES" | tr ',' '\n' | grep -v '^$' || true)
+  while IFS= read -r f; do
+    if [[ -n "$f" ]]; then FILE_ARR+=("$f"); fi
+  done < <(printf '%s\n' "$FILES" | tr ',' '\n')
 else
-  mapfile -t FILE_ARR < <(git -C "$REPO" diff --name-only "$BASE"...HEAD | grep -E '\.(ts|tsx|js|mjs|cjs|jsx|vue)$' || true)
+  while IFS= read -r f; do
+    if [[ -n "$f" ]]; then FILE_ARR+=("$f"); fi
+  done < <(git -C "$REPO" diff --name-only "$BASE"...HEAD | grep -E '\.(ts|tsx|js|mjs|cjs|jsx|vue)$')
 fi
 
-# changed line ranges per file (diff mode only)
-declare -A RANGES=()
+# changed line ranges, parallel indexed arrays (bash 3.2: no assoc arrays)
+RANGE_FILES=()
+RANGE_VALS=()
 if [[ -z "$FILES" && ${#FILE_ARR[@]} -gt 0 ]]; then
-  file="" ranges=""
+  cur_file="" cur_ranges=""
   while IFS= read -r line; do
     if [[ "$line" == "+++ b/"* ]]; then
-      if [[ -n "$file" ]]; then RANGES["$file"]="$ranges"; fi
-      file="${line#+++ b/}"; ranges=""
+      if [[ -n "$cur_file" ]]; then RANGE_FILES+=("$cur_file"); RANGE_VALS+=("$cur_ranges"); fi
+      cur_file="${line#+++ b/}"; cur_ranges=""
     elif [[ "$line" == "@@"* ]]; then
       plus="${line#*+}"; plus="${plus%% *}"
       start="${plus%%,*}"
       if [[ "$plus" == *,* ]]; then count="${plus#*,}"; else count=1; fi
       if [[ "$count" -eq 0 ]]; then continue; fi
-      ranges+="${start}-$((start + count - 1));"
+      cur_ranges+="${start}-$((start + count - 1));"
     fi
   done < <(git -C "$REPO" diff --unified=0 "$BASE"...HEAD)
-  if [[ -n "$file" ]]; then RANGES["$file"]="$ranges"; fi
+  if [[ -n "$cur_file" ]]; then RANGE_FILES+=("$cur_file"); RANGE_VALS+=("$cur_ranges"); fi
 fi
 
 emit() {
@@ -462,7 +469,12 @@ fi
 
 FILES_JSON="[]"
 for f in "${FILE_ARR[@]}"; do
-  r="${RANGES[$f]:-}"
+  r=""
+  if [[ ${#RANGE_FILES[@]} -gt 0 ]]; then
+    for i in "${!RANGE_FILES[@]}"; do
+      if [[ "${RANGE_FILES[$i]}" == "$f" ]]; then r="${RANGE_VALS[$i]}"; break; fi
+    done
+  fi
   FILES_JSON="$(printf '%s' "$FILES_JSON" | jq -c --arg p "$f" --arg r "$r" \
     '. + [{path: $p, changedLines: (if $r == "" then [] else ($r | rtrimstr(";") | split(";") | map(split("-") | map(tonumber))) end)}]')"
 done
@@ -487,7 +499,7 @@ if [[ "$ERRORS" -gt 0 ]]; then exit 1; else exit 0; fi
 chmod +x /Users/yangjun/Desktop/my-ai/.agents/skills/slop-linter/engine/runner.sh /Users/yangjun/Desktop/my-ai/.agents/skills/slop-linter/engine/selfcheck.sh
 ```
 
-**实现说明（why，写给执行者）**：`set -e` 下所有 `[[ cond ]] && cmd` 短路写法都会在条件为假时误杀脚本，因此全部展开为 `if/fi`；`nothingToLint` 必须先于 oxlint 判断——oxlint 无路径参数时会 lint 整个 cwd，这是零侵入红线的反向事故；severity 字段名与取值按 Task 1 spec §13 回写的实测结论对齐（如实际是 `1/2` 数字或 `"warning"`，改 `select(.severity == "error")` 一处即可）。
+**实现说明（why，写给执行者）**：`set -e` 下所有 `[[ cond ]] && cmd` 短路写法都会在条件为假时误杀脚本，因此全部展开为 `if/fi`；本机 `/bin/bash` 实测为 3.2.57（无 bash4+ 在 PATH），故文件集与行范围解析用 while-read + 平行索引数组，**绝不用 `mapfile` / `declare -A`**；空数组在 `set -u` 下展开会报 unbound，所有数组展开前都有长度守卫；`nothingToLint` 必须先于 oxlint 判断——oxlint 无路径参数时会 lint 整个 cwd，这是零侵入红线的反向事故；severity 字段名与取值按 Task 1 spec §13 回写的实测结论对齐（如实际是 `1/2` 数字或 `"warning"`，改 `select(.severity == "error")` 一处即可）。
 
 - [ ] **Step 5: 跑 selfcheck 确认全绿**
 
