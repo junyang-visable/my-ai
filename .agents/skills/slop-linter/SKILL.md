@@ -40,13 +40,15 @@ AGENT="$(cd "$(dirname "$(readlink -f <this-SKILL.md-path>)")" && pwd)"
      插件/版本漂移对照 `engine/anti-slop/VENDORED.md` 的 upstream rev 记录）；
      die 的具体原因走 **stderr**——调用时必须保留并转述 stderr（exit 2 的细节在那里）。
    - oxlint 崩溃/超时 → 保留原始输出与 exit code，agent 判定 escalate（spec §11）。
+   - exit 1 = 正常检出路径（存在 error 级 findings，JSON 已产出）——继续 Order 3，不是失败。
    - `nothingToLint: true` → 报告 "nothing to lint"，正常终止。
 3. 读规则：`semantic-rules.md` 全文（每次运行必读，不跨会话缓存）+
    `<hd>/<alias>/notes.md` 存在 "lint" 段则并入（仓特有规则）。
 4. 读 diff 全文：`git -C <repo> diff <base>...HEAD`。
 5. 新旧行区分：诊断行号（取 `labels[0].span.line`，spec §13 实测）落在该文件 changedLines 内 →
    计入 verdict（仅 severity=error；机械 warn 级 → warn 档，不计入，spec §9）；
-   落在存量行 → advisory（列出、注明"非本次引入"、不阻卡）。
+   落在存量行 → advisory（列出、注明"非本次引入"、不阻卡）；
+   文件无 changedLines 数据（--files 模式）→ 该文件全部诊断按新行处理，计入 verdict。
 6. 语义审查：逐条 SR-* 与仓特有规则对照**新增/修改行**。每条 finding 必须含
    规则 ID + file:line + 原文引用 + 建议修法；低置信 → warn 档。
 7. 写报告（三档表：error / warn / advisory + verdict + 修复循环记录区）。
