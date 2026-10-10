@@ -516,6 +516,8 @@ git add .agents/skills/slop-linter/engine
 git commit -m "feat(slop-linter): add deterministic runner with changed-line extraction and selfcheck"
 ```
 
+> **Task 2 审查后修正（2026-10-10，spec §11 权威裁定）**：上方 verbatim 代码含两处计划级缺陷，已由 fix round 落地修正——① jq 提取须 `set +e` 包裹并把 stderr 并入 die 消息（否则垃圾 stdout 在赋值处被 set -e 静默杀掉，exit 5 无消息）；② 两个 `git diff` 调用须 `VAR="$(...)" || die` 捕获（`< <(...)` 的退出码 set -e 不查，坏 `--base` 会假 clean）；③ diff 模式文件循环加 `[ -f "$REPO/$f" ]` 存在性过滤（删除文件不可 lint，纯删除 diff 正确归 nothingToLint）；④ 参数缺值守卫 exit 2；⑤ selfcheck 增加 exit-code 断言（findings=1 / nothingToLint=0 / 缺 --repo=2 / 坏 --base=2）并将 clean 断言收紧为 `.diagnostics == []`。以 git 实现为准，本注记为计划侧差异记录。
+
 ---
 
 ### Task 3: slop-local 自定义插件（扩展点落地 + 首条规则 no-emoji）
@@ -607,6 +609,8 @@ Expected: `selfcheck PASS`，含 `slop-local/no-emoji fires`。若插件加载�
 git add .agents/skills/slop-linter/engine
 git commit -m "feat(slop-linter): add slop-local plugin with no-emoji rule (SR-006 mechanical counterpart)"
 ```
+
+> **Task 3 审查后修正（2026-10-10，裁定）**：上方 verbatim 规则代码含一处计划级缺陷——comment 目标报在 `Program:exit` 节点（span=line 1），污染下游 `labels[0].span.line` 的新旧行归属。已由 fix round 落地修正：comment 诊断改报 comment token 本身；Literal 检测由 `node.raw` 改 `node.value`（捕获 `\u{...}` 转义形态）；selfcheck 断言升级为 string-literal 与 comment 双 message 各自命中、且 comment 诊断行号 = fixture 中该注释的实际行（exact-value）。以 git 实现为准。
 
 ---
 
@@ -724,7 +728,8 @@ AGENT="$(cd "$(dirname "$(readlink -f <this-SKILL.md-path>)")" && pwd)"
 2. 机械层：
    `bash $AGENT/engine/runner.sh --repo <repo> [--base <base>] --out <findings.json>`
    - oxlint 缺失 → 告知一次性 `cd $AGENT/engine && npm install`，停。
-   - 插件加载失败 / 非法 JSON → **显式失败报告**（spec §11：静默降级 = 假阴性）。
+   - 插件加载失败 / 非法 JSON → **显式失败报告**（spec §11：静默降级 = 假阴性）；
+     die 的具体原因走 **stderr**——调用时必须保留并转述 stderr（exit 2 的细节在那里）。
    - `nothingToLint: true` → 报告 "nothing to lint"，正常终止。
 3. 读规则：`semantic-rules.md` 全文（每次运行必读，不跨会话缓存）+
    `<hd>/<alias>/notes.md` 存在 "lint" 段则并入（仓特有规则）。
