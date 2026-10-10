@@ -30,3 +30,7 @@
 - GA4 payload here is free-form (`{event:'navigate', event_label, event_position}`) — unlike product-editor's typed EventSpecificPayloadGA4; don't copy types across repos.
 - Dev symlink for unpublished visable-vue components: `rm -rf node_modules/@visable-dev/vue && ln -s ../../../../project/visable-vue node_modules/@visable-dev/vue` (repo sits one level deeper: Desktop/project/customer-dashboard-frontend). No test stage configured in harness (no unit tests) — eslint fallback + type-check + build are the gates.
 - (CTOOL-679 design-align) Banner constrained to content width: wrap in `px-2 lg:px-4` outer + `mx-auto xl:max-w-[1440px]` inner (mirrors main's container classes exactly — note max-w only applies at xl in this app). Verify with getBoundingClientRect, not scaled screenshots.
+
+## CTOOL-718 round (2026-10-09)
+- Upgrade touched `@visable-dev/vue` ONLY (43.41.1 → 43.44.0, exact pin): `@visable-dev/routing` is not a direct dep — it resolves transitively at 22.10.0 inside the vue@43.44.0 block (pnpm-lock.yaml ~L4112). Don't re-add routing to package.json.
+- Verified clean: `zsh -ic 'CI=true pnpm install --no-frozen-lockfile'` → `--frozen-lockfile` exit 0 → validate all green (lint/typecheck/build/lock; no test stage). Zero `.snap` changes.
