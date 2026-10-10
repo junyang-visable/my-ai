@@ -302,12 +302,17 @@ diff → 逐条 adopt/reject（reject 写 tombstone）→ 本地改过的种子�
 
 ## 13. Spike 验证点（实现计划第一个任务）
 
-| 待验证 | 失败时的降级 |
-|---|---|
-| `.oxlintrc.json`（json 配置）能加载 `./anti-slop/index.ts` 的 TS 插件 | 换 `oxlint.config.ts`（TS 配置，jiti 运行） |
-| jsPlugins 规则覆盖 `.vue` script 块 | `.vue` 退回 oxlint 原生规则 + 语义层覆盖，`.ts` 保持全套 |
-| `-f json` schema 稳定可解析 | 换 `-f agent` format |
-| `--disable-nested-config` + 显式 `-c` 组合行为符合预期 | 调整为仅显式文件列表传参 |
+| 待验证 | 失败时的降级 | 实测结论 |
+|---|---|---|
+| `.oxlintrc.json`（json 配置）能加载 `./anti-slop/index.ts` 的 TS 插件 | 换 `oxlint.config.ts`（TS 配置，jiti 运行） | 实测：通过，未用降级。spike 样本（oxlint 1.78.0 + @oxlint/plugins 1.78.0）从 json 配置直接加载 TS 插件，`sloppy.ts` 报 15 条 anti-slop 诊断，含全部预期 code；stderr 仅有 Node 的 `MODULE_TYPELESS_PACKAGE_JSON` 警告（无碍 stdout JSON） |
+| jsPlugins 规则覆盖 `.vue` script 块 | `.vue` 退回 oxlint 原生规则 + 语义层覆盖，`.ts` 保持全套 | 实测：覆盖，未用降级。`sloppy.vue` script 块内 `anti-slop(no-runtime-typeof)` 与 `require-readable-spacing` 均触发，行号相对 script 内容（§6 兜底不生效，Task 2 的 .vue 断言走"覆盖"分支） |
+| `-f json` schema 稳定可解析 | 换 `-f agent` format | 实测：可解析，未用降级。但顶层是包装对象 `{diagnostics, number_of_files, number_of_rules, threads_count, start_time}` 而非裸数组——jq 提取必须走 `.diagnostics[]`（裸 `.[]` 会报错）；真实字段名见下方记录 |
+| `--disable-nested-config` + 显式 `-c` 组合行为符合预期 | 调整为仅显式文件列表传参 | 实测：符合，未用降级。cwd 放 `{"rules":{"anti-slop/no-runtime-typeof":"off"}}` 的 `.oxlintrc.json` 后仍显式 `--config` 运行：该规则仍报 1 条、总诊断 15 条、启用规则 115 条，与无本地配置时完全一致——本地 off 未泄漏，kit 配置完全接管 |
+
+JSON 诊断真实字段（Task 2 的 jq 提取路径依据，修正本 spec 此前的假定）：
+`-f json` 输出为包装对象 `{ "diagnostics": [...], "number_of_files": N, "number_of_rules": N, "threads_count": N, "start_time": F }`；
+诊断对象字段为 `message` / `code` / `severity` / `filename` / `labels[].span.{offset, length, line, column}`。
+与假定的差异：① `code` 用括号形式 `anti-slop(no-runtime-typeof)`（非 `anti-slop/no-runtime-typeof`），jq 匹配与 spec 文中规则 ID 写法需按此转换；② 无 `location.start.line`，行号取 `labels[0].span.line`、列取 `labels[0].span.column`；③ 零违规时输出为 `{ "diagnostics": [], ... }`（包装对象内空数组，既非空串也非裸 `[]`），此时 exit code 0，有 error 级诊断时 exit code 1。
 
 ## 14. 边界与非目标
 
