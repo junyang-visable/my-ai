@@ -12,6 +12,7 @@ die() { echo "runner: $*" >&2; exit 2; }
 
 REPO="" BASE="" OUT="" FILES=""
 while [[ $# -gt 0 ]]; do
+  if [[ $# -lt 2 ]]; then die "missing value for: $1"; fi
   case "$1" in
     --repo)  REPO="$2"; shift 2 ;;
     --base)  BASE="$2"; shift 2 ;;
@@ -48,15 +49,21 @@ if [[ -n "$FILES" ]]; then
     if [[ -n "$f" ]]; then FILE_ARR+=("$f"); fi
   done < <(printf '%s\n' "$FILES" | tr ',' '\n')
 else
+  # capture (not process-substitute) so a failing git diff dies loudly (spec §11)
+  DIFF_LIST="$(git -C "$REPO" diff --name-only "$BASE"...HEAD)" || die "git diff failed — bad base or repo: $BASE"
   while IFS= read -r f; do
-    if [[ -n "$f" ]]; then FILE_ARR+=("$f"); fi
-  done < <(git -C "$REPO" diff --name-only "$BASE"...HEAD | grep -E '\.(ts|tsx|js|mjs|cjs|jsx|vue)$')
+    # -f: deleted files are not lintable; grep: non-source extensions are not lintable either (else oxlint prints "No files found to lint." ahead of the JSON)
+    if [[ -n "$f" && -f "$REPO/$f" ]]; then
+      if printf '%s' "$f" | grep -qE '\.(ts|tsx|js|mjs|cjs|jsx|vue)$'; then FILE_ARR+=("$f"); fi
+    fi
+  done <<< "$DIFF_LIST"
 fi
 
 # changed line ranges, parallel indexed arrays (bash 3.2: no assoc arrays)
 RANGE_FILES=()
 RANGE_VALS=()
 if [[ -z "$FILES" && ${#FILE_ARR[@]} -gt 0 ]]; then
+  DIFF_RAW="$(git -C "$REPO" diff --unified=0 "$BASE"...HEAD)" || die "git diff failed — bad base or repo: $BASE"
   cur_file="" cur_ranges=""
   while IFS= read -r line; do
     if [[ "$line" == "+++ b/"* ]]; then
@@ -69,7 +76,7 @@ if [[ -z "$FILES" && ${#FILE_ARR[@]} -gt 0 ]]; then
       if [[ "$count" -eq 0 ]]; then continue; fi
       cur_ranges+="${start}-$((start + count - 1));"
     fi
-  done < <(git -C "$REPO" diff --unified=0 "$BASE"...HEAD)
+  done <<< "$DIFF_RAW"
   if [[ -n "$cur_file" ]]; then RANGE_FILES+=("$cur_file"); RANGE_VALS+=("$cur_ranges"); fi
 fi
 
@@ -102,8 +109,13 @@ OXLINT_OUT="$(cd "$REPO" && "$OXLINT_BIN" --config "$CONFIG" --disable-nested-co
 OXLINT_RC=$?
 set -e
 # oxlint -f json 顶层是包装对象 {diagnostics:[...], ...}（spec §13 实测）——提取 diagnostics 数组
-DIAG="$(printf '%s' "$OXLINT_OUT" | jq -c '.diagnostics' 2>/dev/null)"
-if [[ -z "$DIAG" ]]; then die "oxlint output is not valid JSON or missing diagnostics — report explicitly, never silently skip (spec §11)"; fi
+set +e
+DIAG="$(printf '%s' "$OXLINT_OUT" | jq -c '.diagnostics' 2>&1)"
+JQ_RC=$?
+set -e
+if [[ "$JQ_RC" -ne 0 || -z "$DIAG" ]]; then
+  die "oxlint stdout is not valid JSON or missing diagnostics: $DIAG"
+fi
 ERRORS="$(printf '%s' "$DIAG" | jq '[.[] | select(.severity == "error")] | length')"
 
 emit "$(jq -nc --arg repo "$REPO" --arg base "$BASE" --arg head "$(git -C "$REPO" rev-parse --short HEAD)" \
