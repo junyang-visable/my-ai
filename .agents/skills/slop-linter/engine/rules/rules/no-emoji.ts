@@ -8,11 +8,11 @@ export default {
     };
     return {
       Literal(node: any) {
-        if (typeof node.value === "string" && EMOJI_RE.test(node.raw ?? "")) report(node, "string literal");
+        if (typeof node.value === "string" && EMOJI_RE.test(node.value)) report(node, "string literal");
       },
-      "Program:exit"(node: any) {
+      "Program:exit"() {
         for (const c of context.sourceCode.getAllComments()) {
-          if (EMOJI_RE.test(c.value)) report(node, "comment");
+          if (EMOJI_RE.test(c.value)) report(c, "comment");
         }
       },
     };

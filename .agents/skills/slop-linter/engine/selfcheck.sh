@@ -20,6 +20,22 @@ for rule in 'anti-slop(no-array-filter-map)' 'anti-slop(no-chained-type-assertio
     miss "$rule does NOT fire (tune fixture until deterministic)"
   fi
 done
+# fix-round 1: no-emoji 双目标钉死 — 字面量与注释两条 diagnostic 各自命中，且注释锚定其真实行（fixtures/sloppy.ts 注释在第 19 行、字面量在第 20 行）
+if printf '%s' "$OUT" | jq -e 'any(.diagnostics[]; .code == "slop-local(no-emoji)" and (.message | contains("string literal")))' >/dev/null; then
+  ok "no-emoji fires on string literal"
+else
+  miss "no-emoji does NOT fire on string literal"
+fi
+if printf '%s' "$OUT" | jq -e 'any(.diagnostics[]; .code == "slop-local(no-emoji)" and (.message | contains("comment")))' >/dev/null; then
+  ok "no-emoji fires on comment"
+else
+  miss "no-emoji does NOT fire on comment"
+fi
+if printf '%s' "$OUT" | jq -e 'any(.diagnostics[]; .code == "slop-local(no-emoji)" and (.message | contains("comment")) and .labels[0].span.line == 19)' >/dev/null; then
+  ok "no-emoji comment diagnostic anchors at line 19"
+else
+  miss "no-emoji comment diagnostic NOT anchored at line 19"
+fi
 CLEAN="$("$OXLINT" --config "$CFG" --disable-nested-config -f json "$ENGINE_DIR/fixtures/clean.ts")"
 if printf '%s' "$CLEAN" | jq -e '.diagnostics == []' >/dev/null; then ok "clean.ts zero findings"; else miss "clean.ts has findings"; fi
 
