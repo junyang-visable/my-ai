@@ -258,7 +258,7 @@ git commit -m "feat(slop-linter): scaffold engine, vendor anti-slop, verify oxc 
 - Create: `.agents/skills/slop-linter/engine/fixtures/clean.ts`
 
 **Interfaces:**
-- Consumes: Task 1 的 `engine/oxlintrc.json`、`engine/node_modules/.bin/oxlint`；spec §13 已回写的 JSON 字段结论（下方代码按假定字段写，Step 3 按实测对齐）。
+- Consumes: Task 1 的 `engine/oxlintrc.json`、`engine/node_modules/.bin/oxlint`；spec §13 实测结论：**`-f json` 顶层是包装对象 `{diagnostics:[...], ...}`，jq 走 `.diagnostics[]`；诊断字段 `message/code/severity("error")/filename/labels[].span.{line,column}`（行号=`labels[0].span.line`）；输出 code 为括号形式 `anti-slop(<rule>)`（oxlintrc 配置键仍是斜杠形式）；零违规 = `diagnostics:[]` 且 exit 0**。下方代码已按此写成。
 - Produces: `runner.sh --repo <path> [--base <ref>] [--files <p1,p2>] [--out <file>]` → JSON `{repo, base, head, dirty, nothingToLint, files:[{path, changedLines:[[s,e],…]}], diagnostics:[…], oxlintExitCode}`，exit 0/1/2（SKILL.md 与 selfcheck 依赖此契约）；`selfcheck.sh`（Task 3、以及今后每次规则调整/插件升级后必跑）。
 
 - [ ] **Step 1: 写 fixtures（测试先行）**
@@ -311,22 +311,22 @@ ok()   { echo "  ok  - $1"; }
 miss() { echo "  FAIL- $1"; FAIL=1; }
 
 echo "== part 1: rule engine on fixtures =="
+# oxlint -f json 顶层是包装对象 {diagnostics:[...]}；code 为括号形式 anti-slop(<rule>)（spec §13 实测）
 OUT="$("$OXLINT" --config "$CFG" --disable-nested-config -f json "$ENGINE_DIR/fixtures/sloppy.ts")"
-for rule in anti-slop/no-array-filter-map anti-slop/no-chained-type-assertions \
-            anti-slop/no-runtime-typeof anti-slop/require-safety-comment-for-type-assertion; do
-  if printf '%s' "$OUT" | jq -e --arg r "$rule" 'any(.[]; .code == $r)' >/dev/null; then
+for rule in 'anti-slop(no-array-filter-map)' 'anti-slop(no-chained-type-assertions)' \
+            'anti-slop(no-runtime-typeof)' 'anti-slop(require-safety-comment-for-type-assertion)'; do
+  if printf '%s' "$OUT" | jq -e --arg r "$rule" 'any(.diagnostics[]; .code == $r)' >/dev/null; then
     ok "$rule fires"
   else
     miss "$rule does NOT fire (tune fixture until deterministic)"
   fi
 done
 CLEAN="$("$OXLINT" --config "$CFG" --disable-nested-config -f json "$ENGINE_DIR/fixtures/clean.ts")"
-if printf '%s' "$CLEAN" | jq -e 'length == 0' >/dev/null; then ok "clean.ts zero findings"; else miss "clean.ts has findings"; fi
+if printf '%s' "$CLEAN" | jq -e '.diagnostics | length == 0' >/dev/null; then ok "clean.ts zero findings"; else miss "clean.ts has findings"; fi
 
 VUE_OUT="$("$OXLINT" --config "$CFG" --disable-nested-config -f json "$ENGINE_DIR/fixtures/sloppy.vue")"
-# 按 Task 1 spec §13 实测结论二选一（执行时删掉不适用的分支）：
-if printf '%s' "$VUE_OUT" | jq -e --arg r "anti-slop/no-runtime-typeof" 'any(.[]; .code == $r)' >/dev/null; then
-  ok "jsPlugins covers .vue script blocks"
+if printf '%s' "$VUE_OUT" | jq -e --arg r "anti-slop(no-runtime-typeof)" 'any(.diagnostics[]; .code == $r)' >/dev/null; then
+  ok "jsPlugins covers .vue script blocks (spec §13 实测已证实)"
 else
   echo "  note- jsPlugins does NOT cover .vue (spec §6 fallback active: native rules + semantic layer)"
 fi
@@ -483,9 +483,9 @@ set +e
 OXLINT_OUT="$(cd "$REPO" && "$OXLINT_BIN" --config "$CONFIG" --disable-nested-config -f json "${FILE_ARR[@]}")"
 OXLINT_RC=$?
 set -e
-if [[ -z "$OXLINT_OUT" ]]; then OXLINT_OUT="[]"; fi
-DIAG="$(printf '%s' "$OXLINT_OUT" | jq -c '.' 2>/dev/null)"
-if [[ -z "$DIAG" ]]; then die "oxlint output is not valid JSON — report explicitly, never silently skip (spec §11)"; fi
+# oxlint -f json 顶层是包装对象 {diagnostics:[...], ...}（spec §13 实测）——提取 diagnostics 数组
+DIAG="$(printf '%s' "$OXLINT_OUT" | jq -c '.diagnostics' 2>/dev/null)"
+if [[ -z "$DIAG" ]]; then die "oxlint output is not valid JSON or missing diagnostics — report explicitly, never silently skip (spec §11)"; fi
 ERRORS="$(printf '%s' "$DIAG" | jq '[.[] | select(.severity == "error")] | length')"
 
 emit "$(jq -nc --arg repo "$REPO" --arg base "$BASE" --arg head "$(git -C "$REPO" rev-parse --short HEAD)" \
@@ -499,7 +499,7 @@ if [[ "$ERRORS" -gt 0 ]]; then exit 1; else exit 0; fi
 chmod +x /Users/yangjun/Desktop/my-ai/.agents/skills/slop-linter/engine/runner.sh /Users/yangjun/Desktop/my-ai/.agents/skills/slop-linter/engine/selfcheck.sh
 ```
 
-**实现说明（why，写给执行者）**：`set -e` 下所有 `[[ cond ]] && cmd` 短路写法都会在条件为假时误杀脚本，因此全部展开为 `if/fi`；本机 `/bin/bash` 实测为 3.2.57（无 bash4+ 在 PATH），故文件集与行范围解析用 while-read + 平行索引数组，**绝不用 `mapfile` / `declare -A`**；空数组在 `set -u` 下展开会报 unbound，所有数组展开前都有长度守卫；`nothingToLint` 必须先于 oxlint 判断——oxlint 无路径参数时会 lint 整个 cwd，这是零侵入红线的反向事故；severity 字段名与取值按 Task 1 spec §13 回写的实测结论对齐（如实际是 `1/2` 数字或 `"warning"`，改 `select(.severity == "error")` 一处即可）。
+**实现说明（why，写给执行者）**：`set -e` 下所有 `[[ cond ]] && cmd` 短路写法都会在条件为假时误杀脚本，因此全部展开为 `if/fi`；本机 `/bin/bash` 实测为 3.2.57（无 bash4+ 在 PATH），故文件集与行范围解析用 while-read + 平行索引数组，**绝不用 `mapfile` / `declare -A`**；空数组在 `set -u` 下展开会报 unbound，所有数组展开前都有长度守卫；`nothingToLint` 必须先于 oxlint 判断——oxlint 无路径参数时会 lint 整个 cwd，这是零侵入红线的反向事故；`-f json` 顶层是包装对象（spec §13 实测），故先 `jq '.diagnostics'` 提取数组再做 error 计数，severity 实测即字符串 `"error"`；oxlint 每次运行 stderr 会出一条无害的 Node MODULE_TYPELESS 警告，`$(...)` 只收 stdout，天然分离。
 
 - [ ] **Step 5: 跑 selfcheck 确认全绿**
 
@@ -587,12 +587,12 @@ export default {
 
 - [ ] **Step 4: selfcheck 加断言并确认全绿**
 
-用 Edit 在 selfcheck.sh part1 的规则循环里加 `slop-local/no-emoji`：
+用 Edit 在 selfcheck.sh part1 的规则循环里加 `slop-local(no-emoji)`（输出 code 是括号形式，spec §13 实测）：
 
 ```bash
-for rule in anti-slop/no-array-filter-map anti-slop/no-chained-type-assertions \
-            anti-slop/no-runtime-typeof anti-slop/require-safety-comment-for-type-assertion \
-            slop-local/no-emoji; do
+for rule in 'anti-slop(no-array-filter-map)' 'anti-slop(no-chained-type-assertions)' \
+            'anti-slop(no-runtime-typeof)' 'anti-slop(require-safety-comment-for-type-assertion)' \
+            'slop-local(no-emoji)'; do
 ```
 
 ```bash
@@ -729,8 +729,8 @@ AGENT="$(cd "$(dirname "$(readlink -f <this-SKILL.md-path>)")" && pwd)"
 3. 读规则：`semantic-rules.md` 全文（每次运行必读，不跨会话缓存）+
    `<hd>/<alias>/notes.md` 存在 "lint" 段则并入（仓特有规则）。
 4. 读 diff 全文：`git -C <repo> diff <base>...HEAD`。
-5. 新旧行区分：诊断行号落在该文件 changedLines 内 → 计入 verdict；落在存量行 →
-   advisory（列出、注明"非本次引入"、不阻卡）。
+5. 新旧行区分：诊断行号（取 `labels[0].span.line`，spec §13 实测）落在该文件 changedLines 内 →
+   计入 verdict；落在存量行 → advisory（列出、注明"非本次引入"、不阻卡）。
 6. 语义审查：逐条 SR-* 与仓特有规则对照**新增/修改行**。每条 finding 必须含
    规则 ID + file:line + 原文引用 + 建议修法；低置信 → warn 档。
 7. 写报告（三档表：error / warn / advisory + verdict + 修复循环记录区）。
