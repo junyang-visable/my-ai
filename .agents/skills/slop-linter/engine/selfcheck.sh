@@ -12,7 +12,8 @@ echo "== part 1: rule engine on fixtures =="
 # oxlint -f json 顶层是包装对象 {diagnostics:[...]}；code 为括号形式 anti-slop(<rule>)（spec §13 实测）
 OUT="$("$OXLINT" --config "$CFG" --disable-nested-config -f json "$ENGINE_DIR/fixtures/sloppy.ts")"
 for rule in 'anti-slop(no-array-filter-map)' 'anti-slop(no-chained-type-assertions)' \
-            'anti-slop(no-runtime-typeof)' 'anti-slop(require-safety-comment-for-type-assertion)'; do
+            'anti-slop(no-runtime-typeof)' 'anti-slop(require-safety-comment-for-type-assertion)' \
+            'slop-local(no-emoji)'; do
   if printf '%s' "$OUT" | jq -e --arg r "$rule" 'any(.diagnostics[]; .code == $r)' >/dev/null; then
     ok "$rule fires"
   else

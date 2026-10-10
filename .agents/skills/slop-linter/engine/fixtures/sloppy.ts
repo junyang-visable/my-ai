@@ -16,3 +16,5 @@ export function unsafeDict(value: string): UserId {
   const userId = value as UserId;
   return userId;
 }
+// rocket launch 🚀 — emoji demo for slop-local rule
+export const emojiDemo = "done ✅";
