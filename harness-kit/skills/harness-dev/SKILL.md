@@ -198,7 +198,9 @@ git checkout --no-track -b <branch> origin/<default>
    - practices that hold across repos → `<kit>/playbooks/<topic>.md` (start from `_template.md`)
    - task-level detail → the task's `history.md`
 4. Remind the user: acceptance must happen in a **separate session** using the
-   harness-testing skill (role isolation; never self-accept in this session).
+   harness-testing skill (role isolation; never self-accept in this session);
+   optionally also run the slop-linter skill in a separate session for
+   post-development AI-slop detection.
 
 ## Three-way exit
 
