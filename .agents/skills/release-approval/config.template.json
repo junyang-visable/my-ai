@@ -1,0 +1,19 @@
+{
+  "email": {
+    "from": "",
+    "to": [],
+    "cc": [],
+    "subjectPrefix": "Release approval"
+  },
+  "defaults": {
+    "group": "Supplier",
+    "executor": "Jun Yang",
+    "qaEngineer": "Jun Yang",
+    "canRollback": "Yes",
+    "trackingImpacted": "No"
+  },
+  "database": {
+    "url": "https://visable.atlassian.net/wiki/spaces/PRODTECH/database/376700933",
+    "columns": {}
+  }
+}
