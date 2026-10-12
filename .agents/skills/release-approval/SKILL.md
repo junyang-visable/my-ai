@@ -57,13 +57,18 @@ Step 0：以 harness 加载本技能时给出的 base directory 为 `$SKILL_DIR`
 
 ## 第 3 步：System Change Log 创建发布记录行
 
-背景（勿重试已排除的路由）：官方公开 API 无 database 行级操作（CONFCLOUD-77328 open，`/items` 路由 404）；database 前端是 sandbox iframe 独立应用，browser-use 的 snapshot/click/脚本注入/网络捕获均无法触达。因此行创建走 **computer-use 屏幕级自动化**，等效人工操作。
+背景（勿重试已排除的路由）：官方公开 API 无 database 行级操作（CONFCLOUD-77328 open，`/items` 路由 404）；database 前端是 sandbox iframe 独立应用，browser-use 的 snapshot/click/脚本注入均无法触达 iframe 内部。**已验证可行的机制：Qoder 主应用（`com.qoder.app`）的 AX 树会暴露内置浏览器 webview 的 web 内容**——用 computer-use 对 `com.qoder.app` 做 AX 元素读写；AX 不可用时退化到截图坐标点击。
 
-1. **schema 采集（仅 `database.columns` 为空时）**：请用户打开 Qoder 应用内浏览器窗口，用 browser-use navigate 到 `database.url`，`take_screenshot` 视觉读取全部列名，把「列名 → 填充值来源」映射写入 `config.json` 的 `database.columns`（值用字段名或固定文案占位，如 `"Release item": "name"`）。之后每次免采集。
-2. **打开页面**：browser-use navigate 到 `database.url`；先 `take_screenshot`，若报 `NATIVE_BROWSER_VIEWPORT_UNAVAILABLE` 则请用户打开应用内浏览器窗口后重试；若页面跳到 id.atlassian.com 登录页则请用户在受控窗口重新登录。
-3. **录入**：用 Skill 工具调 computer-use（屏幕级），视觉定位行新增入口（表格底部 `+` / "New entry" / 末行空行），逐格填入按 `database.columns` 映射的值；人名/mention 类列直接输入姓名文本。
-4. **验证**：截图确认新行内容无误。失败重试一次；仍失败走兜底——把按列组织的记录内容完整输出到对话，`open` database 页面让用户手动粘贴，汇报中标注「行创建：手动」。
-5. 测试产生的行要清理时，同样用 computer-use 定位该行删除。
+1. browser-use navigate 到 `database.url` 加载页面；报 `NATIVE_BROWSER_VIEWPORT_UNAVAILABLE` 时请用户打开内置浏览器面板（加载不受影响，但可见面板是 AX 暴露与截图验证的前提）。若跳到 id.atlassian.com 登录页，请用户在受控窗口重登。
+2. computer-use `getAppState({app:"com.qoder.app"})`：确认 AX 树含「System Change Log」「Add entry」且面板可见；不可见则请用户把内置浏览器面板切回前台，重新采集。
+3. 点击「Add entry」→ 表尾出现新空行（2026-10-12 实测）。`config.database.columns` 已采集（12 列：Date / Team / Group / Reasons for the change / Change executor / Change Type / Can it be rolled back if it fails? / Status / Actual start time of change / Change details: Git PR / Others / Code Reviewer / QA Engineer）；若列头有出入，以当次 AX 列头为准并更新 config。
+4. 逐格填写，按列映射：
+   - **元素索引跨 capture 漂移**——每次操作的索引只取自上一步返回的最新状态，绝不复用更早 capture 的索引（曾因漂移点错面板）。
+   - person 列（executor/reviewer/QA）输入姓名后从候选中选；select 列从下拉选。已观测选项：Team=Front-end/Back-end；Group=Buyer Group/Connection Group/UG Group（Supplier 侧选项未观测到，首次录入确认）；Change Type=Tech Project/Biz Project/Online Fix；Status=Success (verified&monitored)/Fail - Rolled back。拿不准的选项问用户，不要猜。
+   - Change details: Git PR / Others 单元格支持多条链接条目，填 PR 链接。
+5. 验证：再次 `getAppState` 确认新行各格内容与预期一致。
+6. 兜底：AX/坐标均失败时，把按列组织的记录内容完整输出到对话 + `open` database 页面让用户手动粘贴，汇报标注「行创建：手动」。
+7. 平台约束（auto 模式实测）：行创建/删除动作会被分类器拦截并要求**动作时打字确认**——提前告知用户确认一次，这是平台行为不是 skill 闸门。测试行清理：行内菜单 Delete，删除前同样需用户确认。
 
 ## 第 4 步：汇报
 

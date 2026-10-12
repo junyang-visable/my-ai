@@ -14,6 +14,19 @@
   },
   "database": {
     "url": "https://visable.atlassian.net/wiki/spaces/PRODTECH/database/376700933",
-    "columns": {}
+    "columns": {
+      "Date": "{date}",
+      "Team": "Front-end",
+      "Group": "{group}",
+      "Reasons for the change": "{reason}",
+      "Change executor": "{executor}",
+      "Change Type": "{changeType}",
+      "Can it be rolled back if it fails?": "{canRollback}",
+      "Status": "{status}",
+      "Actual start time of change": "{actualStartTime}",
+      "Change details: Git PR / Others": "{prUrl}",
+      "Code Reviewer": "{reviewer}",
+      "QA Engineer": "{qaEngineer}"
+    }
   }
 }
