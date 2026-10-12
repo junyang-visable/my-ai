@@ -200,7 +200,9 @@ git checkout --no-track -b <branch> origin/<default>
 4. Remind the user: acceptance must happen in a **separate session** using the
    harness-testing skill (role isolation; never self-accept in this session);
    optionally also run the slop-linter skill in a separate session for
-   post-development AI-slop detection.
+   post-development AI-slop detection, passing the task's repo and base branch
+   explicitly (slop-linter takes repo/base/files input only — it does not read
+   the task pool).
 
 ## Three-way exit
 

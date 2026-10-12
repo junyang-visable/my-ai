@@ -1,6 +1,6 @@
 ---
 name: slop-linter
-description: AI-slop detection for completed requirement development. Use when the user asks to lint or slop-check a finished requirement, branch or PR ("lint 这个需求", "跑一下 slop 检测", "check this branch for slop"), or names a repo for standalone detection. Two layers - deterministic oxlint+anti-slop scan via engine/runner.sh, then agent semantic review against semantic-rules.md - producing a tiered report and verdict, with an optional in-session fix loop after explicit user confirmation.
+description: AI-slop detection for completed development work. Use when the user asks to lint or slop-check a finished requirement, branch or PR ("lint 这个需求", "跑一下 slop 检测", "check this branch for slop"), or hands a repo path to scan. Two layers - deterministic oxlint+anti-slop scan via engine/runner.sh, then agent semantic review against semantic-rules.md - producing a tiered report and verdict, with an optional in-session fix loop after explicit user confirmation.
 version: 1.0.0
 ---
 
@@ -20,15 +20,17 @@ AGENT="$(cd "$(dirname "$(readlink -f <this-SKILL.md-path>)")" && pwd)"
 
 - Engine: `$AGENT/engine/`（runner.sh · oxlintrc.json · rules · fixtures）
 - Semantic rules: `$AGENT/semantic-rules.md`
-- Workspace mode only（目标仓库无 .harness install-mode 支持，遇到时说明并仍按直连模式跑）
+- 仅 workspace 侧运行（零仓库侵入：目标仓库无需 .harness 或任何安装；调用方预期
+  install-mode 时说明后照常跑）
 
-## Invocation modes
+## Invocation
 
-- **Task mode** — 用户点名 harness 任务：repo 从 `<hd>/tasks/<task>/current.md` 解析
-  （`<hd>` = harness-data 根，kit 的同级目录；解析不出就问用户，勿猜）。
-  findings 与报告写 `<hd>/tasks/<task>/lint-findings.json` 与 `lint-report.md`。
-- **Direct mode** — 用户给仓库路径或说"当前仓库"：base 默认 origin 默认分支 merge-base；
-  报告呈现于对话，用户指定路径才落文件。
+单一模式：调用方给 repo + base（或文件集），本技能不读任何任务池——repo/base
+的解析是调用方职责。
+
+- repo：用户给路径或说"当前仓库"；解析不出（如只说"lint 这个需求"）就问用户，勿猜。
+- base：缺省 = origin 默认分支 merge-base；也可指定分支/PR/文件集（--files）。
+- 报告呈现于对话；用户指定路径才落文件（findings JSON 走 runner 的 --out）。
 
 ## Order（严格顺序）
 
@@ -43,7 +45,8 @@ AGENT="$(cd "$(dirname "$(readlink -f <this-SKILL.md-path>)")" && pwd)"
    - exit 1 = 正常检出路径（存在 error 级 findings，JSON 已产出）——继续 Order 3，不是失败。
    - `nothingToLint: true` → 报告 "nothing to lint"，正常终止。
 3. 读规则：`semantic-rules.md` 全文（每次运行必读，不跨会话缓存）+
-   `<hd>/<alias>/notes.md` 存在 "lint" 段则并入（仓特有规则）。
+   仓特有规则可选并入：`<hd>/<alias>/notes.md` 的 "lint" 段（`<hd>` = harness-data
+   根，本仓 harness-kit 的同级目录；不存在则跳过，非依赖）。
 4. 读 diff 全文：`git -C <repo> diff <base>...HEAD`。
 5. 新旧行区分：诊断行号（取 `labels[0].span.line`，spec §13 实测）落在该文件 changedLines 内 →
    计入 verdict（仅 severity=error；机械 warn 级 → warn 档，不计入，spec §9）；
@@ -59,7 +62,8 @@ AGENT="$(cd "$(dirname "$(readlink -f <this-SKILL.md-path>)")" && pwd)"
      $AGENT/engine/oxlintrc.json --disable-nested-config --fix <files>`
    - 剩余项逐个手修（小步、最小 diff）。
    - 出口条件（两查都过才算完）：复跑 runner error 档清零 **且** 目标仓自身 lint 通过
-     （`HARNESS_LINT_CMD` 取自 `<hd>/<alias>/config.sh`，空则跳过并注明）。
+     （可选：`HARNESS_LINT_CMD` 取自 `<hd>/<alias>/config.sh`，`<hd>` 定义见 Order 3；
+   缺失或空则跳过并注明）。
    - 有界：修复轮 ≤3；同一 finding 3 轮不消 → needs_human，出 ESCALATED handoff
      （路径/证据/当前假设/建议下一步）。
    - **不自动 commit**：修完汇总改动，建议 slop 清理单独成 commit，由用户决定。

@@ -46,7 +46,7 @@ AI agent 写码会系统性产出 "slop" 模式：复述代码的注释、为不
 独立会话（角色隔离，对齐 harness-testing 模式）
 ┌────────────────────────────────────────────────────┐
 │ Layer 3  SKILL.md —— 编排层（agent 判断）           │
-│  任务模式 / 直连模式；读规则 → 读 diff → 新旧行区分   │
+│  无任务池依赖；读规则 → 读 diff → 新旧行区分          │
 │  → 语义审查 → 报告 + verdict → 修复循环 → lessons    │
 └──────────────────┬─────────────────────────────────┘
                    │ 消费 findings JSON
@@ -59,8 +59,8 @@ AI agent 写码会系统性产出 "slop" 模式：复述代码的注释、为不
 ```
 
 说明：原设计的 Layer 2（`harness lint` CLI 适配器）已删除——engine 独立后，
-task→repo 解析由 SKILL.md 指导 agent 读 harness-data 路径约定完成（文本约定，
-非代码依赖），harness-kit 引擎与 CLI 零改动（唯一交叉点是 §14 的一行文档提醒）。
+repo/base 由调用方解析后显式传入（2026-10-12 起进一步去除任务模式，SKILL.md
+不读任务池），harness-kit 引擎与 CLI 零改动（唯一交叉点是 §14 的一行文档提醒）。
 
 **层职责边界**：engine 只做确定性的事（同一输入永远同一输出）；判断、裁决、
 修复、lessons 回写全部在 SKILL.md 编排的 agent 侧。
@@ -69,7 +69,7 @@ task→repo 解析由 SKILL.md 指导 agent 读 harness-data 路径约定完成�
 
 ```
 ~/Desktop/my-ai/.agents/skills/slop-linter/     ← 真身目录，随 my-ai 入库
-├── SKILL.md              编排层：两种调用模式 + 判断流程 + verdict + 修复循环
+├── SKILL.md              编排层：调用契约 + 判断流程 + verdict + 修复循环
 ├── README.md             边界契约（runner 接口、规则宿主、SR 文件格式）
 │                         + vendored anti-slop 更新流程 + 推广说明
 ├── semantic-rules.md     全部自然语言规则（种子 + 追加），唯一权威源
@@ -102,7 +102,7 @@ runner.sh --repo <path> [--base <ref>] [--files <显式文件列表>] [--out <fi
 2. 变更文件集：`git -C <repo> diff --name-only <base>...HEAD`，过滤 oxlint 支持
    的扩展名（`.ts .tsx .js .mjs .cjs .jsx .vue`），排除 ignorePatterns。
    以 HEAD 为准；工作树不干净时在输出 JSON 的 `dirty` 字段注明（不阻断）。
-3. 显式 `--files` 传入时跳过 diff 解析（直连模式的窄用法）。
+3. 显式 `--files` 传入时跳过 diff 解析（窄用法）。
 4. 执行：`<engine>/node_modules/.bin/oxlint -c <engine>/oxlintrc.json
    --disable-nested-config -f json <files...>`，cwd = 目标仓库。
 5. 产出 JSON（--out 或 stdout）：
@@ -195,20 +195,21 @@ SR-0xx: rejected — <理由>（tombstone；同步遇上游修订不回塞）
 Step 0 自定位：`readlink -f` 解析本 SKILL.md 真实路径 → agent 根 =
 `<slop-linter>/`；engine = `<slop-linter>/engine/`。
 
-**两种调用模式**：
+**单一调用模式**（2026-10-12 去除任务模式：slop-linter 定位为 AI 基建能力，
+repo/base 的解析是调用方职责，本技能不读任务池）：
 
-- 任务模式：任务名 → 读 `<hd>/tasks/<task>/current.md` 解析 repo（harness-data
-  路径约定，文本依赖）；报告与 findings 落 `<hd>/tasks/<task>/`。
-- 直连模式：用户给仓库路径（无 harness 任务）；base 默认 merge-base；
-  报告落 stdout 或用户指定路径。
+- 调用方给 repo 路径或"当前仓库" + base（或文件集）；解析不出就问用户，勿猜。
+- base 默认 merge-base；报告落 stdout 或用户指定路径。
+- 可选增强（优雅降级，非依赖）：`<hd>/<alias>/notes.md` 的 lint 段并入仓特有规则；
+  `HARNESS_LINT_CMD`（`<hd>/<alias>/config.sh`）用于修复出口第二查，缺失则跳过并注明。
 
 仅支持 workspace mode（install mode 留升级路径，SKILL.md 写明）。
 
 **Order（严格顺序）**：
 
-1. 定位任务/仓库；变更文件集为空 → 终止（nothing to lint）。
-2. 跑机械层：`runner.sh --repo ... --base ... --out <task>/lint-findings.json`。
-3. 读规则：`semantic-rules.md` + `<hd>/<alias>/notes.md` lint 段。
+1. 定位仓库（调用方传入）；变更文件集为空 → 终止（nothing to lint）。
+2. 跑机械层：`runner.sh --repo ... --base ... --out <findings.json>`。
+3. 读规则：`semantic-rules.md` + `<hd>/<alias>/notes.md` lint 段（可选，缺失跳过）。
 4. 读 diff 全文（行范围表已在 findings JSON）。
 5. 新旧行区分：机械违规落在新/改行 → 计入 verdict；落存量行 → advisory。
 6. 语义审查：逐条规则对照 diff，只审本次新增/修改行；findings 必须带
@@ -224,8 +225,8 @@ Step 0 自定位：`readlink -f` 解析本 SKILL.md 真实路径 → agent 根 =
 - **needs-fix** = ≥1 error 级。
 - 报告三档：error（计入）/ warn（机械 warn 级、语义低置信）/ advisory（存量行命中）。
 
-报告落 `<hd>/tasks/<task>/lint-report.md`（任务模式）——process state 归任务池，
-对齐 harness 既有划分（spec/plan 是项目产物进仓、状态进池）：
+报告默认呈现于对话；用户/调用方指定路径才落文件——process state 归调用方
+（harness 流程可落任务池，对齐既有划分：spec/plan 是项目产物进仓、状态进池）：
 
 ```markdown
 # Lint Report — <task>
@@ -329,8 +330,8 @@ JSON 诊断真实字段（Task 2 的 jq 提取路径依据，修正本 spec 此�
 - `selfcheck.sh`：fixtures 含 `.ts` 违规样本、`.vue` 违规样本、干净样本各一，
   断言预期 findings（对齐 `harness validate selfcheck` 先例）；规则调整、插件
   升级、合同 A 整替后必跑。`.vue` 的期望值随 spike 结果定。
-- 真实任务验收：第一个真实需求全流程跑一遍——任务模式调用、报告三档、
-  verdict、修复循环（含出口条件两查）、lessons 回写；直连模式至少跑一次。
+- 真实任务验收：第一个真实需求全流程跑一遍——调用方显式传 repo/base 的调用、
+  报告三档、verdict、修复循环（含出口条件两查）、lessons 回写。
 - 语义层无机械断言，靠真实任务验收。
 
 ## 16. 实现顺序概要（供 writing-plans 参考）
@@ -339,7 +340,7 @@ JSON 诊断真实字段（Task 2 的 jq 提取路径依据，修正本 spec 此�
 2. engine 骨架：package.json pin → vendored anti-slop 拷入（记 upstream rev）→
    oxlintrc.json → runner.sh → fixtures + selfcheck。
 3. `semantic-rules.md` 种子 7 条写入（用户 review）。
-4. SKILL.md（两种模式 + Order + verdict + 修复循环 + lessons）。
+4. SKILL.md（调用契约 + Order + verdict + 修复循环 + lessons）。
 5. README（边界契约 + 更新流程 + 推广）。
 6. harness-dev SKILL.md §8 加一行提醒。
 7. 真实任务验收（§15）。
