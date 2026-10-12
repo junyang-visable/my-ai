@@ -9,7 +9,7 @@ description: 为待发布需求生成审批邮件(.eml)并在 Confluence System 
 
 发布一个需求前做两件事：
 
-1. 按团队模板生成审批邮件 `.eml`（收件人/主题预填，双击即可在邮件客户端预览并发送——**发送动作始终由用户完成，绝不代替发送**）。
+1. 按团队模板生成审批邮件 `.eml` 草稿（收件人/主题预填，`X-Unsent: 1` 草稿标记）。**skill 只创建草稿，绝不发送**——生成后 `open` 打开落到邮件客户端，检查与点发送完全由用户完成。
 2. 在 Confluence database「System Change Log」(id `376700933`，PRODTECH 空间) 创建一行发布记录。
 
 Step 0：以 harness 加载本技能时给出的 base directory 为 `$SKILL_DIR`（若该路径是 symlink，用 `readlink -f` 解析真实路径再拼接 scripts/config 路径）；本仓库注册路径为 `/Users/yangjun/Desktop/my-ai/.agents/skills/release-approval`。
@@ -53,7 +53,7 @@ Step 0：以 harness 加载本技能时给出的 base directory 为 `$SKILL_DIR`
    ```
 
 3. 脚本 stdout 输出 `OK eml written: <路径>` + Subject/To/Cc 摘要即成功；`ERROR:` 开头则按提示补字段重跑。
-4. 可选 `open <eml路径>` 让用户在邮件客户端预览正文；不自动发送。
+4. 生成成功后默认 `open <eml路径>`：邮件客户端立即打开该草稿（Outlook 识别 `X-Unsent: 1` 为可编辑草稿；Mac Mail 为消息预览），由用户核对后自行发送。
 
 ## 第 3 步：System Change Log 创建发布记录行
 

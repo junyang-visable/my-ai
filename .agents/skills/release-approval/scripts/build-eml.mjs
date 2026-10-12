@@ -139,6 +139,7 @@ const headers = [
   `To: ${to.map(encodeAddress).join(', ')}`,
   cc.length ? `Cc: ${cc.map(encodeAddress).join(', ')}` : null,
   `Subject: ${encodeSubject(subject)}`,
+  'X-Unsent: 1',
   `Date: ${new Date().toUTCString()}`,
   `Message-ID: <${Date.now()}.${Math.random().toString(36).slice(2)}@release-approval.local>`,
   'MIME-Version: 1.0',
