@@ -22,7 +22,7 @@ Step 0：以 harness 加载本技能时给出的 base directory 为 `$SKILL_DIR`
 
 关键配置键：
 
-- `email.to` / `email.cc` / `email.from`：固定收件人。**to 为空时先问用户本次收件人**，用户给出后顺手写入 `config.json`（下次免问）。
+- `email.to` / `email.cc` / `email.from`：固定收件人。**to 为空时先问用户本次收件人**，用户给出后顺手写入 `config.json`（下次免问）。条目支持 `"Name <addr>"` 或纯地址两种写法，脚本自动处理显示名引号/RFC2047 编码。
 - `defaults`：group / executor / qaEngineer / canRollback / trackingImpacted 的默认值。
 - `database.url`：database 页面地址。`database.columns`：System Change Log 列名 → 字段映射（首次使用时采集，见第 3 步）。
 

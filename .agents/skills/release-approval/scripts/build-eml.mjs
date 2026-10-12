@@ -30,6 +30,17 @@ function encodeSubject(subject) {
   return `=?UTF-8?B?${b64(subject)}?=`;
 }
 
+function encodeAddress(entry) {
+  const m = String(entry).match(/^\s*(.*?)\s*<([^>]+)>\s*$/);
+  if (!m) return String(entry).trim();
+  let name = m[1];
+  const addr = m[2];
+  if (!name) return addr;
+  if (/[^\x20-\x7e]/.test(name)) name = `=?UTF-8?B?${b64(name)}?=`;
+  else if (/[,;"<>]/.test(name)) name = `"${name.replace(/"/g, '\\"')}"`;
+  return `${name} <${addr}>`;
+}
+
 function wrapBase64(b64str) {
   return (b64str.match(/.{1,76}/g) || []).join('\r\n');
 }
@@ -125,8 +136,8 @@ const outPath = args.out || path.join(os.homedir(), 'Desktop', `${String(fields.
 
 const headers = [
   `From: ${fields.from || 'release-approval'}`,
-  `To: ${to.join(', ')}`,
-  cc.length ? `Cc: ${cc.join(', ')}` : null,
+  `To: ${to.map(encodeAddress).join(', ')}`,
+  cc.length ? `Cc: ${cc.map(encodeAddress).join(', ')}` : null,
   `Subject: ${encodeSubject(subject)}`,
   `Date: ${new Date().toUTCString()}`,
   `Message-ID: <${Date.now()}.${Math.random().toString(36).slice(2)}@release-approval.local>`,
