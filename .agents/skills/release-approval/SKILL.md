@@ -77,5 +77,5 @@ Step 0：以 harness 加载本技能时给出的 base directory 为 `$SKILL_DIR`
 
 ## Resources
 
-- `scripts/build-eml.mjs`：字段 JSON → RFC822 `.eml`（HTML 三列表格正文，✅/`\` 状态列，主题 RFC2047 编码）。缺 name/prUrl/reviewer/to 时 exit 1。
+- `scripts/build-eml.mjs`：字段 JSON → RFC822 `.eml`（HTML 三列表格正文，✅/`\` 状态列，主题 RFC2047 编码）。prUrl 支持单条 URL 或数组（元素为 URL 字符串 / `{text,url}` / `{header}`，每条一行 `<br>`）用于多 PR 发布。缺 name/prUrl/reviewer/to 时 exit 1。
 - `config.template.json` / `config.json`：见「配置」。

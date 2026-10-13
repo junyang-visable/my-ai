@@ -59,6 +59,23 @@ function linkOrText(value) {
   return esc(s);
 }
 
+function prCellHtml(value) {
+  const items = Array.isArray(value) ? value : [value];
+  return items
+    .map((item) => {
+      if (item && typeof item === 'object') {
+        if (item.header) return `<b>${esc(item.header)}</b>`;
+        const url = String(item.url || '').trim();
+        const text = String(item.text || url).trim();
+        if (/^https?:\/\//i.test(url)) return `<a href="${esc(url)}">${esc(text)}</a>`;
+        return esc(text || url);
+      }
+      return linkOrText(item);
+    })
+    .filter(Boolean)
+    .join('<br>');
+}
+
 function buildHtml(f) {
   const trackingImpacted = String(f.trackingImpacted || 'No').trim();
   const trackingContent = /^yes$/i.test(trackingImpacted)
@@ -73,7 +90,7 @@ function buildHtml(f) {
   const rows = [
     { item: 'Group', status: '\\', content: esc(f.group || '') },
     { item: 'Reason for the changes', status: '\\', content: esc(f.reason || '') },
-    { item: 'Change type: Git PR / Others', status: '\\', content: linkOrText(f.prUrl) },
+    { item: 'Change type: Git PR / Others', status: '\\', content: prCellHtml(f.prUrl) },
     { item: 'Change executor', status: '\\', content: esc(f.executor || '') },
     { item: 'Code reviewer', status: '\\', content: esc(f.reviewer || '') },
     { item: 'QA engineer', status: '\\', content: esc(f.qaEngineer || '') },
@@ -121,8 +138,11 @@ function readFields(args) {
 const args = parseArgs(process.argv.slice(2));
 const fields = readFields(args);
 
-for (const key of ['name', 'prUrl', 'reviewer']) {
+for (const key of ['name', 'reviewer']) {
   if (!fields[key] || !String(fields[key]).trim()) fail(`missing required field "${key}"`);
+}
+if (Array.isArray(fields.prUrl) ? fields.prUrl.length === 0 : !fields.prUrl || !String(fields.prUrl).trim()) {
+  fail('missing required field "prUrl"');
 }
 
 const subject = `Release approval: ${fields.name}`;
