@@ -1,0 +1,89 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="930" viewBox="0 0 1000 930" font-family="-apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', 'Microsoft YaHei', sans-serif">
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#94a3b8"/>
+    </marker>
+  </defs>
+  <rect width="1000" height="930" fill="#ffffff"/>
+
+  <!-- A entry -->
+  <rect x="270" y="24" width="320" height="60" rx="10" fill="#e2e8f0" stroke="#64748b" stroke-width="1.5"/>
+  <text x="430" y="48" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1e293b">需求收尾后显式调用</text>
+  <text x="430" y="68" text-anchor="middle" font-size="12" fill="#475569">独立会话 · 角色隔离</text>
+  <line x1="430" y1="84" x2="430" y2="118" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- B mechanical scan -->
+  <rect x="260" y="124" width="340" height="84" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="430" y="148" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1e293b">第 1 层：机械扫描</text>
+  <text x="430" y="168" text-anchor="middle" font-size="12" fill="#475569">oxlint 启用 115 条规则</text>
+  <text x="430" y="188" text-anchor="middle" font-size="12" fill="#475569">其中 20 条专打 AI-slop 模式</text>
+  <line x1="430" y1="208" x2="430" y2="242" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- C findings JSON -->
+  <rect x="270" y="248" width="320" height="60" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="430" y="272" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1e293b">findings JSON</text>
+  <text x="430" y="292" text-anchor="middle" font-size="12" fill="#475569">含每个文件的变更行号</text>
+  <line x1="430" y1="308" x2="430" y2="342" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- D new/old line split -->
+  <rect x="260" y="348" width="340" height="60" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="430" y="372" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1e293b">新旧行区分</text>
+  <text x="430" y="392" text-anchor="middle" font-size="12" fill="#475569">本次变更行计入 · 存量问题降为 advisory</text>
+  <line x1="430" y1="408" x2="430" y2="442" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- E semantic review -->
+  <rect x="260" y="448" width="340" height="60" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="430" y="472" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1e293b">第 2 层：AI 语义审查</text>
+  <text x="430" y="492" text-anchor="middle" font-size="12" fill="#475569">7 条自然语言规则逐行看 diff</text>
+  <line x1="430" y1="508" x2="430" y2="542" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- F report -->
+  <rect x="270" y="548" width="320" height="60" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+  <text x="430" y="572" text-anchor="middle" font-size="13.5" font-weight="600" fill="#1e293b">三档报告 + verdict</text>
+  <text x="430" y="592" text-anchor="middle" font-size="12" fill="#475569">clean / needs-fix</text>
+  <line x1="430" y1="608" x2="430" y2="642" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+
+  <!-- G decision diamond -->
+  <polygon points="430,648 600,700 430,752 260,700" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="430" y="696" text-anchor="middle" font-size="12.5" font-weight="600" fill="#1e293b">needs-fix</text>
+  <text x="430" y="714" text-anchor="middle" font-size="12.5" fill="#1e293b">且用户确认修复？</text>
+
+  <!-- G -> H -->
+  <line x1="604" y1="700" x2="634" y2="700" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="619" y="690" text-anchor="middle" font-size="11.5" fill="#1e293b">是</text>
+
+  <!-- G -> I -->
+  <line x1="256" y1="700" x2="226" y2="700" stroke="#94a3b8" stroke-width="1.5" marker-end="url(#arrow)"/>
+  <text x="240" y="688" text-anchor="middle" font-size="11" fill="#1e293b">否 / clean</text>
+
+  <!-- I end -->
+  <rect x="20" y="676" width="200" height="48" rx="10" fill="#d1fae5" stroke="#059669" stroke-width="1.5"/>
+  <text x="120" y="704" text-anchor="middle" font-size="12.5" fill="#1e293b">报告交付，结束</text>
+
+  <!-- H fix loop -->
+  <rect x="640" y="665" width="320" height="70" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="800" y="690" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">有界修复循环 ≤ 3 轮</text>
+  <text x="800" y="712" text-anchor="middle" font-size="12" fill="#475569">双出口：复扫清零 + 目标仓库自身 lint</text>
+
+  <!-- H -> J dashed -->
+  <line x1="800" y1="735" x2="800" y2="796" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+  <text x="812" y="770" text-anchor="start" font-size="11" fill="#64748b">漏判/误判 · 每轮运行后沉淀</text>
+
+  <!-- J rules upgrade gate -->
+  <rect x="640" y="802" width="320" height="64" rx="10" fill="#fef3c7" stroke="#d97706" stroke-width="1.5"/>
+  <text x="800" y="826" text-anchor="middle" font-size="13" font-weight="600" fill="#1e293b">规则升级闸门</text>
+  <text x="800" y="848" text-anchor="middle" font-size="12" fill="#475569">提议-确认后写入</text>
+
+  <!-- J -> E feedback dashed, routed right -->
+  <path d="M 960 834 L 980 834 L 980 478 L 608 478" fill="none" stroke="#94a3b8" stroke-width="1.5" stroke-dasharray="6 4" marker-end="url(#arrow)"/>
+
+  <!-- legend -->
+  <rect x="300" y="894" width="14" height="14" rx="3" fill="#ede9fe" stroke="#7c3aed"/>
+  <text x="322" y="905" text-anchor="start" font-size="11.5" fill="#475569">检测/判断环节</text>
+  <rect x="440" y="894" width="14" height="14" rx="3" fill="#d1fae5" stroke="#059669"/>
+  <text x="462" y="905" text-anchor="start" font-size="11.5" fill="#475569">产出</text>
+  <rect x="520" y="894" width="14" height="14" rx="3" fill="#fef3c7" stroke="#d97706"/>
+  <text x="542" y="905" text-anchor="start" font-size="11.5" fill="#475569">需人参与的闸门</text>
+  <rect x="670" y="894" width="14" height="14" rx="3" fill="#e2e8f0" stroke="#64748b"/>
+  <text x="692" y="905" text-anchor="start" font-size="11.5" fill="#475569">入口</text>
+</svg>
