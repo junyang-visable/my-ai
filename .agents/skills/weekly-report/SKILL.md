@@ -19,7 +19,7 @@ description: 起草并保真更新 Eric(Jun Yang) 的 Confluence 周报页(pageI
    JQL `assignee = currentUser() AND updated >= "<窗口起始日>" ORDER BY updated DESC`，fields 只取 summary/status/issuetype/project/updated。结果常超 25k tokens 被落盘——用 Grep 在落盘文件中按行号对齐 `"key"`/`"summary"`/`"name"`(status)/`"updated"` 四类行还原每张票。
 2. **Git**：`bash /Users/yangjun/Desktop/my-ai/.agents/skills/weekly-report/scripts/scan_git.sh <YYYY-MM-DD>`。扫 ~/Desktop/project、~/Desktop/my-ai、~/Documents 一级子仓库（`--all --since`），默认 author "Jun Yang"；`--all-authors` 或追加目录参数可扩展。Obsidian Vault 的日记提交也会被扫到，注意区分。
 3. **Confluence**（`searchConfluenceUsingCql`）：`contributor = currentUser() AND lastmodified >= "<窗口起始日>" AND type = page ORDER BY lastmodified DESC`。
-4. **Obsidian 日记**：`~/Documents/Obsidian Vault/10-Daily/YYYY-MM-DD.md`。会议、1v1、竞品调研、非代码工作的唯一来源，git/Jira 查不到。
+4. **Obsidian 日记**：`~/Documents/Obsidian Vault/work/daily/YYYY-MM-DD.md`。会议、1v1、竞品调研、非代码工作的唯一来源，git/Jira 查不到。
 
 ## 2. 起草
 

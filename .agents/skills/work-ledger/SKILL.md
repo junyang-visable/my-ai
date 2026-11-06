@@ -1,6 +1,6 @@
 ---
 name: work-ledger
-description: 维护个人工作账本（Obsidian `40-Areas/Work Ledger.md`）：登记工作项、记录需求评审要点、追加状态变更、完成归档并记录完成时间。两节结构=进行中/已完成，用于快速回顾与向老板汇报。Use when 用户提到 工作台账、记录/登记工作项、需求评审了/评审完成、状态变更（提测/上线/阻塞/改期）、某项完成了、回顾或查看我的工作。
+description: 维护个人工作账本（Obsidian `work/areas/Work Ledger.md`）：登记工作项、记录需求评审要点、追加状态变更、完成归档并记录完成时间。两节结构=进行中/已完成，用于快速回顾与向老板汇报。Use when 用户提到 工作台账、记录/登记工作项、需求评审了/评审完成、状态变更（提测/上线/阻塞/改期）、某项完成了、回顾或查看我的工作。
 ---
 
 # Work Ledger（个人工作台账）
@@ -11,9 +11,9 @@ description: 维护个人工作账本（Obsidian `40-Areas/Work Ledger.md`）：
 
 ## 账本文件
 
-路径：`~/Documents/Obsidian Vault/40-Areas/Work Ledger.md`（vault 为 git 仓，误改可从历史找回）。
+路径：`~/Documents/Obsidian Vault/work/areas/Work Ledger.md`（vault 为 git 仓，误改可从历史找回）。
 
-首次使用且文件不存在时，创建骨架并同时在 `40-Areas/Areas Index.md` 的"领域"列表登记 `[[Work Ledger]]`：
+首次使用且文件不存在时，创建骨架并同时在 `work/areas/Areas Index.md` 的"领域"列表登记 `[[Work Ledger]]`：
 
 ```markdown
 ---
